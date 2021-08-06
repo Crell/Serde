@@ -1,0 +1,40 @@
+# To use:
+# Run "docker-compose build" to rebuild the app container.
+# Run "docker-compose run --rm php80" to run the test script with xdebug.
+# Run "docker-compose run --rm php81" to run the test script on 8.1.
+# Run "docker-compose down -v" to fully wipe everything and start over.
+# Run "docker-compose run --rm php80 bash" to log into the container to run tests selectively.
+
+version: "3"
+services:
+    php80:
+        build: ./docker/php/80
+        volumes:
+            - .:/usr/src/myapp
+            - ./docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+            - ./docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+        depends_on:
+            -   db
+        environment:
+            XDEBUG_MODE: "develop,debug"
+            XDEBUG_CONFIG: "client_host=${HOST_IP} idekey=${IDE_KEY} client_port=${XDEBUG_PORT} discover_client_host=1 start_with_request=1"
+    php81:
+        build: ./docker/php/81
+        volumes:
+            - .:/usr/src/myapp
+#            - ./docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+            - ./docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+        depends_on:
+            -   db
+#        environment:
+#            PHP_IDE_CONFIG: "serverName=Rekodi"
+#            XDEBUG_MODE: "develop,debug"
+#            XDEBUG_CONFIG: "client_host=${HOST_IP} idekey=${IDE_KEY} client_port=${XDEBUG_PORT} discover_client_host=1 start_with_request=1"
+    db:
+        image: mariadb
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: test
+            MYSQL_DATABASE: rekodi
+        ports:
+            - 3306:3306

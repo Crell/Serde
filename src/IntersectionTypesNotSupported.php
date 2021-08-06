@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Crell\Serde;
+
+class IntersectionTypesNotSupported extends \TypeError
+{
+    // @todo Use this in the error message.
+    protected \ReflectionProperty $property;
+
+    public static function create(\ReflectionProperty $property): static
+    {
+        $new = new static();
+        $new->property = $property;
+        return $new;
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "bootstrap": "vendor/autoload.php",
+    "path": "benchmarks",
+    "retry_threshold": 5,
+    "reports": {
+        "short": {
+            "title": "Short summary",
+            "extends": "aggregate",
+            "cols": ["benchmark", "subject", "mode", "mean", "stdev", "rstdev", "mem_peak"],
+            "break": ["benchmark"]
+        }
+    }
+}
