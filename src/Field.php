@@ -17,6 +17,11 @@ class Field implements FromReflectionProperty
      */
     public string $phpType;
 
+    /**
+     * The property name, not to be confused with the desired serialized $name.
+     */
+    public string $phpName;
+
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
     public function __construct(
@@ -26,7 +31,8 @@ class Field implements FromReflectionProperty
 
     public function fromReflection(\ReflectionProperty $subject): void
     {
-        $this->name = $subject->name;
+        $this->phpName = $subject->name;
+        $this->name ??= $subject->name;
         $this->phpType ??= $this->getNativeType($subject);
         $this->default ??= $subject->getDefaultValue();
     }

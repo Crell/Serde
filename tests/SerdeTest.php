@@ -6,6 +6,7 @@ namespace Crell\Serde;
 
 use Crell\AttributeUtils\Analyzer;
 use Crell\Serde\Records\AllFieldTypes;
+use Crell\Serde\Records\CustomNames;
 use Crell\Serde\Records\Point;
 use PHPUnit\Framework\TestCase;
 
@@ -24,8 +25,6 @@ class SerdeTest extends TestCase
     {
         $serde = $this->getSerde();
         $serialized = $serde->serialize($subject);
-
-        var_dump($serialized);
 
         $deserialized = $serde->deserialize($serialized, $subject::class);
 
@@ -59,13 +58,36 @@ class SerdeTest extends TestCase
         ];
     }
 
+    /**
+     * @test
+     */
+    public function changes(): void
+    {
+        $subject = new CustomNames(first: 'Larry', last: 'Garfield');
+
+        $serde = $this->getSerde();
+        $serialized = $serde->serialize($subject);
+
+        $expectedJson = json_encode(['firstName' => 'Larry', 'lastName' => 'Garfield']);
+
+        self::assertEquals($expectedJson, $serialized);
+
+        $deserialized = $serde->deserialize($serialized, $subject::class);
+
+        $fields ??= $this->getFields($subject::class);
+
+        foreach ($fields as $field) {
+            self::assertEquals($subject->$field, $deserialized->$field);
+        }
+    }
+
     protected function getFields(string $class): array
     {
         $analyzer = new Analyzer();
         // @todo Generalize this.
         $classDef = $analyzer->analyze($class, ClassDef::class);
 
-        return array_map(static fn(Field $f) => $f->name, $classDef->properties);
+        return array_map(static fn(Field $f) => $f->phpName, $classDef->properties);
     }
 
 }
