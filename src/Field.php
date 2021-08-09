@@ -6,8 +6,6 @@ namespace Crell\Serde;
 
 use Attribute;
 use Crell\AttributeUtils\FromReflectionProperty;
-use Crell\Serde\IntersectionTypesNotSupported;
-use Crell\Serde\UnionTypesNotSupported;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class Field implements FromReflectionProperty

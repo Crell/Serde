@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 namespace Crell\Serde\Records;
-use Crell\Serde\Field;
-use Crell\Serde\Table;
 
 /**
  * The most basic test for a non-entity record.
