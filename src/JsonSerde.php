@@ -61,6 +61,14 @@ class JsonSerde
 
         $populate = function(array $data) use ($fields, $decoder) {
             foreach ($fields as $name => $field) {
+                if ($field instanceof ArrayField) {
+                    $decoded = [];
+                    foreach ($data[$name] as $childKey => $childValue) {
+                        $decoded[$childKey] = $decoder($childValue, $field->valueType);
+                    }
+                    $this->$name = $decoded;
+                    continue;
+                }
                 $this->$name = match ($field->phpType) {
                     Field::TYPE_NOT_SPECIFIED, 'int', 'float', 'string', 'array', 'bool' => $data[$field->name] ?? $field->default,
                     \DateTime::class => new \DateTime($data[$name]['date'], timezone: new \DateTimeZone($data[$name]['timezone'])),
