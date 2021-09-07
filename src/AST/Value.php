@@ -6,31 +6,32 @@ namespace Crell\Serde\AST;
 
 interface Value
 {
-
 }
 
-class IntegerValue implements Value
+interface PrimitiveValue extends Value {}
+
+class IntegerValue implements PrimitiveValue
 {
     public function __construct(
         public int $value,
     ) {}
 }
 
-class StringValue implements Value
+class StringValue implements PrimitiveValue
 {
     public function __construct(
         public string $value,
     ) {}
 }
 
-class FloatValue implements Value
+class FloatValue implements PrimitiveValue
 {
     public function __construct(
         public float $value,
     ) {}
 }
 
-class BooleanValue implements Value
+class BooleanValue implements PrimitiveValue
 {
     public function __construct(
         public bool $value,
@@ -68,5 +69,14 @@ class EnumValue implements Value
     public function __construct(
         public string $type,
         public string|int $value,
+    ) {}
+}
+
+class DateTimeValue implements Value
+{
+    public function __construct(
+        public string $dateTime,
+        public string $dateTimeZone,
+        public bool $immutable = true,
     ) {}
 }
