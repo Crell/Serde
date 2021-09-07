@@ -19,11 +19,13 @@ class ClassDef implements FromReflectionClass, ParseProperties
 
     public function __construct(
         public ?string $name = null,
+        public ?string $fullName = null,
     ){}
 
     public function fromReflection(\ReflectionClass $subject): void
     {
         $this->name ??= $subject->getShortName();
+        $this->fullName ??= $subject->name;
     }
 
     public function setProperties(array $properties): void
