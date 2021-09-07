@@ -33,11 +33,7 @@ class SerdeTest extends TestCase
         $serde = $this->getSerde();
         $serialized = $serde->serialize($subject);
 
-        var_dump($serialized);
-
         $deserialized = $serde->deserialize($serialized, $subject::class);
-
-        var_dump($deserialized);
 
         $fields ??= $this->getFields($subject::class);
 
@@ -62,26 +58,26 @@ class SerdeTest extends TestCase
 
     public function roundTripProvider(): iterable
     {
-//
-//        yield Point::class => [
-//            'subject' => new Point(1, 2, 3),
-//        ];
-//
-//        yield AllFieldTypes::class => [
-//            'subject' => new AllFieldTypes(
-//                anint: 1,
-//                string: 'beep',
-//                afloat: 5.5,
-//                bool: true,
-//                dateTimeImmutable: new \DateTimeImmutable('2021-08-06 15:48:25'),
-//                dateTime: new \DateTime('2021-08-06 15:48:25'),
-//                simpleArray: [1, 2, 3],
-//                assocArray: ['a' => 'A', 'b' => 'B'],
-//                simpleObject: new Point(1, 2, 3),
-//                untyped: 5,
-////                resource: \fopen(__FILE__, 'rb'),
-//            ),
-//        ];
+
+        yield Point::class => [
+            'subject' => new Point(1, 2, 3),
+        ];
+
+        yield AllFieldTypes::class => [
+            'subject' => new AllFieldTypes(
+                anint: 1,
+                string: 'beep',
+                afloat: 5.5,
+                bool: true,
+                dateTimeImmutable: new \DateTimeImmutable('2021-08-06 15:48:25'),
+                dateTime: new \DateTime('2021-08-06 15:48:25'),
+                simpleArray: [1, 2, 3],
+                assocArray: ['a' => 'A', 'b' => 'B'],
+                simpleObject: new Point(1, 2, 3),
+                untyped: 5,
+//                resource: \fopen(__FILE__, 'rb'),
+            ),
+        ];
 
 
         $node = new Node('A node', 3, false, false);
@@ -102,7 +98,7 @@ class SerdeTest extends TestCase
             new LinkItem(uri: 'https://typo3.com', title: 'TYPO3'),
             new LinkItem(uri: 'https://google.com', title: 'Big Evil'),
         ]);
-
+/*
         yield "DrupalNode" => [
             'subject' => $node,
             'fields' => null,
@@ -112,6 +108,7 @@ class SerdeTest extends TestCase
                 self::assertInstanceOf(FieldItemList::class, $deserialized->fields[0]);
             },
         ];
+*/
     }
 
     public function roundTripProvider81(): iterable
