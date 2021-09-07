@@ -8,5 +8,7 @@ use Crell\Serde\AST\Value;
 
 interface Decoder
 {
-    public function decode(object $object): Value;
+    public function decode(mixed $value): Value;
+
+    public function setDeferrer(Decoder $decoder): void;
 }

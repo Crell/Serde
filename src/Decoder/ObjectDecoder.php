@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Decoder;
 
 use Crell\AttributeUtils\ClassAnalyzer;
-use Crell\Serde\AST\BooleanValue;
-use Crell\Serde\AST\FloatValue;
-use Crell\Serde\AST\IntegerValue;
-use Crell\Serde\AST\StringValue;
 use Crell\Serde\AST\StructValue;
 use Crell\Serde\AST\Value;
-use Crell\Serde\Decoder\DateTimeImmutableDecoder;
+use Crell\Serde\ClassDef;
+use Crell\Serde\Decoder;
 
 class ObjectDecoder implements Decoder
 {
+    use Deferer;
+
     /** @var array<class-string, Decoder> */
     protected array $classDecoders = [];
 
@@ -28,17 +27,21 @@ class ObjectDecoder implements Decoder
         $this->classDecoders[$class] = $decoder;
     }
 
-    public function decode(object $object): Value
+    /**
+     * @param object $value
+     * @return StructValue
+     */
+    public function decode(mixed $value): Value
     {
         // Allow overrides to trigger first.
         foreach ($this->classDecoders as $class => $decoder) {
-            if ($object instanceof $class) {
-                return $decoder->decode($object);
+            if ($value instanceof $class) {
+                return $decoder->decode($value);
             }
         }
 
         // If there were no overrides, do the default decoding.
-        return $this->defaultObjectDecoding($object);
+        return $this->defaultObjectDecoding($value);
     }
 
     protected function defaultObjectDecoding(object $object): StructValue
@@ -61,15 +64,7 @@ class ObjectDecoder implements Decoder
             }
             $value = $rProp->getValue($object);
 
-            $ret->values[$field->name] = match ($field->phpType) {
-                'int' => new IntegerValue($value),
-                'float' => new FloatValue($value),
-                'string' => new StringValue($value),
-                'bool' => new BooleanValue($value),
-                'array' => throw new \RuntimeException('TODO'),
-                // Objects will have whatever their object type is, so just recurse on that.
-                default => $this->decode($value),
-            };
+            $ret->values[$field->name] = $this->deferrer->decode($value);
         }
 
         return $ret;
