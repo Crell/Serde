@@ -9,11 +9,11 @@ use Crell\Serde\AST\StructValue;
 use Crell\Serde\AST\Value;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Decoder;
-use Crell\Serde\Deferrable;
+use Crell\Serde\Delegatable;
 
-class ObjectDecoder implements Decoder, Deferrable
+class ObjectDecoder implements Decoder, Delegatable
 {
-    use Deferer;
+    use Delegator;
 
     /** @var array<class-string, Decoder> */
     protected array $classDecoders = [];

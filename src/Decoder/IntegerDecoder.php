@@ -9,7 +9,7 @@ use Crell\Serde\Decoder;
 
 class IntegerDecoder implements Decoder
 {
-    use Deferer;
+    use Delegator;
 
     /**
      * @param int $value

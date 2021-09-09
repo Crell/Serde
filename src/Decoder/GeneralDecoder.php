@@ -6,7 +6,7 @@ namespace Crell\Serde\Decoder;
 
 use Crell\Serde\AST\Value;
 use Crell\Serde\Decoder;
-use Crell\Serde\Deferrable;
+use Crell\Serde\Delegatable;
 use Crell\Serde\ResourcePropertiesNotAllowed;
 
 class GeneralDecoder implements Decoder
@@ -34,8 +34,8 @@ class GeneralDecoder implements Decoder
 
         // @todo Convert to a splat array once we require 8.1.
         foreach (array_merge($this->decoders, [$this->defaultDecoder]) as $decoder) {
-            if ($decoder instanceof Deferrable) {
-                $decoder->setDeferrer($this);
+            if ($decoder instanceof Delegatable) {
+                $decoder->setDelegationTarget($this);
             }
         }
     }
@@ -47,8 +47,8 @@ class GeneralDecoder implements Decoder
 
     public function setDecoderFor(string $type, Decoder $decoder): static
     {
-        if ($decoder instanceof Deferrable) {
-            $decoder->setDeferrer($this);
+        if ($decoder instanceof Delegatable) {
+            $decoder->setDelegationTarget($this);
         }
 
         $this->decoders[$type] = $decoder;

@@ -8,14 +8,14 @@ use Crell\Serde\AST\DictionaryValue;
 use Crell\Serde\AST\SequenceValue;
 use Crell\Serde\AST\Value;
 use Crell\Serde\Decoder;
-use Crell\Serde\Deferrable;
+use Crell\Serde\Delegatable;
 
 /**
  * This handles both sequences and dictionaries, because PHP doesn't differentiate.
  */
-class ArrayDecoder implements Decoder, Deferrable
+class ArrayDecoder implements Decoder, Delegatable
 {
-    use Deferer;
+    use Delegator;
 
     /**
      * @param array $value

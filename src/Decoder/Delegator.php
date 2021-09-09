@@ -9,11 +9,11 @@ use Crell\Serde\Decoder;
 /**
  * @todo This is a poor name.
  */
-trait Deferer
+trait Delegator
 {
     protected Decoder $deferrer;
 
-    public function setDeferrer(Decoder $decoder): void
+    public function setDelegationTarget(Decoder $decoder): void
     {
         $this->deferrer = $decoder;
     }
