@@ -9,8 +9,6 @@ use Crell\Serde\Decoder;
 
 class StringDecoder implements Decoder
 {
-    use Deferer;
-
     /**
      * @param string $value
      * @return StringValue

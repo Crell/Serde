@@ -9,8 +9,6 @@ use Crell\Serde\Decoder;
 
 class FloatDecoder implements Decoder
 {
-    use Deferer;
-
     /**
      * @param float $value
      * @return FloatValue

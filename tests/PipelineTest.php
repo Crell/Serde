@@ -153,6 +153,5 @@ class PipelineTest extends TestCase
         // Untyped
         self::assertInstanceOf(StringValue::class, $result->values['untyped']);
         self::assertEquals('beep', $result->values['untyped']->value);
-
     }
 }

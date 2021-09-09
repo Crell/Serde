@@ -9,8 +9,6 @@ use Crell\Serde\Decoder;
 
 class BooleanDecoder implements Decoder
 {
-    use Deferer;
-
     /**
      * @param bool $value
      * @return BooleanValue

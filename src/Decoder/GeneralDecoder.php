@@ -6,6 +6,7 @@ namespace Crell\Serde\Decoder;
 
 use Crell\Serde\AST\Value;
 use Crell\Serde\Decoder;
+use Crell\Serde\Deferrable;
 use Crell\Serde\ResourcePropertiesNotAllowed;
 
 class GeneralDecoder implements Decoder
@@ -25,32 +26,33 @@ class GeneralDecoder implements Decoder
         $this->decoders['DateTimeImmutable'] = new DateTimeImmutableDecoder();
 
         $this->decoders['resource'] = new class implements Decoder {
-            use Deferer;
-
             public function decode(mixed $value): Value
             {
                 throw ResourcePropertiesNotAllowed::create($value);
             }
         };
 
-        foreach ($this->decoders as $decoder) {
-            $decoder->setDeferrer($this);
+        // @todo Convert to a splat array once we require 8.1.
+        foreach (array_merge($this->decoders, [$this->defaultDecoder]) as $decoder) {
+            if ($decoder instanceof Deferrable) {
+                $decoder->setDeferrer($this);
+            }
         }
+    }
 
-        $this->defaultDecoder->setDeferrer($this);
+    public function encode(Value $ast): mixed
+    {
+
     }
 
     public function setDecoderFor(string $type, Decoder $decoder): static
     {
-        $decoder->setDeferrer($this);
+        if ($decoder instanceof Deferrable) {
+            $decoder->setDeferrer($this);
+        }
+
         $this->decoders[$type] = $decoder;
         return $this;
-    }
-
-    public function setDeferrer(Decoder $decoder): void
-    {
-        // Do nothing, because this class must be the root.
-        // It is what is passed to other Decoders.
     }
 
     public function decode(mixed $value): Value

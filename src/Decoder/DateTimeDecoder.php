@@ -9,8 +9,6 @@ use Crell\Serde\Decoder;
 
 class DateTimeDecoder implements Decoder
 {
-    use Deferer;
-
     /**
      * @param \DateTime $value
      * @return DateTimeValue

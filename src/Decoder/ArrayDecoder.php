@@ -8,11 +8,12 @@ use Crell\Serde\AST\DictionaryValue;
 use Crell\Serde\AST\SequenceValue;
 use Crell\Serde\AST\Value;
 use Crell\Serde\Decoder;
+use Crell\Serde\Deferrable;
 
 /**
  * This handles both sequences and dictionaries, because PHP doesn't differentiate.
  */
-class ArrayDecoder implements Decoder
+class ArrayDecoder implements Decoder, Deferrable
 {
     use Deferer;
 

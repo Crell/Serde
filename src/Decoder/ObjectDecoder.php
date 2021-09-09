@@ -9,8 +9,9 @@ use Crell\Serde\AST\StructValue;
 use Crell\Serde\AST\Value;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Decoder;
+use Crell\Serde\Deferrable;
 
-class ObjectDecoder implements Decoder
+class ObjectDecoder implements Decoder, Deferrable
 {
     use Deferer;
 

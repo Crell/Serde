@@ -9,8 +9,6 @@ use Crell\Serde\Decoder;
 
 class DateTimeImmutableDecoder implements Decoder
 {
-    use Deferer;
-
     /**
      * @param \DateTimeImmutable $value
      * @return DateTimeValue
