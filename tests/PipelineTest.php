@@ -273,7 +273,7 @@ class PipelineTest extends TestCase
     }
 
     /**
-     * @test
+     * @test-disable
      */
     public function AstToJson(): void
     {
