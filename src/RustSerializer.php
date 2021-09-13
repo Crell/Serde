@@ -16,27 +16,25 @@ class RustSerializer
         $this->analyzer = new Analyzer();
     }
 
-    public function serialize(object $o, string $format): string
+    public function serialize(object $object, string $format): string
     {
         /** @var ClassDef $objectMetadata */
-        $objectMetadata = $this->analyzer->analyze($o, ClassDef::class);
-
-        $rObject = new \ReflectionObject($o);
+        $objectMetadata = $this->analyzer->analyze($object, ClassDef::class);
 
         // @todo $format would get used here.
         $formatter = new JsonFormatter();
 
-        $props = array_filter($objectMetadata->properties, $this->shouldSerialize($rObject, $o));
+        $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
 
-        $eachProp = function ($runningValue, Field $field) use ($formatter, $o) {
+        $eachProp = function ($runningValue, Field $field) use ($formatter, $object) {
             $name = $this->mangle($field->name);
             return match ($field->phpType) {
-                'int' => $formatter->serializeInt($runningValue, $name, $o->$name),
-                'float' => $formatter->serializeFloat($runningValue, $name, $o->$name),
-                'bool' => $formatter->serializeBool($runningValue, $name, $o->$name),
-                'string' => $formatter->serializeString($runningValue, $name, $o->$name),
-                'array' => $formatter->serializeArray($runningValue, $name, $o->$name),
-                'object' => $formatter->serializeObject($runningValue, $name, $o->$name),
+                'int' => $formatter->serializeInt($runningValue, $name, $object->$name),
+                'float' => $formatter->serializeFloat($runningValue, $name, $object->$name),
+                'bool' => $formatter->serializeBool($runningValue, $name, $object->$name),
+                'string' => $formatter->serializeString($runningValue, $name, $object->$name),
+                'array' => $formatter->serializeArray($runningValue, $name, $object->$name),
+                'object' => $formatter->serializeObject($runningValue, $name, $object->$name),
                 default => throw new \RuntimeException('Cannot match ' . $field->phpType),
             };
         };
@@ -46,11 +44,12 @@ class RustSerializer
         return $formatter->finalize($runningValue);
     }
 
-    protected function shouldSerialize(\ReflectionObject $rObject, object $o): callable
+    protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
     {
+        // @todo Do we serialize nulls or no? Right now we don't.
         return static fn (Field $field) =>
-            $rObject->getProperty($field->phpName)->isInitialized($o)
-            && !is_null($o->{$field->phpName});
+            $rObject->getProperty($field->phpName)->isInitialized($object)
+            && !is_null($object->{$field->phpName});
     }
 
     public function deserialize(string $serialized, string $from, string $to): object
@@ -68,7 +67,6 @@ class RustSerializer
         // Build up an array of properties that we can then assign all at once.
         foreach ($objectMetadata->properties as $field) {
             $name = $this->mangle($field->name);
-
             $props[$field->name] = match ($field->phpType) {
                 'int' => $formatter->deserializeInt($decoded, $name),
                 'float' => $formatter->deserializeFloat($decoded, $name),
@@ -89,6 +87,8 @@ class RustSerializer
                 $props[$param->name] = $param->getDefaultValue();
             }
         }
+
+        // @todo What should happen if something is still set to Missing?
 
         $populate = function (array $props) {
             foreach ($props as $k => $v) {
