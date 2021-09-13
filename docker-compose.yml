@@ -11,10 +11,8 @@ services:
         build: ./docker/php/80
         volumes:
             - .:/usr/src/myapp
-            - ./docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+            - ./docker/php/80/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
             - ./docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
-#        depends_on:
-#            -   db
         environment:
             XDEBUG_MODE: "develop,debug"
             XDEBUG_CONFIG: "client_host=${HOST_IP} idekey=${IDE_KEY} client_port=${XDEBUG_PORT} discover_client_host=1 start_with_request=1"
@@ -22,19 +20,8 @@ services:
         build: ./docker/php/81
         volumes:
             - .:/usr/src/myapp
-#            - ./docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+            - ./docker/php/81/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
             - ./docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
-#        depends_on:
-#            -   db
-#        environment:
-#            PHP_IDE_CONFIG: "serverName=Rekodi"
-#            XDEBUG_MODE: "develop,debug"
-#            XDEBUG_CONFIG: "client_host=${HOST_IP} idekey=${IDE_KEY} client_port=${XDEBUG_PORT} discover_client_host=1 start_with_request=1"
-#    db:
-#        image: mariadb
-#        restart: always
-#        environment:
-#            MYSQL_ROOT_PASSWORD: test
-#            MYSQL_DATABASE: rekodi
-#        ports:
-#            - 3306:3306
+        environment:
+            XDEBUG_MODE: "develop,debug"
+            XDEBUG_CONFIG: "client_host=${HOST_IP} idekey=${IDE_KEY} client_port=${XDEBUG_PORT} discover_client_host=1 start_with_request=1"
