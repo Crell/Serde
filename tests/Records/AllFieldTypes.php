@@ -14,12 +14,13 @@ class AllFieldTypes
         public string $string = '',
         public float $afloat = 0,
         public bool $bool = true,
-        public ?\DateTimeImmutable $dateTimeImmutable = null,
-        public ?\DateTime $dateTime = null,
+//        public ?\DateTimeImmutable $dateTimeImmutable = null,
+//        public ?\DateTime $dateTime = null,
         public array $simpleArray = [],
         public array $assocArray = [],
-        public ?Point $simpleObject = null,
-        public $untyped = null,
+//        public ?Point $simpleObject = null,
+        public array $objectList = [],
+//        public $untyped = null,
 //        public $resource = null,
     ) {}
 }

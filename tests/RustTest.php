@@ -6,13 +6,14 @@ namespace Crell\Serde;
 
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\Point;
 use PHPUnit\Framework\TestCase;
 
 class RustTest extends TestCase
 {
     /**
-     * @test
+     * @test-disabled
      */
     public function point(): void
     {
@@ -28,11 +29,44 @@ class RustTest extends TestCase
 
         self::assertEquals($p1, $result);
     }
+
+    /**
+     * @test
+     */
+    public function allFields(): void
+    {
+        $s = new RustSerializer();
+
+        $data = new AllFieldTypes(
+            anint: 5,
+            string: 'hello',
+            afloat: 3.14,
+            bool: true,
+//            dateTimeImmutable: new \DateTimeImmutable('2021-05-01 08:30:45', new \DateTimeZone('America/Chicago')),
+//            dateTime: new \DateTime('2021-05-01 08:30:45', new \DateTimeZone('America/Chicago')),
+            simpleArray: ['a', 'b', 'c', 1, 2, 3],
+            assocArray: ['a' => 'A', 'b' => 'B', 'c' => 'C'],
+//            simpleObject: new Point(4, 5, 6),
+//            untyped: 'beep',
+        );
+
+        $json = $s->serialize($data, 'json');
+
+        var_dump($json);
+        //self::assertEquals('{"x":1,"y":2,"z":3}', $json);
+
+        $result = $s->deserialize($json, from: 'json', to: AllFieldTypes::class);
+
+        self::assertEquals($data, $result);
+    }
+
+
 }
 
 class RustSerializer
 {
     protected ClassAnalyzer $analyzer;
+
     public function __construct()
     {
         $this->analyzer = new Analyzer();
@@ -43,9 +77,16 @@ class RustSerializer
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($o, ClassDef::class);
 
+        $rObject = new \ReflectionObject($o);
+
         $formatter = new JsonFormatter();
         $runningValue = $formatter->initialize();
         foreach ($objectMetadata->properties as $field) {
+            $rProp = $rObject->getProperty($field->phpName);
+            if (! $rProp->isInitialized($o) || is_null($o->{$field->phpName})) {
+                continue;
+            }
+
             $name = $field->name;
             $name = $this->mangle($name);
 
@@ -57,6 +98,7 @@ class RustSerializer
                 'array' => $formatter->serializeArray($runningValue, $name, $o->{$field->name}),
                 'object' => $formatter->serializeObject($runningValue, $name, $o->{$field->name}),
 //                'DateTime' => $formatter->translateDateTime($runningValue, $name, $o->{$field->name}),
+                default => throw new \RuntimeException('Cannot match ' . $field->phpType),
             };
         }
 
@@ -67,6 +109,7 @@ class RustSerializer
     {
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($to, ClassDef::class);
+        $rObject = new \ReflectionClass($to);
 
         $formatter = new JsonFormatter();
 
@@ -76,6 +119,11 @@ class RustSerializer
 
         // Build up an array of properties that we can then assign all at once.
         foreach ($objectMetadata->properties as $field) {
+            $rProp = $rObject->getProperty($field->phpName);
+//            if (! $rProp->isInitialized($o) || is_null($o->{$field->phpName})) {
+//                continue;
+//            }
+
             $name = $field->name;
             $name = $this->mangle($name);
 
@@ -87,6 +135,7 @@ class RustSerializer
                 'array' => $formatter->deserializeArray($decoded, $name),
                 'object' => $formatter->deserializeObject($decoded, $name),
 //                'DateTime' => $formatter->translateDateTime($runningValue, $name, $o->{$field->name}),
+                default => throw new \RuntimeException('Could not handle ' . $field->phpType),
             };
         }
 
@@ -159,23 +208,23 @@ class JsonFormatter
     {
         return $decoded[$name];
     }
-    public function deserializeFloat(mixed $decoded, string $name): int
+    public function deserializeFloat(mixed $decoded, string $name): float
     {
         return $decoded[$name];
     }
-    public function deserializeBool(mixed $decoded, string $name): int
+    public function deserializeBool(mixed $decoded, string $name): bool
     {
         return $decoded[$name];
     }
-    public function deserializeString(mixed $decoded, string $name): int
+    public function deserializeString(mixed $decoded, string $name): string
     {
         return $decoded[$name];
     }
-    public function deserializeArray(mixed $decoded, string $name): int
+    public function deserializeArray(mixed $decoded, string $name): array
     {
         return $decoded[$name];
     }
-    public function deserializeObject(mixed $decoded, string $name): int
+    public function deserializeObject(mixed $decoded, string $name): object
     {
         return $decoded[$name];
     }
