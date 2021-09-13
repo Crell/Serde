@@ -23,17 +23,14 @@ class RustSerializer
 
         $rObject = new \ReflectionObject($o);
 
+        // @todo $format would get used here.
         $formatter = new JsonFormatter();
-        $runningValue = $formatter->initialize();
-        foreach ($objectMetadata->properties as $field) {
-            $rProp = $rObject->getProperty($field->phpName);
-            if (!$rProp->isInitialized($o) || is_null($o->{$field->phpName})) {
-                continue;
-            }
 
+        $props = array_filter($objectMetadata->properties, $this->shouldSerialize($rObject, $o));
+
+        $eachProp = function ($runningValue, Field $field) use ($formatter, $o) {
             $name = $this->mangle($field->name);
-
-            $runningValue = match ($field->phpType) {
+            return match ($field->phpType) {
                 'int' => $formatter->serializeInt($runningValue, $name, $o->$name),
                 'float' => $formatter->serializeFloat($runningValue, $name, $o->$name),
                 'bool' => $formatter->serializeBool($runningValue, $name, $o->$name),
@@ -42,9 +39,18 @@ class RustSerializer
                 'object' => $formatter->serializeObject($runningValue, $name, $o->$name),
                 default => throw new \RuntimeException('Cannot match ' . $field->phpType),
             };
-        }
+        };
+
+        $runningValue = array_reduce($props, $eachProp, $formatter->initialize());
 
         return $formatter->finalize($runningValue);
+    }
+
+    protected function shouldSerialize(\ReflectionObject $rObject, object $o): callable
+    {
+        return static fn (Field $field) =>
+            $rObject->getProperty($field->phpName)->isInitialized($o)
+            && !is_null($o->{$field->phpName});
     }
 
     public function deserialize(string $serialized, string $from, string $to): object
