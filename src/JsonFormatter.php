@@ -48,6 +48,26 @@ class JsonFormatter
         return $val;
     }
 
+    public function serializeDateTime(mixed $val, string $name, \DateTime $next): mixed
+    {
+        $val[$name] = [
+            // @todo We may want to manually provide a format instead of using 'c' to skip the empty offset.
+            'timestamp' => $next->format('c'),
+            'timezone' => $next->getTimezone()->getName(),
+        ];
+        return $val;
+    }
+
+    public function serializeDateTimeImmutable(mixed $val, string $name, \DateTimeImmutable $next): mixed
+    {
+        $val[$name] = [
+            // @todo We may want to manually provide a format instead of using 'c' to skip the empty offset.
+            'timestamp' => $next->format('c'),
+            'timezone' => $next->getTimezone()->getName(),
+        ];
+        return $val;
+    }
+
     public function serializeObject(mixed $val, string $name, object $next, RustSerializer $serializer, string $format): mixed
     {
         $val[$name] = $serializer->serialize($next, $format);
@@ -84,8 +104,22 @@ class JsonFormatter
         return $decoded[$name] ?? SerdeError::Missing;
     }
 
+    public function deserializeDateTime(mixed $decoded, string $name): \DateTime
+    {
+        // @todo Should we also support cases where the value is a string?  Probably.
+        $value = $decoded[$name];
+        return new \DateTime($value['timestamp'], new \DateTimeZone($value['timezone']));
+    }
+
+    public function deserializeDateTimeImmutable(mixed $decoded, string $name): \DateTimeImmutable
+    {
+        $value = $decoded[$name];
+        return new \DateTimeImmutable($value['timestamp'], new \DateTimeZone($value['timezone']));
+    }
+
     public function deserializeObject(mixed $decoded, string $name, RustSerializer $serializer, string $format, string $targetType): object
     {
-        return $serializer->deserialize(serialized: $decoded[$name], from: $format, to: $targetType);
+        $valueToDeserialize = $decoded[$name];
+        return $serializer->deserialize(serialized: $valueToDeserialize, from: $format, to: $targetType);
     }
 }

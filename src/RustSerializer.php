@@ -35,6 +35,8 @@ class RustSerializer
                 'string' => $formatter->serializeString($runningValue, $name, $object->$name),
                 'array' => $formatter->serializeArray($runningValue, $name, $object->$name),
                 'resource' => throw ResourcePropertiesNotAllowed::create($field->name),
+                \DateTime::class => $formatter->serializeDateTime($runningValue, $name, $object->$name),
+                \DateTimeImmutable::class => $formatter->serializeDateTimeImmutable($runningValue, $name, $object->$name),
                 // We assume anything else means an object.
                 default => $formatter->serializeObject($runningValue, $name, $object->$name, $this, $format),
             };
@@ -58,8 +60,8 @@ class RustSerializer
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($to, ClassDef::class);
 
-        // $from would get used here.
-        $formatter = new JsonFormatter();
+        $formatters['json'] = new JsonFormatter();
+        $formatter = $formatters[$from];
 
         $props = [];
 
@@ -75,6 +77,8 @@ class RustSerializer
                 'string' => $formatter->deserializeString($decoded, $name),
                 'array' => $formatter->deserializeArray($decoded, $name),
                 'resource' => throw ResourcePropertiesNotAllowed::create($field->name),
+                \DateTime::class => $formatter->deserializeDateTime($decoded, $name),
+                \DateTimeImmutable::class => $formatter->deserializeDateTimeImmutable($decoded, $name),
                 // We assume anything else means an object.
                 default => $formatter->deserializeObject($decoded, $name, $this, $from, $field->phpType),
             };
