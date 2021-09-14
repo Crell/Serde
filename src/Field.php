@@ -25,9 +25,11 @@ class Field implements FromReflectionProperty
     public function __construct(
         /** A custom name to use for this field */
         public ?string $name = null,
+        /** Specify a case folding strategy to use */
         public Cases $caseFold = Cases::Unchanged,
         /** Use this default value if none is specified. */
         public mixed $default = null,
+        public bool $flatten = false,
     ) {}
 
     public function fromReflection(\ReflectionProperty $subject): void

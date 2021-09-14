@@ -122,4 +122,9 @@ class JsonFormatter
         $valueToDeserialize = $decoded[$name];
         return $serializer->deserialize(serialized: $valueToDeserialize, from: $format, to: $targetType);
     }
+
+    public function getRemainingData(mixed $source, array $used): mixed
+    {
+        return array_diff_key($source, array_flip($used));
+    }
 }

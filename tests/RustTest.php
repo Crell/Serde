@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Records\AllFieldTypes;
+use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Point;
@@ -101,6 +102,34 @@ class RustTest extends TestCase
         self::assertEquals('value', $toTest['tolower']);
 
         $result = $s->deserialize($json, from: 'json', to: MangleNames::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function flattening(): void
+    {
+        $s = new RustSerializer();
+
+        $data = new Flattening(
+            first: 'Larry',
+            last: 'Garfield',
+            other: ['a' => 'A', 'b' => 2, 'c' => 'C'],
+        );
+
+        $json = $s->serialize($data, 'json');
+
+        $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertEquals('Larry', $toTest['first']);
+        self::assertEquals('Garfield', $toTest['last']);
+        self::assertEquals('A', $toTest['a']);
+        self::assertEquals(2, $toTest['b']);
+        self::assertEquals('C', $toTest['c']);
+
+        $result = $s->deserialize($json, from: 'json', to: Flattening::class);
 
         self::assertEquals($data, $result);
     }

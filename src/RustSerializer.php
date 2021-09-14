@@ -26,26 +26,47 @@ class RustSerializer
 
         $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
 
-        $eachProp = function ($runningValue, Field $field) use ($formatter, $object, $format) {
+        $valueSerializer = $this->makeValueSerializer($formatter, $format);
+        $propertySerializer = $this->makePropertySerializer($valueSerializer, $object);
+
+        $serializedValue = array_reduce($props, $propertySerializer, $formatter->initialize());
+
+        return $formatter->finalize($serializedValue);
+    }
+
+    protected function makePropertySerializer(callable $valueSerializer, object $object): callable
+    {
+        return function ($runningValue, Field $field) use ($object, $valueSerializer) {
             $propName = $field->phpName;
+
+            // @todo Figure out if we care about flattening/collecting objects.
+            if ($field->flatten && $field->phpType === 'array') {
+                foreach ($object->$propName as $k => $v) {
+                    // @todo We really should standardize between the various ways of labeling types.
+                    $runningValue = $valueSerializer(\get_debug_type($v), $runningValue, $k, $v);
+                }
+                return $runningValue;
+            }
+
             $name = $this->deriveSerializedName($field);
-            return match ($field->phpType) {
-                'int' => $formatter->serializeInt($runningValue, $name, $object->$propName),
-                'float' => $formatter->serializeFloat($runningValue, $name, $object->$propName),
-                'bool' => $formatter->serializeBool($runningValue, $name, $object->$propName),
-                'string' => $formatter->serializeString($runningValue, $name, $object->$propName),
-                'array' => $formatter->serializeArray($runningValue, $name, $object->$propName),
-                'resource' => throw ResourcePropertiesNotAllowed::create($field->name),
-                \DateTime::class => $formatter->serializeDateTime($runningValue, $name, $object->$propName),
-                \DateTimeImmutable::class => $formatter->serializeDateTimeImmutable($runningValue, $name, $object->$propName),
-                // We assume anything else means an object.
-                default => $formatter->serializeObject($runningValue, $name, $object->$propName, $this, $format),
-            };
+            return $valueSerializer($field->phpType, $runningValue, $name, $object->$propName);
         };
+    }
 
-        $runningValue = array_reduce($props, $eachProp, $formatter->initialize());
-
-        return $formatter->finalize($runningValue);
+    protected function makeValueSerializer(JsonFormatter $formatter, string $format): callable
+    {
+        return fn (string $phpType, mixed $runningValue, string $name, mixed $value) => match ($phpType) {
+            'int' => $formatter->serializeInt($runningValue, $name, $value),
+            'float' => $formatter->serializeFloat($runningValue, $name, $value),
+            'bool' => $formatter->serializeBool($runningValue, $name, $value),
+            'string' => $formatter->serializeString($runningValue, $name, $value),
+            'array' => $formatter->serializeArray($runningValue, $name, $value),
+            'resource' => throw ResourcePropertiesNotAllowed::create($name),
+            \DateTime::class => $formatter->serializeDateTime($runningValue, $name, $value),
+            \DateTimeImmutable::class => $formatter->serializeDateTimeImmutable($runningValue, $name, $value),
+            // We assume anything else means an object.
+            default => $formatter->serializeObject($runningValue, $name, $value, $this, $format),
+        };
     }
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
@@ -64,25 +85,35 @@ class RustSerializer
         $formatters['json'] = new JsonFormatter();
         $formatter = $formatters[$from];
 
-        $props = [];
+        $valueDeserializer = fn(string $type, mixed $source, string $name): mixed
+            => $this->deserializeValue($formatter, $from, $type, $source, $name);
 
         $decoded = $formatter->deserializeInitialize($serialized);
+
+        $props = [];
+        $usedNames = [];
+        $collectingField = null;
 
         // Build up an array of properties that we can then assign all at once.
         foreach ($objectMetadata->properties as $field) {
             $name = $this->deriveSerializedName($field);
-            $props[$field->phpName] = match ($field->phpType) {
-                'int' => $formatter->deserializeInt($decoded, $name),
-                'float' => $formatter->deserializeFloat($decoded, $name),
-                'bool' => $formatter->deserializeBool($decoded, $name),
-                'string' => $formatter->deserializeString($decoded, $name),
-                'array' => $formatter->deserializeArray($decoded, $name),
-                'resource' => throw ResourcePropertiesNotAllowed::create($field->name),
-                \DateTime::class => $formatter->deserializeDateTime($decoded, $name),
-                \DateTimeImmutable::class => $formatter->deserializeDateTimeImmutable($decoded, $name),
-                // We assume anything else means an object.
-                default => $formatter->deserializeObject($decoded, $name, $this, $from, $field->phpType),
-            };
+
+            $usedNames[] = $name;
+             if ($field->flatten) {
+                 $collectingField = $field;
+             } else {
+                 $props[$field->phpName] = $valueDeserializer($field->phpType, $decoded, $name);
+             }
+        }
+
+        if ($collectingField) {
+            $remaining = $formatter->getRemainingData($decoded, $usedNames);
+            if ($collectingField->phpType === 'array') {
+                foreach ($remaining as $k => $v) {
+                    $props[$collectingField->phpName][$k] = $valueDeserializer(\get_debug_type($v), $remaining, $k);
+                }
+            }
+            // @todo Do we support collecting into objects? Does that even make sense?
         }
 
         $rClass = new \ReflectionClass($to);
@@ -104,7 +135,22 @@ class RustSerializer
         };
         $populate->bindTo($new, $new)($props);
         return $new;
+    }
 
+    protected function deserializeValue(JsonFormatter $formatter, string $format, string $type, mixed $source, string $name): mixed
+    {
+        return match ($type) {
+            'int' => $formatter->deserializeInt($source, $name),
+            'float' => $formatter->deserializeFloat($source, $name),
+            'bool' => $formatter->deserializeBool($source, $name),
+            'string' => $formatter->deserializeString($source, $name),
+            'array' => $formatter->deserializeArray($source, $name),
+            'resource' => throw ResourcePropertiesNotAllowed::create($name),
+            \DateTime::class => $formatter->deserializeDateTime($source, $name),
+            \DateTimeImmutable::class => $formatter->deserializeDateTimeImmutable($source, $name),
+            // We assume anything else means an object.
+            default => $formatter->deserializeObject($source, $name, $this, $format, $type),
+        };
     }
 
     protected function deriveSerializedName(Field $field): string
