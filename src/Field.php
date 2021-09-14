@@ -23,8 +23,11 @@ class Field implements FromReflectionProperty
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
     public function __construct(
+        /** A custom name to use for this field */
         public ?string $name = null,
-        public ?string $default = null,
+        public ?Cases $caseFold = null,
+        /** Use this default value if none is specified. */
+        public mixed $default = null,
     ) {}
 
     public function fromReflection(\ReflectionProperty $subject): void

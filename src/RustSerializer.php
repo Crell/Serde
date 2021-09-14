@@ -27,18 +27,19 @@ class RustSerializer
         $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
 
         $eachProp = function ($runningValue, Field $field) use ($formatter, $object, $format) {
-            $name = $this->mangle($field->name);
+            $propName = $field->phpName;
+            $name = $this->deriveSerializedName($field);
             return match ($field->phpType) {
-                'int' => $formatter->serializeInt($runningValue, $name, $object->$name),
-                'float' => $formatter->serializeFloat($runningValue, $name, $object->$name),
-                'bool' => $formatter->serializeBool($runningValue, $name, $object->$name),
-                'string' => $formatter->serializeString($runningValue, $name, $object->$name),
-                'array' => $formatter->serializeArray($runningValue, $name, $object->$name),
+                'int' => $formatter->serializeInt($runningValue, $name, $object->$propName),
+                'float' => $formatter->serializeFloat($runningValue, $name, $object->$propName),
+                'bool' => $formatter->serializeBool($runningValue, $name, $object->$propName),
+                'string' => $formatter->serializeString($runningValue, $name, $object->$propName),
+                'array' => $formatter->serializeArray($runningValue, $name, $object->$propName),
                 'resource' => throw ResourcePropertiesNotAllowed::create($field->name),
-                \DateTime::class => $formatter->serializeDateTime($runningValue, $name, $object->$name),
-                \DateTimeImmutable::class => $formatter->serializeDateTimeImmutable($runningValue, $name, $object->$name),
+                \DateTime::class => $formatter->serializeDateTime($runningValue, $name, $object->$propName),
+                \DateTimeImmutable::class => $formatter->serializeDateTimeImmutable($runningValue, $name, $object->$propName),
                 // We assume anything else means an object.
-                default => $formatter->serializeObject($runningValue, $name, $object->$name, $this, $format),
+                default => $formatter->serializeObject($runningValue, $name, $object->$propName, $this, $format),
             };
         };
 
@@ -69,8 +70,8 @@ class RustSerializer
 
         // Build up an array of properties that we can then assign all at once.
         foreach ($objectMetadata->properties as $field) {
-            $name = $this->mangle($field->name);
-            $props[$field->name] = match ($field->phpType) {
+            $name = $this->deriveSerializedName($field);
+            $props[$field->phpName] = match ($field->phpType) {
                 'int' => $formatter->deserializeInt($decoded, $name),
                 'float' => $formatter->deserializeFloat($decoded, $name),
                 'bool' => $formatter->deserializeBool($decoded, $name),
@@ -106,8 +107,14 @@ class RustSerializer
 
     }
 
-    protected function mangle(string $name): string
+    protected function deriveSerializedName(Field $field): string
     {
+        $name = $field->phpName;
+
+        if ($field->name) {
+            $name = $field->name;
+        }
+
         return $name;
     }
 }

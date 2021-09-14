@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Records\AllFieldTypes;
+use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Point;
 use PHPUnit\Framework\TestCase;
@@ -78,5 +79,26 @@ class RustTest extends TestCase
         self::assertEquals($data, $result);
     }
 
+    /**
+     * @test
+     */
+    public function name_mangling(): void
+    {
+        $s = new RustSerializer();
+
+        $data = new MangleNames(
+            customName: 'Larry',
+        );
+
+        $json = $s->serialize($data, 'json');
+
+        $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertEquals('Larry', $toTest['renamed']);
+
+        $result = $s->deserialize($json, from: 'json', to: MangleNames::class);
+
+        self::assertEquals($data, $result);
+    }
 
 }
