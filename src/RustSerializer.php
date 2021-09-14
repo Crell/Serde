@@ -115,6 +115,10 @@ class RustSerializer
             $name = $field->name;
         }
 
+        if ($field->caseFold !== Cases::Unchanged) {
+            $name = $field->caseFold->convert($name);
+        }
+
         return $name;
     }
 }

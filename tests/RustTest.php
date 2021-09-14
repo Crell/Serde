@@ -88,6 +88,8 @@ class RustTest extends TestCase
 
         $data = new MangleNames(
             customName: 'Larry',
+            toUpper: 'value',
+            toLower: 'value',
         );
 
         $json = $s->serialize($data, 'json');
@@ -95,6 +97,8 @@ class RustTest extends TestCase
         $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
         self::assertEquals('Larry', $toTest['renamed']);
+        self::assertEquals('value', $toTest['TOUPPER']);
+        self::assertEquals('value', $toTest['tolower']);
 
         $result = $s->deserialize($json, from: 'json', to: MangleNames::class);
 
