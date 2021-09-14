@@ -18,7 +18,7 @@ class AllFieldTypes
 //        public ?\DateTime $dateTime = null,
         public array $simpleArray = [],
         public array $assocArray = [],
-//        public ?Point $simpleObject = null,
+        public ?Point $simpleObject = null,
         public array $objectList = [],
 //        public $untyped = null,
 //        public $resource = null,

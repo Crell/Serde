@@ -26,7 +26,7 @@ class RustSerializer
 
         $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
 
-        $eachProp = function ($runningValue, Field $field) use ($formatter, $object) {
+        $eachProp = function ($runningValue, Field $field) use ($formatter, $object, $format) {
             $name = $this->mangle($field->name);
             return match ($field->phpType) {
                 'int' => $formatter->serializeInt($runningValue, $name, $object->$name),
@@ -34,8 +34,9 @@ class RustSerializer
                 'bool' => $formatter->serializeBool($runningValue, $name, $object->$name),
                 'string' => $formatter->serializeString($runningValue, $name, $object->$name),
                 'array' => $formatter->serializeArray($runningValue, $name, $object->$name),
-                'object' => $formatter->serializeObject($runningValue, $name, $object->$name),
-                default => throw new \RuntimeException('Cannot match ' . $field->phpType),
+                'resource' => throw ResourcePropertiesNotAllowed::create($field->name),
+                // We assume anything else means an object.
+                default => $formatter->serializeObject($runningValue, $name, $object->$name, $this, $format),
             };
         };
 
@@ -73,8 +74,9 @@ class RustSerializer
                 'bool' => $formatter->deserializeBool($decoded, $name),
                 'string' => $formatter->deserializeString($decoded, $name),
                 'array' => $formatter->deserializeArray($decoded, $name),
-                'object' => $formatter->deserializeObject($decoded, $name),
-                default => throw new \RuntimeException('Could not handle ' . $field->phpType),
+                'resource' => throw ResourcePropertiesNotAllowed::create($field->name),
+                // We assume anything else means an object.
+                default => $formatter->deserializeObject($decoded, $name, $this, $from, $field->phpType),
             };
         }
 
