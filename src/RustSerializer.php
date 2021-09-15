@@ -54,23 +54,31 @@ class RustSerializer
 
     public function serialize(object $object, string $format): string
     {
-        /** @var ClassDef $objectMetadata */
-        $objectMetadata = $this->analyzer->analyze($object, ClassDef::class);
-
         // @todo $format would get used here.
         $formatter = new JsonFormatter();
+
+        $init = $formatter->initialize();
+
+        $serializedValue = $this->innerSerialize($formatter, $format, $object, $init);
+
+        return $formatter->finalize($serializedValue);
+    }
+
+    // @todo This is ugly and gross.
+    public function innerSerialize(JsonFormatter $formatter, string $format, object $object, mixed $runningValue): mixed
+    {
+        /** @var ClassDef $objectMetadata */
+        $objectMetadata = $this->analyzer->analyze($object, ClassDef::class);
 
         $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
 
         $valueSerializer = fn (string $type, mixed $source, string $name, mixed $value): mixed
-            => $this->serializeValue($formatter, $format, $type, $source, $name, $value);
+        => $this->serializeValue($formatter, $format, $type, $source, $name, $value);
 
         $propertySerializer = fn (mixed $runningValue, Field $field): mixed
-            => $this->serializeProperty($valueSerializer, $object, $runningValue, $field);
+        => $this->serializeProperty($valueSerializer, $object, $runningValue, $field);
 
-        $serializedValue = array_reduce($props, $propertySerializer, $formatter->initialize());
-
-        return $formatter->finalize($serializedValue);
+        return array_reduce($props, $propertySerializer, $runningValue);
     }
 
     protected function serializeProperty(callable $valueSerializer, object $object, mixed $runningValue, Field $field): mixed
@@ -87,17 +95,6 @@ class RustSerializer
 
         $name = $this->deriveSerializedName($field);
         return $valueSerializer($field->phpType, $runningValue, $name, $object->$propName);
-    }
-
-    // @todo Needs to be a first() function from FP.
-    private function first(iterable $list, callable $c): mixed
-    {
-        foreach ($list as $k => $v) {
-            if ($c($v, $k)) {
-                return $v;
-            }
-        }
-        return null;
     }
 
     protected function serializeValue(JsonFormatter $formatter, string $format, string $phpType, mixed $runningValue, string $name, mixed $value): mixed
@@ -121,16 +118,25 @@ class RustSerializer
 
     public function deserialize(string $serialized, string $from, string $to): object
     {
-        /** @var ClassDef $objectMetadata */
-        $objectMetadata = $this->analyzer->analyze($to, ClassDef::class);
-
         $formatters['json'] = new JsonFormatter();
         $formatter = $formatters[$from];
 
-        $valueDeserializer = fn(string $type, mixed $source, string $name): mixed
-            => $this->deserializeValue($formatter, $from, $type, $source, $name);
-
         $decoded = $formatter->deserializeInitialize($serialized);
+
+        $new = $this->innerDeserialize($formatter, $from, $decoded, $to);
+
+        $formatter->finalizeDeserialize($decoded);
+
+        return $new;
+    }
+
+    public function innerDeserialize(JsonFormatter $formatter, string $format, mixed $decoded, string $to): mixed
+    {
+        /** @var ClassDef $objectMetadata */
+        $objectMetadata = $this->analyzer->analyze($to, ClassDef::class);
+
+        $valueDeserializer = fn(string $type, mixed $source, string $name): mixed
+        => $this->deserializeValue($formatter, $format, $type, $source, $name);
 
         $props = [];
         $usedNames = [];
@@ -141,11 +147,11 @@ class RustSerializer
             $name = $this->deriveSerializedName($field);
 
             $usedNames[] = $name;
-             if ($field->flatten) {
-                 $collectingField = $field;
-             } else {
-                 $props[$field->phpName] = $valueDeserializer($field->phpType, $decoded, $name);
-             }
+            if ($field->flatten) {
+                $collectingField = $field;
+            } else {
+                $props[$field->phpName] = $valueDeserializer($field->phpType, $decoded, $name);
+            }
         }
 
         if ($collectingField) {
@@ -158,6 +164,7 @@ class RustSerializer
             // @todo Do we support collecting into objects? Does that even make sense?
         }
 
+        // @todo What should happen if something is still set to Missing?
         $rClass = new \ReflectionClass($to);
         $new = $rClass->newInstanceWithoutConstructor();
 
@@ -167,8 +174,6 @@ class RustSerializer
                 $props[$param->name] = $param->getDefaultValue();
             }
         }
-
-        // @todo What should happen if something is still set to Missing?
 
         $populate = function (array $props) {
             foreach ($props as $k => $v) {
@@ -204,5 +209,16 @@ class RustSerializer
         }
 
         return $name;
+    }
+
+    // @todo Needs to be a first() function from FP.
+    private function first(iterable $list, callable $c): mixed
+    {
+        foreach ($list as $k => $v) {
+            if ($c($v, $k)) {
+                return $v;
+            }
+        }
+        return null;
     }
 }
