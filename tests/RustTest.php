@@ -72,7 +72,7 @@ class RustTest extends TestCase
 
         $json = $s->serialize($data, 'json');
 
-        //var_dump($json);
+//        var_dump($json);
         //self::assertEquals('{"x":1,"y":2,"z":3}', $json);
 
         $result = $s->deserialize($json, from: 'json', to: AllFieldTypes::class);

@@ -6,14 +6,50 @@ namespace Crell\Serde;
 
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\Serde\Extractor\DateTimeExtractor;
+use Crell\Serde\Extractor\DictionaryExtractor;
+use Crell\Serde\Extractor\Extractor;
+use Crell\Serde\Extractor\Injector;
+use Crell\Serde\Extractor\ObjectExtractor;
+use Crell\Serde\Extractor\SerializerAware;
+use Crell\Serde\Extractor\ScalarExtractor;
+use Crell\Serde\Extractor\SequenceExtractor;
 
 class RustSerializer
 {
     protected ClassAnalyzer $analyzer;
 
+    /** @var Extractor[]  */
+    protected array $extractors = [];
+
+    /** @var Injector[] */
+    protected array $injectors = [];
+
     public function __construct()
     {
         $this->analyzer = new Analyzer();
+
+        $this->addExtractor(new ScalarExtractor());
+        $this->addExtractor(new SequenceExtractor());
+        $this->addExtractor(new DictionaryExtractor());
+        $this->addExtractor(new DateTimeExtractor());
+        $this->addExtractor(new ObjectExtractor());
+    }
+
+    public function addExtractor(Extractor|Injector $v): static
+    {
+        if ($v instanceof SerializerAware) {
+            $v->setSerializer($this);
+        }
+
+        if ($v instanceof Extractor) {
+            $this->extractors[] = $v;
+        }
+        if ($v instanceof Injector) {
+            $this->injectors[] = $v;
+        }
+
+        return $this;
     }
 
     public function serialize(object $object, string $format): string
@@ -26,47 +62,53 @@ class RustSerializer
 
         $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
 
-        $valueSerializer = $this->makeValueSerializer($formatter, $format);
-        $propertySerializer = $this->makePropertySerializer($valueSerializer, $object);
+        $valueSerializer = fn (string $type, mixed $source, string $name, mixed $value): mixed
+            => $this->serializeValue($formatter, $format, $type, $source, $name, $value);
+
+        $propertySerializer = fn (mixed $runningValue, Field $field): mixed
+            => $this->serializeProperty($valueSerializer, $object, $runningValue, $field);
 
         $serializedValue = array_reduce($props, $propertySerializer, $formatter->initialize());
 
         return $formatter->finalize($serializedValue);
     }
 
-    protected function makePropertySerializer(callable $valueSerializer, object $object): callable
+    protected function serializeProperty(callable $valueSerializer, object $object, mixed $runningValue, Field $field): mixed
     {
-        return function ($runningValue, Field $field) use ($object, $valueSerializer) {
-            $propName = $field->phpName;
+        $propName = $field->phpName;
 
-            // @todo Figure out if we care about flattening/collecting objects.
-            if ($field->flatten && $field->phpType === 'array') {
-                foreach ($object->$propName as $k => $v) {
-                    // @todo We really should standardize between the various ways of labeling types.
-                    $runningValue = $valueSerializer(\get_debug_type($v), $runningValue, $k, $v);
-                }
-                return $runningValue;
+        // @todo Figure out if we care about flattening/collecting objects.
+        if ($field->flatten && $field->phpType === 'array') {
+            foreach ($object->$propName as $k => $v) {
+                $runningValue = $valueSerializer(\get_debug_type($v), $runningValue, $k, $v);
             }
+            return $runningValue;
+        }
 
-            $name = $this->deriveSerializedName($field);
-            return $valueSerializer($field->phpType, $runningValue, $name, $object->$propName);
-        };
+        $name = $this->deriveSerializedName($field);
+        return $valueSerializer($field->phpType, $runningValue, $name, $object->$propName);
     }
 
-    protected function makeValueSerializer(JsonFormatter $formatter, string $format): callable
+    // @todo Needs to be a first() function from FP.
+    private function first(iterable $list, callable $c): mixed
     {
-        return fn (string $phpType, mixed $runningValue, string $name, mixed $value) => match ($phpType) {
-            'int' => $formatter->serializeInt($runningValue, $name, $value),
-            'float' => $formatter->serializeFloat($runningValue, $name, $value),
-            'bool' => $formatter->serializeBool($runningValue, $name, $value),
-            'string' => $formatter->serializeString($runningValue, $name, $value),
-            'array' => $formatter->serializeArray($runningValue, $name, $value),
-            'resource' => throw ResourcePropertiesNotAllowed::create($name),
-            \DateTime::class => $formatter->serializeDateTime($runningValue, $name, $value),
-            \DateTimeImmutable::class => $formatter->serializeDateTimeImmutable($runningValue, $name, $value),
-            // We assume anything else means an object.
-            default => $formatter->serializeObject($runningValue, $name, $value, $this, $format),
-        };
+        foreach ($list as $k => $v) {
+            if ($c($v, $k)) {
+                return $v;
+            }
+        }
+        return null;
+    }
+
+    protected function serializeValue(JsonFormatter $formatter, string $format, string $phpType, mixed $runningValue, string $name, mixed $value): mixed
+    {
+        $extractor = $this->first($this->extractors, fn (Extractor $ex) => $ex->supportsExtract($phpType, $value, $format));
+
+        if (!$extractor) {
+            throw new \RuntimeException('No extractor for ' . $phpType);
+        }
+
+        return $extractor->extract($formatter, $format, $name, $value, $phpType, $runningValue);
     }
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
@@ -139,18 +181,14 @@ class RustSerializer
 
     protected function deserializeValue(JsonFormatter $formatter, string $format, string $type, mixed $source, string $name): mixed
     {
-        return match ($type) {
-            'int' => $formatter->deserializeInt($source, $name),
-            'float' => $formatter->deserializeFloat($source, $name),
-            'bool' => $formatter->deserializeBool($source, $name),
-            'string' => $formatter->deserializeString($source, $name),
-            'array' => $formatter->deserializeArray($source, $name),
-            'resource' => throw ResourcePropertiesNotAllowed::create($name),
-            \DateTime::class => $formatter->deserializeDateTime($source, $name),
-            \DateTimeImmutable::class => $formatter->deserializeDateTimeImmutable($source, $name),
-            // We assume anything else means an object.
-            default => $formatter->deserializeObject($source, $name, $this, $format, $type),
-        };
+        /** @var Injector $injector */
+        $injector = $this->first($this->injectors, fn (Injector $in): bool => $in->supportsInject($type, $format));
+
+        if (!$injector) {
+            throw new \RuntimeException('No injector for ' . $type);
+        }
+
+        return $injector->getValue($formatter, $format, $source, $name, $type);
     }
 
     protected function deriveSerializedName(Field $field): string
