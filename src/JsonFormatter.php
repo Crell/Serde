@@ -11,47 +11,47 @@ class JsonFormatter
         return [];
     }
 
-    public function finalize(mixed $val): string
+    public function finalize(mixed $runningValue): string
     {
-        return json_encode($val, JSON_THROW_ON_ERROR);
+        return json_encode($runningValue, JSON_THROW_ON_ERROR);
     }
 
-    public function serializeInt(mixed $val, string $name, int $next): mixed
+    public function serializeInt(mixed $runningValue, string $name, int $next): mixed
     {
-        $val[$name] = $next;
-        return $val;
+        $runningValue[$name] = $next;
+        return $runningValue;
     }
 
-    public function serializeFloat(mixed $val, string $name, float $next): mixed
+    public function serializeFloat(mixed $runningValue, string $name, float $next): mixed
     {
-        $val[$name] = $next;
-        return $val;
+        $runningValue[$name] = $next;
+        return $runningValue;
     }
 
-    public function serializeString(mixed $val, string $name, string $next): mixed
+    public function serializeString(mixed $runningValue, string $name, string $next): mixed
     {
-        $val[$name] = $next;
-        return $val;
+        $runningValue[$name] = $next;
+        return $runningValue;
     }
 
-    public function serializeBool(mixed $val, string $name, bool $next): mixed
+    public function serializeBool(mixed $runningValue, string $name, bool $next): mixed
     {
-        $val[$name] = $next;
-        return $val;
+        $runningValue[$name] = $next;
+        return $runningValue;
     }
 
-    public function serializeArray(mixed $val, string $name, array $next): mixed
+    public function serializeArray(mixed $runningValue, string $name, array $next): mixed
     {
         foreach ($next as $k => $v) {
-            $val[$name][$k] = $v;
+            $runningValue[$name][$k] = $v;
         }
-        return $val;
+        return $runningValue;
     }
 
-    public function serializeObject(mixed $val, string $name, object $next, RustSerializer $serializer, string $format): mixed
+    public function serializeObject(mixed $runningValue, string $name, object $next, RustSerializer $serializer, string $format): mixed
     {
-        $val[$name] = $serializer->innerSerialize($this, $format, $next, []);
-        return $val;
+        $runningValue[$name] = $serializer->innerSerialize($this, $format, $next, []);
+        return $runningValue;
     }
 
     public function deserializeInitialize(string $serialized): mixed
