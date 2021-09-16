@@ -11,12 +11,11 @@ interface PropertyReader
 {
     public function readValue(
         JsonFormatter $formatter,
-        string $format,
-        mixed $value,
+        callable $recursor,
         Field $field,
+        mixed $value,
         mixed $runningValue
     ): mixed;
 
     public function canRead(Field $field, mixed $value, string $format): bool;
-
 }

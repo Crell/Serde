@@ -11,9 +11,9 @@ class DictionaryPropertyReader implements PropertyReader
 {
     public function readValue(
         JsonFormatter $formatter,
-        string $format,
-        mixed $value,
+        callable $recursor,
         Field $field,
+        mixed $value,
         mixed $runningValue
     ): mixed {
         // @todo Differentiate this from sequences.

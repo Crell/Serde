@@ -11,7 +11,6 @@ use Crell\Serde\PropertyHandler\DictionaryPropertyReader;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
 use Crell\Serde\PropertyHandler\ObjectPropertyReader;
-use Crell\Serde\PropertyHandler\SerializerAware;
 use Crell\Serde\PropertyHandler\ScalarPropertyReader;
 use Crell\Serde\PropertyHandler\SequencePropertyReader;
 
@@ -38,10 +37,6 @@ class RustSerializer
 
     public function addPropertyHandler(PropertyReader|PropertyWriter $v): static
     {
-        if ($v instanceof SerializerAware) {
-            $v->setSerializer($this);
-        }
-
         if ($v instanceof PropertyReader) {
             $this->readers[] = $v;
         }
@@ -64,8 +59,7 @@ class RustSerializer
         return $formatter->finalize($serializedValue);
     }
 
-    // @todo This is ugly and gross.
-    public function innerSerialize(JsonFormatter $formatter, string $format, object $object, mixed $runningValue): mixed
+    protected function innerSerialize(JsonFormatter $formatter, string $format, object $object, mixed $runningValue): mixed
     {
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($object, ClassDef::class);
@@ -107,7 +101,8 @@ class RustSerializer
             throw new \RuntimeException('No reader for ' . $field->phpType);
         }
 
-        return $reader->readValue($formatter, $format, $value, $field, $runningValue);
+        $recursor = fn (mixed $value, mixed $runValue) => $this->innerSerialize($formatter, $format, $value, $runValue);
+        return $reader->readValue($formatter, $recursor, $field, $value, $runningValue);
     }
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
@@ -132,13 +127,13 @@ class RustSerializer
         return $new;
     }
 
-    public function innerDeserialize(JsonFormatter $formatter, string $format, mixed $decoded, string $targetType): mixed
+    protected function innerDeserialize(JsonFormatter $formatter, string $format, mixed $decoded, string $targetType): mixed
     {
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($targetType, ClassDef::class);
 
         $valueDeserializer = fn(Field $field, mixed $source): mixed
-        => $this->deserializeValue($formatter, $format, $field, $source);
+            => $this->deserializeValue($formatter, $format, $field, $source);
 
         $props = [];
         $usedNames = [];
@@ -195,7 +190,8 @@ class RustSerializer
             throw new \RuntimeException('No writer for ' . $field->phpType);
         }
 
-        return $writer->writeValue($formatter, $format, $source, $field);
+        $recursor = fn (mixed $value, $target) => $this->innerDeserialize($formatter, $format, $value, $target);
+        return $writer->writeValue($formatter, $recursor, $source, $field);
     }
 
     // @todo Needs to be a first() function from FP.

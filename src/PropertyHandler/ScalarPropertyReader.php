@@ -11,9 +11,9 @@ class ScalarPropertyReader implements PropertyReader, PropertyWriter
 {
     public function readValue(
         JsonFormatter $formatter,
-        string $format,
-        mixed $value,
+        callable $recursor,
         Field $field,
+        mixed $value,
         mixed $runningValue
     ): mixed {
         return match ($field->phpType) {
@@ -24,7 +24,7 @@ class ScalarPropertyReader implements PropertyReader, PropertyWriter
         };
     }
 
-    public function writeValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
+    public function writeValue(JsonFormatter $formatter, callable $recursor, mixed $source, Field $field): mixed
     {
         return match ($field->phpType) {
             'int' => $formatter->deserializeInt($source, $field->serializedName()),

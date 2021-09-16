@@ -48,9 +48,9 @@ class JsonFormatter
         return $runningValue;
     }
 
-    public function serializeObject(mixed $runningValue, string $name, object $next, RustSerializer $serializer, string $format): mixed
+    public function serializeObject(mixed $runningValue, string $name, object $next, callable $recursor): mixed
     {
-        $runningValue[$name] = $serializer->innerSerialize($this, $format, $next, []);
+        $runningValue[$name] = $recursor($next, []);
         return $runningValue;
     }
 
@@ -84,10 +84,10 @@ class JsonFormatter
         return $decoded[$name] ?? SerdeError::Missing;
     }
 
-    public function deserializeObject(mixed $decoded, string $name, RustSerializer $serializer, string $format, string $targetType): object
+    public function deserializeObject(mixed $decoded, string $name, callable $recursor, string $targetType): object
     {
         $valueToDeserialize = $decoded[$name];
-        return $serializer->innerDeserialize($this, $format, $valueToDeserialize, $targetType);
+        return $recursor($valueToDeserialize, $targetType);
     }
 
     public function getRemainingData(mixed $source, array $used): mixed

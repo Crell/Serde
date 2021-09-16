@@ -9,7 +9,7 @@ use Crell\Serde\JsonFormatter;
 
 interface PropertyWriter
 {
-    public function writeValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed;
+    public function writeValue(JsonFormatter $formatter, callable $recursor, mixed $source, Field $field): mixed;
 
     public function canWrite(Field $field, string $format): bool;
 }

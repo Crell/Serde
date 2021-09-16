@@ -11,9 +11,9 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
 {
     public function readValue(
         JsonFormatter $formatter,
-        string $format,
-        mixed $value,
+        callable $recursor,
         Field $field,
+        mixed $value,
         mixed $runningValue
     ): mixed {
         return $formatter->serializeArray($runningValue, $field->serializedName(), $value);
@@ -24,7 +24,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
         return $field->phpType === 'array' && \array_is_list($value);
     }
 
-    public function writeValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
+    public function writeValue(JsonFormatter $formatter, callable $recursor, mixed $source, Field $field): mixed
     {
         return $formatter->deserializeArray($source, $field->serializedName());
     }
