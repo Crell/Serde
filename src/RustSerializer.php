@@ -97,7 +97,7 @@ class RustSerializer
     protected function serializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $runningValue, mixed $value): mixed
     {
         /** @var PropertyReader $reader */
-        $reader = $this->first($this->readers, fn (PropertyReader $ex) => $ex->canRead($field, $value, $format));
+        $reader = $this->first($this->readers, fn (PropertyReader $r) => $r->canRead($field, $value, $format));
 
         if (!$reader) {
             // @todo Better exception.
@@ -186,7 +186,7 @@ class RustSerializer
     protected function deserializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $source): mixed
     {
         /** @var PropertyWriter $writer */
-        $writer = $this->first($this->writers, fn (PropertyWriter $in): bool => $in->canWrite($field, $format));
+        $writer = $this->first($this->writers, fn (PropertyWriter $w): bool => $w->canWrite($field, $format));
 
         if (!$writer) {
             // @todo Better exception.
