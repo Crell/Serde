@@ -46,6 +46,25 @@ class Field implements FromReflectionProperty
         $this->default ??= $subject->getDefaultValue();
     }
 
+    /**
+     * @internal
+     *
+     * This method is to allow the serializer to create new pseudo-Fields
+     * for nested values when flattening and collecting. Do not call it directly.
+     */
+    public static function create(
+        ?string $name = null,
+        Cases $caseFold = Cases::Unchanged,
+        string $phpName = null,
+        string $phpType = null,
+    ): static
+    {
+        $new = new static(name: $name, caseFold: $caseFold);
+        $new->phpType = $phpType;
+        $new->phpName = $phpName;
+        return $new;
+    }
+
     protected function getNativeType(\ReflectionProperty $property): string
     {
         // @todo Support easy unions, like int|float.

@@ -88,7 +88,8 @@ class RustSerializer
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
             foreach ($object->$propName as $k => $v) {
-                $runningValue = $valueSerializer($this->makePseudoFieldForValue($k, $v), $runningValue, $v);
+                $f = Field::create(name: $k, phpName: $k, phpType: \get_debug_type($v));
+                $runningValue = $valueSerializer($f, $runningValue, $v);
             }
             return $runningValue;
         }
@@ -157,7 +158,8 @@ class RustSerializer
             $remaining = $formatter->getRemainingData($decoded, $usedNames);
             if ($collectingField->phpType === 'array') {
                 foreach ($remaining as $k => $v) {
-                    $props[$collectingField->phpName][$k] = $valueDeserializer($this->makePseudoFieldForValue($k, $v), $remaining, $k);
+                    $f = Field::create(name: $k, phpName: $k, phpType: \get_debug_type($v));
+                    $props[$collectingField->phpName][$k] = $valueDeserializer($f, $remaining, $k);
                 }
             }
             // @todo Do we support collecting into objects? Does that even make sense?
@@ -193,15 +195,6 @@ class RustSerializer
         }
 
         return $writer->writeValue($formatter, $format, $source, $field);
-    }
-
-    // @todo Redesign this so we can make phpType readonly.
-    protected function makePseudoFieldForValue(string $name, mixed $value): Field
-    {
-        $f = new Field(name: $name);
-        $f->phpName = $name;
-        $f->phpType = \get_debug_type($value);
-        return $f;
     }
 
     // @todo Needs to be a first() function from FP.
