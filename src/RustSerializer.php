@@ -100,10 +100,10 @@ class RustSerializer
     protected function serializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $runningValue, mixed $value): mixed
     {
         /** @var PropertyReader $reader */
-        $reader = $this->first($this->readers, fn (PropertyReader $ex) => $ex->canRead($field, $value,
-            $format));
+        $reader = $this->first($this->readers, fn (PropertyReader $ex) => $ex->canRead($field, $value, $format));
 
         if (!$reader) {
+            // @todo Better exception.
             throw new \RuntimeException('No reader for ' . $field->phpType);
         }
 
@@ -191,6 +191,7 @@ class RustSerializer
         $writer = $this->first($this->writers, fn (PropertyWriter $in): bool => $in->canWrite($field, $format));
 
         if (!$writer) {
+            // @todo Better exception.
             throw new \RuntimeException('No writer for ' . $field->phpType);
         }
 
