@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Extractor;
 
+use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
 class DateTimeExtractor implements Extractor, Injector
@@ -13,7 +14,7 @@ class DateTimeExtractor implements Extractor, Injector
      * @param string $format
      * @param string $name
      * @param \DateTimeInterface $value
-     * @param string $type
+     * @param Field $field
      * @param mixed $runningValue
      * @return mixed
      */
@@ -22,14 +23,14 @@ class DateTimeExtractor implements Extractor, Injector
         string $format,
         string $name,
         mixed $value,
-        string $type,
+        Field $field,
         mixed $runningValue
     ): mixed {
         $string = $value->format(\DateTimeInterface::RFC3339_EXTENDED);
         return $formatter->serializeString($runningValue, $name, $string);
     }
 
-    public function supportsExtract(string $type, mixed $value, string $format): bool
+    public function supportsExtract(Field $field, mixed $value, string $format): bool
     {
         return $value instanceof \DateTimeInterface;
     }
@@ -41,9 +42,9 @@ class DateTimeExtractor implements Extractor, Injector
         return new $type($string);
     }
 
-    public function supportsInject(string $type, string $format): bool
+    public function supportsInject(Field $field, string $format): bool
     {
-        return in_array($type, [\DateTimeInterface::class, \DateTime::class, \DateTimeImmutable::class]);
+        return in_array($field->phpType, [\DateTimeInterface::class, \DateTime::class, \DateTimeImmutable::class]);
     }
 
 

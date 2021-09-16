@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Extractor;
 
+use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
 class DictionaryExtractor implements Extractor
@@ -13,15 +14,15 @@ class DictionaryExtractor implements Extractor
         string $format,
         string $name,
         mixed $value,
-        string $type,
+        Field $field,
         mixed $runningValue
     ): mixed {
         // @todo Differentiate this from sequences.
         return $formatter->serializeArray($runningValue, $name, $value);
     }
 
-    public function supportsExtract(string $type, mixed $value, string $format): bool
+    public function supportsExtract(Field $field, mixed $value, string $format): bool
     {
-        return $type === 'array' && !\array_is_list($value);
+        return $field->phpType === 'array' && !\array_is_list($value);
     }
 }

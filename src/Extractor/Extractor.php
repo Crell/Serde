@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Extractor;
 
+use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
 interface Extractor
@@ -13,10 +14,10 @@ interface Extractor
         string $format,
         string $name,
         mixed $value,
-        string $type,
+        Field $field,
         mixed $runningValue
     ): mixed;
 
-    public function supportsExtract(string $type, mixed $value, string $format): bool;
+    public function supportsExtract(Field $field, mixed $value, string $format): bool;
 
 }

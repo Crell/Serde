@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Extractor;
 
+use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
 class ScalarExtractor implements Extractor, Injector
@@ -13,10 +14,10 @@ class ScalarExtractor implements Extractor, Injector
         string $format,
         string $name,
         mixed $value,
-        string $type,
+        Field $field,
         mixed $runningValue
     ): mixed {
-        return match ($type) {
+        return match ($field->phpType) {
             'int' => $formatter->serializeInt($runningValue, $name, $value),
             'float' => $formatter->serializeFloat($runningValue, $name, $value),
             'bool' => $formatter->serializeBool($runningValue, $name, $value),
@@ -34,14 +35,13 @@ class ScalarExtractor implements Extractor, Injector
         };
     }
 
-
-    public function supportsExtract(string $type, mixed $value, string $format): bool
+    public function supportsExtract(Field $field, mixed $value, string $format): bool
     {
         return is_scalar($value);
     }
 
-    public function supportsInject(string $type, string $format): bool
+    public function supportsInject(Field $field, string $format): bool
     {
-        return in_array($type, ['int', 'float', 'bool', 'string']);
+        return in_array($field->phpType, ['int', 'float', 'bool', 'string']);
     }
 }

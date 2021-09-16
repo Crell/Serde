@@ -72,8 +72,8 @@ class RustSerializer
 
         $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
 
-        $valueSerializer = fn (string $type, mixed $source, string $name, mixed $value): mixed
-        => $this->serializeValue($formatter, $format, $type, $source, $name, $value);
+        $valueSerializer = fn (Field $field, mixed $source, string $name, mixed $value): mixed
+        => $this->serializeValue($formatter, $format, $field, $source, $name, $value);
 
         $propertySerializer = fn (mixed $runningValue, Field $field): mixed
         => $this->serializeProperty($valueSerializer, $object, $runningValue, $field);
@@ -88,24 +88,26 @@ class RustSerializer
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
             foreach ($object->$propName as $k => $v) {
-                $runningValue = $valueSerializer(\get_debug_type($v), $runningValue, $k, $v);
+                $runningValue = $valueSerializer($this->makePseudoFieldForValue($k, $v), $runningValue, $k, $v);
             }
             return $runningValue;
         }
 
         $name = $this->deriveSerializedName($field);
-        return $valueSerializer($field->phpType, $runningValue, $name, $object->$propName);
+        return $valueSerializer($field, $runningValue, $name, $object->$propName);
     }
 
-    protected function serializeValue(JsonFormatter $formatter, string $format, string $phpType, mixed $runningValue, string $name, mixed $value): mixed
+    protected function serializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $runningValue, string $name, mixed $value): mixed
     {
-        $extractor = $this->first($this->extractors, fn (Extractor $ex) => $ex->supportsExtract($phpType, $value, $format));
+        /** @var Extractor $extractor */
+        $extractor = $this->first($this->extractors, fn (Extractor $ex) => $ex->supportsExtract($field, $value,
+            $format));
 
         if (!$extractor) {
-            throw new \RuntimeException('No extractor for ' . $phpType);
+            throw new \RuntimeException('No extractor for ' . $field->phpType);
         }
 
-        return $extractor->extract($formatter, $format, $name, $value, $phpType, $runningValue);
+        return $extractor->extract($formatter, $format, $name, $value, $field, $runningValue);
     }
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
@@ -130,13 +132,13 @@ class RustSerializer
         return $new;
     }
 
-    public function innerDeserialize(JsonFormatter $formatter, string $format, mixed $decoded, string $to): mixed
+    public function innerDeserialize(JsonFormatter $formatter, string $format, mixed $decoded, string $targetType): mixed
     {
         /** @var ClassDef $objectMetadata */
-        $objectMetadata = $this->analyzer->analyze($to, ClassDef::class);
+        $objectMetadata = $this->analyzer->analyze($targetType, ClassDef::class);
 
-        $valueDeserializer = fn(string $type, mixed $source, string $name): mixed
-        => $this->deserializeValue($formatter, $format, $type, $source, $name);
+        $valueDeserializer = fn(Field $field, mixed $source, string $name): mixed
+        => $this->deserializeValue($formatter, $format, $field, $source, $name);
 
         $props = [];
         $usedNames = [];
@@ -150,7 +152,7 @@ class RustSerializer
             if ($field->flatten) {
                 $collectingField = $field;
             } else {
-                $props[$field->phpName] = $valueDeserializer($field->phpType, $decoded, $name);
+                $props[$field->phpName] = $valueDeserializer($field, $decoded, $name);
             }
         }
 
@@ -158,14 +160,14 @@ class RustSerializer
             $remaining = $formatter->getRemainingData($decoded, $usedNames);
             if ($collectingField->phpType === 'array') {
                 foreach ($remaining as $k => $v) {
-                    $props[$collectingField->phpName][$k] = $valueDeserializer(\get_debug_type($v), $remaining, $k);
+                    $props[$collectingField->phpName][$k] = $valueDeserializer($this->makePseudoFieldForValue($k, $v), $remaining, $k);
                 }
             }
             // @todo Do we support collecting into objects? Does that even make sense?
         }
 
         // @todo What should happen if something is still set to Missing?
-        $rClass = new \ReflectionClass($to);
+        $rClass = new \ReflectionClass($targetType);
         $new = $rClass->newInstanceWithoutConstructor();
 
         // Get defaults from the constructor if necessary and possible.
@@ -184,16 +186,16 @@ class RustSerializer
         return $new;
     }
 
-    protected function deserializeValue(JsonFormatter $formatter, string $format, string $type, mixed $source, string $name): mixed
+    protected function deserializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $source, string $name): mixed
     {
         /** @var Injector $injector */
-        $injector = $this->first($this->injectors, fn (Injector $in): bool => $in->supportsInject($type, $format));
+        $injector = $this->first($this->injectors, fn (Injector $in): bool => $in->supportsInject($field, $format));
 
         if (!$injector) {
-            throw new \RuntimeException('No injector for ' . $type);
+            throw new \RuntimeException('No injector for ' . $field->phpType);
         }
 
-        return $injector->getValue($formatter, $format, $source, $name, $type);
+        return $injector->getValue($formatter, $format, $source, $name, $field->phpType);
     }
 
     protected function deriveSerializedName(Field $field): string
@@ -209,6 +211,14 @@ class RustSerializer
         }
 
         return $name;
+    }
+
+    // @todo Redesign this so we can make phpType readonly.
+    protected function makePseudoFieldForValue(string $name, mixed $value): Field
+    {
+        $f = new Field(name: $name);
+        $f->phpType = \get_debug_type($value);
+        return $f;
     }
 
     // @todo Needs to be a first() function from FP.

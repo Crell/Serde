@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Extractor;
 
+use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
 class ObjectExtractor implements SerializerAware, Injector, Extractor
@@ -15,13 +16,13 @@ class ObjectExtractor implements SerializerAware, Injector, Extractor
         string $format,
         string $name,
         mixed $value,
-        string $type,
+        Field $field,
         mixed $runningValue
     ): mixed {
         return $formatter->serializeObject($runningValue, $name, $value, $this->serializer, $format);
     }
 
-    public function supportsExtract(string $type, mixed $value, string $format): bool
+    public function supportsExtract(Field $field, mixed $value, string $format): bool
     {
         return is_object($value);
     }
@@ -31,10 +32,8 @@ class ObjectExtractor implements SerializerAware, Injector, Extractor
         return $formatter->deserializeObject($source, $name, $this->serializer, $format, $type);
     }
 
-    public function supportsInject(string $type, string $format): bool
+    public function supportsInject(Field $field, string $format): bool
     {
-        return $type === 'object' || class_exists($type);
+        return $field->phpType === 'object' || class_exists($field->phpType);
     }
-
-
 }

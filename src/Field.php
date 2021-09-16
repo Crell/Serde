@@ -28,7 +28,8 @@ class Field implements FromReflectionProperty
         /** Specify a case folding strategy to use */
         public Cases $caseFold = Cases::Unchanged,
         /** Use this default value if none is specified. */
-        public mixed $default = null,
+        //public mixed $default = null,
+        /** True to flatten an array on serialization and collect into it when deserializing. */
         public bool $flatten = false,
     ) {}
 
