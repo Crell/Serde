@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde\Extractor;
+namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
-class DictionaryExtractor implements Extractor
+class DictionaryPropertyReader implements PropertyReader
 {
-    public function extract(
+    public function readValue(
         JsonFormatter $formatter,
         string $format,
         mixed $value,
@@ -20,7 +20,7 @@ class DictionaryExtractor implements Extractor
         return $formatter->serializeArray($runningValue, $field->serializedName(), $value);
     }
 
-    public function supportsExtract(Field $field, mixed $value, string $format): bool
+    public function canRead(Field $field, mixed $value, string $format): bool
     {
         return $field->phpType === 'array' && !\array_is_list($value);
     }

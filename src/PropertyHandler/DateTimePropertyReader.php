@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde\Extractor;
+namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
-class DateTimeExtractor implements Extractor, Injector
+class DateTimePropertyReader implements PropertyReader, PropertyWriter
 {
     /**
      * @param JsonFormatter $formatter
@@ -17,7 +17,7 @@ class DateTimeExtractor implements Extractor, Injector
      * @param mixed $runningValue
      * @return mixed
      */
-    public function extract(
+    public function readValue(
         JsonFormatter $formatter,
         string $format,
         mixed $value,
@@ -28,19 +28,19 @@ class DateTimeExtractor implements Extractor, Injector
         return $formatter->serializeString($runningValue, $field->serializedName(), $string);
     }
 
-    public function supportsExtract(Field $field, mixed $value, string $format): bool
+    public function canRead(Field $field, mixed $value, string $format): bool
     {
         return $value instanceof \DateTimeInterface;
     }
 
-    public function getValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
+    public function writeValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
     {
         $string = $formatter->deserializeString($source, $field->serializedName());
 
         return new ($field->phpType)($string);
     }
 
-    public function supportsInject(Field $field, string $format): bool
+    public function canWrite(Field $field, string $format): bool
     {
         return in_array($field->phpType, [\DateTimeInterface::class, \DateTime::class, \DateTimeImmutable::class]);
     }

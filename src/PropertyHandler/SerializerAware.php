@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde\Extractor;
+namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\RustSerializer;
 

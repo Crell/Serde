@@ -6,47 +6,47 @@ namespace Crell\Serde;
 
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
-use Crell\Serde\Extractor\DateTimeExtractor;
-use Crell\Serde\Extractor\DictionaryExtractor;
-use Crell\Serde\Extractor\Extractor;
-use Crell\Serde\Extractor\Injector;
-use Crell\Serde\Extractor\ObjectExtractor;
-use Crell\Serde\Extractor\SerializerAware;
-use Crell\Serde\Extractor\ScalarExtractor;
-use Crell\Serde\Extractor\SequenceExtractor;
+use Crell\Serde\PropertyHandler\DateTimePropertyReader;
+use Crell\Serde\PropertyHandler\DictionaryPropertyReader;
+use Crell\Serde\PropertyHandler\PropertyReader;
+use Crell\Serde\PropertyHandler\PropertyWriter;
+use Crell\Serde\PropertyHandler\ObjectPropertyReader;
+use Crell\Serde\PropertyHandler\SerializerAware;
+use Crell\Serde\PropertyHandler\ScalarPropertyReader;
+use Crell\Serde\PropertyHandler\SequencePropertyReader;
 
 class RustSerializer
 {
     protected ClassAnalyzer $analyzer;
 
-    /** @var Extractor[]  */
-    protected array $extractors = [];
+    /** @var PropertyReader[]  */
+    protected array $readers = [];
 
-    /** @var Injector[] */
-    protected array $injectors = [];
+    /** @var PropertyWriter[] */
+    protected array $writers = [];
 
     public function __construct()
     {
         $this->analyzer = new Analyzer();
 
-        $this->addExtractor(new ScalarExtractor());
-        $this->addExtractor(new SequenceExtractor());
-        $this->addExtractor(new DictionaryExtractor());
-        $this->addExtractor(new DateTimeExtractor());
-        $this->addExtractor(new ObjectExtractor());
+        $this->addPropertyHandler(new ScalarPropertyReader());
+        $this->addPropertyHandler(new SequencePropertyReader());
+        $this->addPropertyHandler(new DictionaryPropertyReader());
+        $this->addPropertyHandler(new DateTimePropertyReader());
+        $this->addPropertyHandler(new ObjectPropertyReader());
     }
 
-    public function addExtractor(Extractor|Injector $v): static
+    public function addPropertyHandler(PropertyReader|PropertyWriter $v): static
     {
         if ($v instanceof SerializerAware) {
             $v->setSerializer($this);
         }
 
-        if ($v instanceof Extractor) {
-            $this->extractors[] = $v;
+        if ($v instanceof PropertyReader) {
+            $this->readers[] = $v;
         }
-        if ($v instanceof Injector) {
-            $this->injectors[] = $v;
+        if ($v instanceof PropertyWriter) {
+            $this->writers[] = $v;
         }
 
         return $this;
@@ -98,15 +98,15 @@ class RustSerializer
 
     protected function serializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $runningValue, mixed $value): mixed
     {
-        /** @var Extractor $extractor */
-        $extractor = $this->first($this->extractors, fn (Extractor $ex) => $ex->supportsExtract($field, $value,
+        /** @var PropertyReader $reader */
+        $reader = $this->first($this->readers, fn (PropertyReader $ex) => $ex->canRead($field, $value,
             $format));
 
-        if (!$extractor) {
-            throw new \RuntimeException('No extractor for ' . $field->phpType);
+        if (!$reader) {
+            throw new \RuntimeException('No reader for ' . $field->phpType);
         }
 
-        return $extractor->extract($formatter, $format, $value, $field, $runningValue);
+        return $reader->readValue($formatter, $format, $value, $field, $runningValue);
     }
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
@@ -185,14 +185,14 @@ class RustSerializer
 
     protected function deserializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $source): mixed
     {
-        /** @var Injector $injector */
-        $injector = $this->first($this->injectors, fn (Injector $in): bool => $in->supportsInject($field, $format));
+        /** @var PropertyWriter $writer */
+        $writer = $this->first($this->writers, fn (PropertyWriter $in): bool => $in->canWrite($field, $format));
 
-        if (!$injector) {
-            throw new \RuntimeException('No injector for ' . $field->phpType);
+        if (!$writer) {
+            throw new \RuntimeException('No writer for ' . $field->phpType);
         }
 
-        return $injector->getValue($formatter, $format, $source, $field);
+        return $writer->writeValue($formatter, $format, $source, $field);
     }
 
     // @todo Redesign this so we can make phpType readonly.

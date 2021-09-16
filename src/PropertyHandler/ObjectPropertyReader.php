@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde\Extractor;
+namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
-class ObjectExtractor implements SerializerAware, Injector, Extractor
+class ObjectPropertyReader implements SerializerAware, PropertyWriter, PropertyReader
 {
-    use RecursiveExtractorTrait;
+    use RecursivePropertyHandler;
 
-    public function extract(
+    public function readValue(
         JsonFormatter $formatter,
         string $format,
         mixed $value,
@@ -21,17 +21,17 @@ class ObjectExtractor implements SerializerAware, Injector, Extractor
         return $formatter->serializeObject($runningValue, $field->serializedName(), $value, $this->serializer, $format);
     }
 
-    public function supportsExtract(Field $field, mixed $value, string $format): bool
+    public function canRead(Field $field, mixed $value, string $format): bool
     {
         return is_object($value);
     }
 
-    public function getValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
+    public function writeValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
     {
         return $formatter->deserializeObject($source, $field->serializedName(), $this->serializer, $format, $field->phpType);
     }
 
-    public function supportsInject(Field $field, string $format): bool
+    public function canWrite(Field $field, string $format): bool
     {
         return $field->phpType === 'object' || class_exists($field->phpType);
     }

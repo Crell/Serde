@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde\Extractor;
+namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
-class ScalarExtractor implements Extractor, Injector
+class ScalarPropertyReader implements PropertyReader, PropertyWriter
 {
-    public function extract(
+    public function readValue(
         JsonFormatter $formatter,
         string $format,
         mixed $value,
@@ -24,7 +24,7 @@ class ScalarExtractor implements Extractor, Injector
         };
     }
 
-    public function getValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
+    public function writeValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
     {
         return match ($field->phpType) {
             'int' => $formatter->deserializeInt($source, $field->serializedName()),
@@ -34,12 +34,12 @@ class ScalarExtractor implements Extractor, Injector
         };
     }
 
-    public function supportsExtract(Field $field, mixed $value, string $format): bool
+    public function canRead(Field $field, mixed $value, string $format): bool
     {
         return is_scalar($value);
     }
 
-    public function supportsInject(Field $field, string $format): bool
+    public function canWrite(Field $field, string $format): bool
     {
         return in_array($field->phpType, ['int', 'float', 'bool', 'string']);
     }

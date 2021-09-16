@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde\Extractor;
+namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 
-interface Extractor
+interface PropertyReader
 {
-    public function extract(
+    public function readValue(
         JsonFormatter $formatter,
         string $format,
         mixed $value,
@@ -17,6 +17,6 @@ interface Extractor
         mixed $runningValue
     ): mixed;
 
-    public function supportsExtract(Field $field, mixed $value, string $format): bool;
+    public function canRead(Field $field, mixed $value, string $format): bool;
 
 }
