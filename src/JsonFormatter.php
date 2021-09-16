@@ -48,9 +48,9 @@ class JsonFormatter
         return $runningValue;
     }
 
-    public function serializeObject(mixed $runningValue, string $name, object $next, callable $recursor): mixed
+    public function serializeObject(mixed $runningValue, string $name, object $next, callable $recursor, array $extra = []): mixed
     {
-        $runningValue[$name] = $recursor($next, []);
+        $runningValue[$name] = $recursor($next, []) + $extra;
         return $runningValue;
     }
 

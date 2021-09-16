@@ -10,6 +10,8 @@ use Crell\AttributeUtils\FromReflectionProperty;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class Field implements FromReflectionProperty
 {
+    use Evolvable;
+
     /**
      * The native PHP type, as the reflection system defines it.
      */

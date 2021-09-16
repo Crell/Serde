@@ -8,9 +8,9 @@ use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\PropertyHandler\DateTimePropertyReader;
 use Crell\Serde\PropertyHandler\DictionaryPropertyReader;
+use Crell\Serde\PropertyHandler\ObjectPropertyReader;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
-use Crell\Serde\PropertyHandler\ObjectPropertyReader;
 use Crell\Serde\PropertyHandler\ScalarPropertyReader;
 use Crell\Serde\PropertyHandler\SequencePropertyReader;
 
@@ -24,9 +24,12 @@ class RustSerializer
     /** @var PropertyWriter[] */
     protected array $writers = [];
 
-    public function __construct()
+    // @todo Make the analyzer required.
+    public function __construct(?ClassAnalyzer $analyzer = null, array $handlers = [])
     {
-        $this->analyzer = new Analyzer();
+        $this->analyzer = $analyzer ?? new Analyzer();
+
+        array_map(fn (PropertyWriter|PropertyReader $handler) => $this->addPropertyHandler($handler), $handlers);
 
         $this->addPropertyHandler(new ScalarPropertyReader());
         $this->addPropertyHandler(new SequencePropertyReader());
@@ -35,13 +38,13 @@ class RustSerializer
         $this->addPropertyHandler(new ObjectPropertyReader());
     }
 
-    public function addPropertyHandler(PropertyReader|PropertyWriter $v): static
+    public function addPropertyHandler(PropertyReader|PropertyWriter $handler): static
     {
-        if ($v instanceof PropertyReader) {
-            $this->readers[] = $v;
+        if ($handler instanceof PropertyReader) {
+            $this->readers[] = $handler;
         }
-        if ($v instanceof PropertyWriter) {
-            $this->writers[] = $v;
+        if ($handler instanceof PropertyWriter) {
+            $this->writers[] = $handler;
         }
 
         return $this;
