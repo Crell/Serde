@@ -12,7 +12,6 @@ interface Extractor
     public function extract(
         JsonFormatter $formatter,
         string $format,
-        string $name,
         mixed $value,
         Field $field,
         mixed $runningValue

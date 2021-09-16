@@ -12,12 +12,11 @@ class SequenceExtractor implements Extractor, Injector
     public function extract(
         JsonFormatter $formatter,
         string $format,
-        string $name,
         mixed $value,
         Field $field,
         mixed $runningValue
     ): mixed {
-        return $formatter->serializeArray($runningValue, $name, $value);
+        return $formatter->serializeArray($runningValue, $field->serializedName(), $value);
     }
 
     public function supportsExtract(Field $field, mixed $value, string $format): bool
@@ -25,9 +24,9 @@ class SequenceExtractor implements Extractor, Injector
         return $field->phpType === 'array' && \array_is_list($value);
     }
 
-    public function getValue(JsonFormatter $formatter, string $format, mixed $source, string $name, string $type): mixed
+    public function getValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
     {
-        return $formatter->deserializeArray($source, $name);
+        return $formatter->deserializeArray($source, $field->serializedName());
     }
 
     public function supportsInject(Field $field, string $format): bool

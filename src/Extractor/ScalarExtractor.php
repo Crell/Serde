@@ -12,26 +12,25 @@ class ScalarExtractor implements Extractor, Injector
     public function extract(
         JsonFormatter $formatter,
         string $format,
-        string $name,
         mixed $value,
         Field $field,
         mixed $runningValue
     ): mixed {
         return match ($field->phpType) {
-            'int' => $formatter->serializeInt($runningValue, $name, $value),
-            'float' => $formatter->serializeFloat($runningValue, $name, $value),
-            'bool' => $formatter->serializeBool($runningValue, $name, $value),
-            'string' => $formatter->serializeString($runningValue, $name, $value),
+            'int' => $formatter->serializeInt($runningValue, $field->serializedName(), $value),
+            'float' => $formatter->serializeFloat($runningValue, $field->serializedName(), $value),
+            'bool' => $formatter->serializeBool($runningValue, $field->serializedName(), $value),
+            'string' => $formatter->serializeString($runningValue, $field->serializedName(), $value),
         };
     }
 
-    public function getValue(JsonFormatter $formatter, string $format, mixed $source, string $name, string $type): mixed
+    public function getValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
     {
-        return match ($type) {
-            'int' => $formatter->deserializeInt($source, $name),
-            'float' => $formatter->deserializeFloat($source, $name),
-            'bool' => $formatter->deserializeBool($source, $name),
-            'string' => $formatter->deserializeString($source, $name),
+        return match ($field->phpType) {
+            'int' => $formatter->deserializeInt($source, $field->serializedName()),
+            'float' => $formatter->deserializeFloat($source, $field->serializedName()),
+            'bool' => $formatter->deserializeBool($source, $field->serializedName()),
+            'string' => $formatter->deserializeString($source, $field->serializedName()),
         };
     }
 

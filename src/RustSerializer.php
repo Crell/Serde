@@ -72,8 +72,8 @@ class RustSerializer
 
         $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
 
-        $valueSerializer = fn (Field $field, mixed $source, string $name, mixed $value): mixed
-        => $this->serializeValue($formatter, $format, $field, $source, $name, $value);
+        $valueSerializer = fn (Field $field, mixed $runningVal, mixed $value): mixed
+        => $this->serializeValue($formatter, $format, $field, $runningVal, $value);
 
         $propertySerializer = fn (mixed $runningValue, Field $field): mixed
         => $this->serializeProperty($valueSerializer, $object, $runningValue, $field);
@@ -88,16 +88,15 @@ class RustSerializer
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
             foreach ($object->$propName as $k => $v) {
-                $runningValue = $valueSerializer($this->makePseudoFieldForValue($k, $v), $runningValue, $k, $v);
+                $runningValue = $valueSerializer($this->makePseudoFieldForValue($k, $v), $runningValue, $v);
             }
             return $runningValue;
         }
 
-        $name = $this->deriveSerializedName($field);
-        return $valueSerializer($field, $runningValue, $name, $object->$propName);
+        return $valueSerializer($field, $runningValue, $object->$propName);
     }
 
-    protected function serializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $runningValue, string $name, mixed $value): mixed
+    protected function serializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $runningValue, mixed $value): mixed
     {
         /** @var Extractor $extractor */
         $extractor = $this->first($this->extractors, fn (Extractor $ex) => $ex->supportsExtract($field, $value,
@@ -107,7 +106,7 @@ class RustSerializer
             throw new \RuntimeException('No extractor for ' . $field->phpType);
         }
 
-        return $extractor->extract($formatter, $format, $name, $value, $field, $runningValue);
+        return $extractor->extract($formatter, $format, $value, $field, $runningValue);
     }
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
@@ -137,8 +136,8 @@ class RustSerializer
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($targetType, ClassDef::class);
 
-        $valueDeserializer = fn(Field $field, mixed $source, string $name): mixed
-        => $this->deserializeValue($formatter, $format, $field, $source, $name);
+        $valueDeserializer = fn(Field $field, mixed $source): mixed
+        => $this->deserializeValue($formatter, $format, $field, $source);
 
         $props = [];
         $usedNames = [];
@@ -146,13 +145,11 @@ class RustSerializer
 
         // Build up an array of properties that we can then assign all at once.
         foreach ($objectMetadata->properties as $field) {
-            $name = $this->deriveSerializedName($field);
-
-            $usedNames[] = $name;
+            $usedNames[] = $field->serializedName();
             if ($field->flatten) {
                 $collectingField = $field;
             } else {
-                $props[$field->phpName] = $valueDeserializer($field, $decoded, $name);
+                $props[$field->phpName] = $valueDeserializer($field, $decoded);
             }
         }
 
@@ -186,7 +183,7 @@ class RustSerializer
         return $new;
     }
 
-    protected function deserializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $source, string $name): mixed
+    protected function deserializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $source): mixed
     {
         /** @var Injector $injector */
         $injector = $this->first($this->injectors, fn (Injector $in): bool => $in->supportsInject($field, $format));
@@ -195,28 +192,14 @@ class RustSerializer
             throw new \RuntimeException('No injector for ' . $field->phpType);
         }
 
-        return $injector->getValue($formatter, $format, $source, $name, $field->phpType);
-    }
-
-    protected function deriveSerializedName(Field $field): string
-    {
-        $name = $field->phpName;
-
-        if ($field->name) {
-            $name = $field->name;
-        }
-
-        if ($field->caseFold !== Cases::Unchanged) {
-            $name = $field->caseFold->convert($name);
-        }
-
-        return $name;
+        return $injector->getValue($formatter, $format, $source, $field);
     }
 
     // @todo Redesign this so we can make phpType readonly.
     protected function makePseudoFieldForValue(string $name, mixed $value): Field
     {
         $f = new Field(name: $name);
+        $f->phpName = $name;
         $f->phpType = \get_debug_type($value);
         return $f;
     }

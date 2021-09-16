@@ -14,12 +14,11 @@ class ObjectExtractor implements SerializerAware, Injector, Extractor
     public function extract(
         JsonFormatter $formatter,
         string $format,
-        string $name,
         mixed $value,
         Field $field,
         mixed $runningValue
     ): mixed {
-        return $formatter->serializeObject($runningValue, $name, $value, $this->serializer, $format);
+        return $formatter->serializeObject($runningValue, $field->serializedName(), $value, $this->serializer, $format);
     }
 
     public function supportsExtract(Field $field, mixed $value, string $format): bool
@@ -27,9 +26,9 @@ class ObjectExtractor implements SerializerAware, Injector, Extractor
         return is_object($value);
     }
 
-    public function getValue(JsonFormatter $formatter, string $format, mixed $source, string $name, string $type): mixed
+    public function getValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
     {
-        return $formatter->deserializeObject($source, $name, $this->serializer, $format, $type);
+        return $formatter->deserializeObject($source, $field->serializedName(), $this->serializer, $format, $field->phpType);
     }
 
     public function supportsInject(Field $field, string $format): bool

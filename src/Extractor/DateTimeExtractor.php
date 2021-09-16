@@ -12,7 +12,6 @@ class DateTimeExtractor implements Extractor, Injector
     /**
      * @param JsonFormatter $formatter
      * @param string $format
-     * @param string $name
      * @param \DateTimeInterface $value
      * @param Field $field
      * @param mixed $runningValue
@@ -21,13 +20,12 @@ class DateTimeExtractor implements Extractor, Injector
     public function extract(
         JsonFormatter $formatter,
         string $format,
-        string $name,
         mixed $value,
         Field $field,
         mixed $runningValue
     ): mixed {
         $string = $value->format(\DateTimeInterface::RFC3339_EXTENDED);
-        return $formatter->serializeString($runningValue, $name, $string);
+        return $formatter->serializeString($runningValue, $field->serializedName(), $string);
     }
 
     public function supportsExtract(Field $field, mixed $value, string $format): bool
@@ -35,17 +33,15 @@ class DateTimeExtractor implements Extractor, Injector
         return $value instanceof \DateTimeInterface;
     }
 
-    public function getValue(JsonFormatter $formatter, string $format, mixed $source, string $name, string $type): mixed
+    public function getValue(JsonFormatter $formatter, string $format, mixed $source, Field $field): mixed
     {
-        $string = $formatter->deserializeString($source, $name);
+        $string = $formatter->deserializeString($source, $field->serializedName());
 
-        return new $type($string);
+        return new ($field->phpType)($string);
     }
 
     public function supportsInject(Field $field, string $format): bool
     {
         return in_array($field->phpType, [\DateTimeInterface::class, \DateTime::class, \DateTimeImmutable::class]);
     }
-
-
 }

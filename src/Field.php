@@ -20,6 +20,11 @@ class Field implements FromReflectionProperty
      */
     public string $phpName;
 
+    /**
+     * Cached copy of the serialized name this field should use.
+     */
+    protected string $serializedName;
+
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
     public function __construct(
@@ -43,7 +48,7 @@ class Field implements FromReflectionProperty
 
     protected function getNativeType(\ReflectionProperty $property): string
     {
-        // @todo Support easy unions, like int|float
+        // @todo Support easy unions, like int|float.
         $rType = $property->getType();
         return match(true) {
             $rType instanceof \ReflectionUnionType => throw UnionTypesNotSupported::create($property),
@@ -51,5 +56,25 @@ class Field implements FromReflectionProperty
             $rType instanceof \ReflectionNamedType => $rType->getName(),
             default => static::TYPE_NOT_SPECIFIED,
         };
+    }
+
+    public function serializedName(): string
+    {
+        return $this->serializedName ??= $this->deriveSerializedName();
+    }
+
+    protected function deriveSerializedName(): string
+    {
+        $name = $this->phpName;
+
+        if ($this->name) {
+            $name = $this->name;
+        }
+
+        if ($this->caseFold !== Cases::Unchanged) {
+            $name = $this->caseFold->convert($name);
+        }
+
+        return $name;
     }
 }
