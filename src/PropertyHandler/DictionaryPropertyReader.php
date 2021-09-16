@@ -9,13 +9,8 @@ use Crell\Serde\JsonFormatter;
 
 class DictionaryPropertyReader implements PropertyReader
 {
-    public function readValue(
-        JsonFormatter $formatter,
-        callable $recursor,
-        Field $field,
-        mixed $value,
-        mixed $runningValue
-    ): mixed {
+    public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    {
         // @todo Differentiate this from sequences.
         return $formatter->serializeArray($runningValue, $field->serializedName(), $value);
     }

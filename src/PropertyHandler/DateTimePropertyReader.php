@@ -17,13 +17,8 @@ class DateTimePropertyReader implements PropertyReader, PropertyWriter
      * @param mixed $runningValue
      * @return mixed
      */
-    public function readValue(
-        JsonFormatter $formatter,
-        callable $recursor,
-        Field $field,
-        mixed $value,
-        mixed $runningValue
-    ): mixed {
+    public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    {
         $string = $value->format(\DateTimeInterface::RFC3339_EXTENDED);
         return $formatter->serializeString($runningValue, $field->serializedName(), $string);
     }
@@ -33,7 +28,7 @@ class DateTimePropertyReader implements PropertyReader, PropertyWriter
         return $value instanceof \DateTimeInterface;
     }
 
-    public function writeValue(JsonFormatter $formatter, callable $recursor, mixed $source, Field $field): mixed
+    public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         $string = $formatter->deserializeString($source, $field->serializedName());
 

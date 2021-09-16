@@ -9,13 +9,8 @@ use Crell\Serde\JsonFormatter;
 
 class SequencePropertyReader implements PropertyReader, PropertyWriter
 {
-    public function readValue(
-        JsonFormatter $formatter,
-        callable $recursor,
-        Field $field,
-        mixed $value,
-        mixed $runningValue
-    ): mixed {
+    public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    {
         return $formatter->serializeArray($runningValue, $field->serializedName(), $value);
     }
 
@@ -24,7 +19,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
         return $field->phpType === 'array' && \array_is_list($value);
     }
 
-    public function writeValue(JsonFormatter $formatter, callable $recursor, mixed $source, Field $field): mixed
+    public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         return $formatter->deserializeArray($source, $field->serializedName());
     }
@@ -34,6 +29,4 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
         // This is not good, as we cannot differentiate from dictionaries. :-(
         return $field->phpType === 'array';
     }
-
-
 }

@@ -9,14 +9,8 @@ use Crell\Serde\JsonFormatter;
 
 class ObjectPropertyReader implements PropertyWriter, PropertyReader
 {
-    public function readValue(
-        JsonFormatter $formatter,
-        callable $recursor,
-        Field $field,
-        mixed $value,
-        mixed $runningValue,
-    ): mixed {
-
+    public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    {
         return $formatter->serializeObject($runningValue, $field->serializedName(), $value, $recursor);
     }
 
@@ -25,7 +19,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return is_object($value);
     }
 
-    public function writeValue(JsonFormatter $formatter, callable $recursor, mixed $source, Field $field): mixed
+    public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         return $formatter->deserializeObject($source, $field->serializedName(), $recursor, $field->phpType);
     }

@@ -191,7 +191,7 @@ class RustSerializer
         }
 
         $recursor = fn (mixed $value, $target) => $this->innerDeserialize($formatter, $format, $value, $target);
-        return $writer->writeValue($formatter, $recursor, $source, $field);
+        return $writer->writeValue($formatter, $recursor, $field, $source);
     }
 
     // @todo Needs to be a first() function from FP.
