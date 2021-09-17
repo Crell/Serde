@@ -20,7 +20,7 @@ class DateTimePropertyReader implements PropertyReader, PropertyWriter
     public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $string = $value->format(\DateTimeInterface::RFC3339_EXTENDED);
-        return $formatter->serializeString($runningValue, $field->serializedName(), $string);
+        return $formatter->serializeString($runningValue, $field, $string);
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool
@@ -30,7 +30,7 @@ class DateTimePropertyReader implements PropertyReader, PropertyWriter
 
     public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
-        $string = $formatter->deserializeString($source, $field->serializedName());
+        $string = $formatter->deserializeString($source, $field);
 
         return new ($field->phpType)($string);
     }

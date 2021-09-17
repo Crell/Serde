@@ -11,7 +11,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 {
     public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        return $formatter->serializeObject($runningValue, $field->serializedName(), $value, $recursor);
+        return $formatter->serializeObject($runningValue, $field, $value, $recursor);
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool
@@ -21,7 +21,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
     public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
-        return $formatter->deserializeObject($source, $field->serializedName(), $recursor, $field->phpType);
+        return $formatter->deserializeObject($source, $field, $recursor, $field->phpType);
     }
 
     public function canWrite(Field $field, string $format): bool

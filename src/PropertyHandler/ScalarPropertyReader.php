@@ -12,20 +12,20 @@ class ScalarPropertyReader implements PropertyReader, PropertyWriter
     public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
         return match ($field->phpType) {
-            'int' => $formatter->serializeInt($runningValue, $field->serializedName(), $value),
-            'float' => $formatter->serializeFloat($runningValue, $field->serializedName(), $value),
-            'bool' => $formatter->serializeBool($runningValue, $field->serializedName(), $value),
-            'string' => $formatter->serializeString($runningValue, $field->serializedName(), $value),
+            'int' => $formatter->serializeInt($runningValue, $field, $value),
+            'float' => $formatter->serializeFloat($runningValue, $field, $value),
+            'bool' => $formatter->serializeBool($runningValue, $field, $value),
+            'string' => $formatter->serializeString($runningValue, $field, $value),
         };
     }
 
     public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         return match ($field->phpType) {
-            'int' => $formatter->deserializeInt($source, $field->serializedName()),
-            'float' => $formatter->deserializeFloat($source, $field->serializedName()),
-            'bool' => $formatter->deserializeBool($source, $field->serializedName()),
-            'string' => $formatter->deserializeString($source, $field->serializedName()),
+            'int' => $formatter->deserializeInt($source, $field),
+            'float' => $formatter->deserializeFloat($source, $field),
+            'bool' => $formatter->deserializeBool($source, $field),
+            'string' => $formatter->deserializeString($source, $field),
         };
     }
 

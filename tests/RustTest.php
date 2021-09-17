@@ -151,7 +151,7 @@ class RustTest extends TestCase
                 mixed $value,
                 mixed $runningValue
             ): mixed {
-                return $formatter->serializeObject($runningValue, $field->serializedName(), $value, $recursor, ['size' => $value::class]);
+                return $formatter->serializeObject($runningValue, $field, $value, $recursor, ['size' => $value::class]);
             }
 
             public function canRead(Field $field, mixed $value, string $format): bool

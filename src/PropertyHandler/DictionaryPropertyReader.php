@@ -12,7 +12,7 @@ class DictionaryPropertyReader implements PropertyReader
     public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
         // @todo Differentiate this from sequences.
-        return $formatter->serializeArray($runningValue, $field->serializedName(), $value);
+        return $formatter->serializeArray($runningValue, $field, $value);
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool
