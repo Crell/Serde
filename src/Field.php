@@ -25,13 +25,13 @@ class Field implements FromReflectionProperty
     /**
      * Cached copy of the serialized name this field should use.
      */
-    protected string $serializedName;
+    protected string $cachedSerializedName;
 
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
     public function __construct(
         /** A custom name to use for this field */
-        public ?string $name = null,
+        public ?string $serializedName = null,
         /** Specify a case folding strategy to use */
         public Cases $caseFold = Cases::Unchanged,
         /** Use this default value if none is specified. */
@@ -45,7 +45,7 @@ class Field implements FromReflectionProperty
     public function fromReflection(\ReflectionProperty $subject): void
     {
         $this->phpName = $subject->name;
-        $this->name ??= $subject->name;
+//        $this->renameTo ??= $subject->name;
         $this->phpType ??= $this->getNativeType($subject);
         $this->default ??= $subject->getDefaultValue();
     }
@@ -63,7 +63,7 @@ class Field implements FromReflectionProperty
         string $phpType = null,
     ): static
     {
-        $new = new static(name: $name, caseFold: $caseFold);
+        $new = new static(serializedName: $name, caseFold: $caseFold);
         $new->phpType = $phpType;
         $new->phpName = $phpName;
         return $new;
@@ -83,15 +83,15 @@ class Field implements FromReflectionProperty
 
     public function serializedName(): string
     {
-        return $this->serializedName ??= $this->deriveSerializedName();
+        return $this->cachedSerializedName ??= $this->deriveSerializedName();
     }
 
     protected function deriveSerializedName(): string
     {
         $name = $this->phpName;
 
-        if ($this->name) {
-            $name = $this->name;
+        if ($this->serializedName) {
+            $name = $this->serializedName;
         }
 
         if ($this->caseFold !== Cases::Unchanged) {

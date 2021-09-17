@@ -12,7 +12,7 @@ use Crell\Serde\Field;
 class MangleNames
 {
     public function __construct(
-        #[Field(name: 'renamed')]
+        #[Field(serializedName: 'renamed')]
         public string $customName = '',
         #[Field(caseFold: Cases::UPPERCASE)]
         public string $toUpper = '',

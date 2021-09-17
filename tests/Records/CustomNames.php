@@ -11,9 +11,9 @@ use Crell\Serde\Field;
 class CustomNames
 {
     public function __construct(
-        #[Field(name: 'firstName')]
+        #[Field(serializedName: 'firstName')]
         public string $first = '',
-        #[Field(name: 'lastName')]
+        #[Field(serializedName: 'lastName')]
         public string $last = '',
     ) {}
 }
