@@ -32,7 +32,8 @@
     "require-dev": {
         "phpunit/phpunit": "~9.0",
         "vishnubob/wait-for-it": "dev-master",
-        "crell/attributeutils": ">= 0.2.0"
+        "crell/attributeutils": ">= 0.2.0",
+        "crell/fp": ">= 0.2.0"
     },
     "autoload": {
         "psr-4": {

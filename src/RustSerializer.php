@@ -14,6 +14,9 @@ use Crell\Serde\PropertyHandler\PropertyWriter;
 use Crell\Serde\PropertyHandler\ScalarPropertyReader;
 use Crell\Serde\PropertyHandler\SequencePropertyReader;
 
+use function Crell\fp\pipe;
+use function Crell\fp\first;
+
 class RustSerializer
 {
     protected ClassAnalyzer $analyzer;
@@ -97,12 +100,8 @@ class RustSerializer
     protected function serializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $runningValue, mixed $value): mixed
     {
         /** @var PropertyReader $reader */
-        $reader = $this->first($this->readers, fn (PropertyReader $r) => $r->canRead($field, $value, $format));
-
-        if (!$reader) {
-            // @todo Better exception.
-            throw new \RuntimeException('No reader for ' . $field->phpType);
-        }
+        $reader = pipe($this->readers, first(static fn (PropertyReader $r) => $r->canRead($field, $value, $format)))
+            ?? throw new \RuntimeException('No reader for ' . $field->phpType);
 
         $recursor = fn (mixed $value, mixed $runValue) => $this->innerSerialize($formatter, $format, $value, $runValue);
         return $reader->readValue($formatter, $recursor, $field, $value, $runningValue);
@@ -185,26 +184,13 @@ class RustSerializer
 
     protected function deserializeValue(JsonFormatter $formatter, string $format, Field $field, mixed $source): mixed
     {
+        // @todo Better exception.
         /** @var PropertyWriter $writer */
-        $writer = $this->first($this->writers, fn (PropertyWriter $w): bool => $w->canWrite($field, $format));
-
-        if (!$writer) {
-            // @todo Better exception.
-            throw new \RuntimeException('No writer for ' . $field->phpType);
-        }
+        $writer =
+            pipe($this->writers, first(static fn (PropertyWriter $w): bool => $w->canWrite($field, $format)))
+            ?? throw new \RuntimeException('No writer for ' . $field->phpType);
 
         $recursor = fn (mixed $value, $target) => $this->innerDeserialize($formatter, $format, $value, $target);
         return $writer->writeValue($formatter, $recursor, $field, $source);
-    }
-
-    // @todo Needs to be a first() function from FP.
-    private function first(iterable $list, callable $c): mixed
-    {
-        foreach ($list as $k => $v) {
-            if ($c($v, $k)) {
-                return $v;
-            }
-        }
-        return null;
     }
 }
