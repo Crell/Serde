@@ -38,6 +38,8 @@ class Field implements FromReflectionProperty
         //public mixed $default = null,
         /** True to flatten an array on serialization and collect into it when deserializing. */
         public bool $flatten = false,
+        /** For an array property, specifies the class type of each item in the array. */
+        public ?string $arrayType = null,
     ) {}
 
     public function fromReflection(\ReflectionProperty $subject): void

@@ -11,7 +11,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
 {
     public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        return $formatter->serializeArray($runningValue, $field, $value);
+        return $formatter->serializeArray($runningValue, $field, $value, $recursor);
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool
@@ -21,7 +21,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
 
     public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
-        return $formatter->deserializeArray($source, $field);
+        return $formatter->deserializeArray($source, $field, $recursor);
     }
 
     public function canWrite(Field $field, string $format): bool

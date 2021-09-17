@@ -40,11 +40,11 @@ class JsonFormatter
         return $runningValue;
     }
 
-    public function serializeArray(mixed $runningValue, Field $field, array $next): mixed
+    public function serializeArray(mixed $runningValue, Field $field, array $next, callable $recursor): mixed
     {
         $name = $field->serializedName();
         foreach ($next as $k => $v) {
-            $runningValue[$name][$k] = $v;
+            $runningValue[$name][$k] = is_object($v) ? $recursor($v, []) : $v;
         }
         return $runningValue;
     }
@@ -80,9 +80,11 @@ class JsonFormatter
         return $decoded[$field->serializedName()];
     }
 
-    public function deserializeArray(mixed $decoded, Field $field): array|SerdeError
+    public function deserializeArray(mixed $decoded, Field $field, callable $recursor): array|SerdeError
     {
-        return $decoded[$field->serializedName()] ?? SerdeError::Missing;
+        return ($field->arrayType && class_exists($field->arrayType))
+            ? array_map(static fn (mixed $value) => $recursor($value, $field->arrayType), $decoded[$field->serializedName()])
+            : $decoded[$field->serializedName()];
     }
 
     public function deserializeObject(mixed $decoded, Field $field, callable $recursor, string $targetType): object
