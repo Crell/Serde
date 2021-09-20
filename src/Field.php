@@ -18,19 +18,19 @@ class Field implements FromReflectionProperty
     /**
      * The native PHP type, as the reflection system defines it.
      */
-    public string $phpType;
+    public readonly string $phpType;
 
     /**
      * The property name, not to be confused with the desired serialized $name.
      */
-    public string $phpName;
+    public readonly string $phpName;
 
     /**
      * Cached copy of the serialized name this field should use.
      */
-    protected string $serializedName;
+    protected readonly string $serializedName;
 
-    protected ?RenamingStrategy $rename;
+    protected readonly ?RenamingStrategy $rename;
 
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 

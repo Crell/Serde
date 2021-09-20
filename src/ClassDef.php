@@ -15,7 +15,7 @@ use Crell\AttributeUtils\ParseProperties;
 class ClassDef implements FromReflectionClass, ParseProperties
 {
     /** @var Field[] */
-    public array $properties;
+    public readonly array $properties;
 
     public function __construct(
         public ?string $name = null,

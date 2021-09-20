@@ -6,8 +6,7 @@ namespace Crell\Serde;
 
 class ResourcePropertiesNotAllowed extends \InvalidArgumentException
 {
-    // @todo Make readonly.
-    public string $name;
+    public readonly string $name;
 
     public static function create(string $name): static
     {

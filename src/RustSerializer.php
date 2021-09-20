@@ -19,7 +19,7 @@ use function Crell\fp\first;
 
 class RustSerializer
 {
-    protected ClassAnalyzer $analyzer;
+    protected readonly ClassAnalyzer $analyzer;
 
     /** @var PropertyReader[]  */
     protected array $readers = [];
