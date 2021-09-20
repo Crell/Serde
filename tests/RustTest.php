@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\PropertyHandler\ObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\Flattening;
@@ -145,32 +146,7 @@ class RustTest extends TestCase
      */
     public function custom_object_reader(): void
     {
-        $customHandler = new class extends ObjectPropertyReader {
-            public function readValue(
-                JsonFormatter $formatter,
-                callable $recursor,
-                Field $field,
-                mixed $value,
-                mixed $runningValue
-            ): mixed {
-                return $formatter->serializeObject($runningValue, $field, $value, $recursor, ['size' => $value::class]);
-            }
-
-            public function canRead(Field $field, mixed $value, string $format): bool
-            {
-                return is_object($value) && $value instanceof Task;
-            }
-
-            public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
-            {
-                return parent::writeValue($formatter, $recursor, $field->with(phpType: $source[$field->serializedName()]['size']), $source);
-            }
-
-            public function canWrite(Field $field, string $format): bool
-            {
-                return $field->phpType === Task::class;
-            }
-        };
+        $customHandler = new MappedObjectPropertyReader();
 
         $s = new RustSerializer(handlers: [$customHandler]);
 
@@ -183,11 +159,10 @@ class RustTest extends TestCase
         $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
 
         self::assertEquals('huge', $toTest['task']['name']);
-        self::assertEquals(BigTask::class, $toTest['task']['size']);
+        self::assertEquals('big', $toTest['task']['size']);
 
         $result = $s->deserialize($json, from: 'json', to: TaskContainer::class);
 
         self::assertEquals($data, $result);
     }
-
 }
