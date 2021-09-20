@@ -95,6 +95,7 @@ class RustTest extends TestCase
             customName: 'Larry',
             toUpper: 'value',
             toLower: 'value',
+            prefix: 'value',
         );
 
         $json = $s->serialize($data, 'json');
@@ -104,6 +105,7 @@ class RustTest extends TestCase
         self::assertEquals('Larry', $toTest['renamed']);
         self::assertEquals('value', $toTest['TOUPPER']);
         self::assertEquals('value', $toTest['tolower']);
+        self::assertEquals('value', $toTest['beep_prefix']);
 
         $result = $s->deserialize($json, from: 'json', to: MangleNames::class);
 

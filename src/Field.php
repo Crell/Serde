@@ -6,6 +6,9 @@ namespace Crell\Serde;
 
 use Attribute;
 use Crell\AttributeUtils\FromReflectionProperty;
+use Crell\Serde\Renaming\Cases;
+use Crell\Serde\Renaming\LiteralName;
+use Crell\Serde\Renaming\RenamingStrategy;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class Field implements FromReflectionProperty
@@ -25,13 +28,16 @@ class Field implements FromReflectionProperty
     /**
      * Cached copy of the serialized name this field should use.
      */
-    protected string $cachedSerializedName;
+    protected string $serializedName;
+
+    protected ?RenamingStrategy $rename;
 
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
     public function __construct(
         /** A custom name to use for this field */
-        public ?string $serializedName = null,
+        ?string $serializedName = null,
+        ?RenamingStrategy $renamingStrategy = null,
         /** Specify a case folding strategy to use */
         public Cases $caseFold = Cases::Unchanged,
         /** Use this default value if none is specified. */
@@ -40,7 +46,12 @@ class Field implements FromReflectionProperty
         public bool $flatten = false,
         /** For an array property, specifies the class type of each item in the array. */
         public ?string $arrayType = null,
-    ) {}
+    ) {
+        // Upcast the literal serialized name to a converter if appropriate.
+        $this->rename ??=
+            $renamingStrategy
+            ?? ($serializedName ? new LiteralName($serializedName) : null);
+    }
 
     public function fromReflection(\ReflectionProperty $subject): void
     {
@@ -83,21 +94,8 @@ class Field implements FromReflectionProperty
 
     public function serializedName(): string
     {
-        return $this->cachedSerializedName ??= $this->deriveSerializedName();
-    }
-
-    protected function deriveSerializedName(): string
-    {
-        $name = $this->phpName;
-
-        if ($this->serializedName) {
-            $name = $this->serializedName;
-        }
-
-        if ($this->caseFold !== Cases::Unchanged) {
-            $name = $this->caseFold->convert($name);
-        }
-
-        return $name;
+        return $this->serializedName ??=
+            $this->rename?->convert($this->phpName)
+            ?? $this->phpName;
     }
 }

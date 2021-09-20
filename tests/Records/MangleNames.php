@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records;
 
-use Crell\Serde\Cases;
+use Crell\Serde\Renaming\Cases;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
+use Crell\Serde\Renaming\Prefix;
 
 #[ClassDef]
 class MangleNames
@@ -14,9 +15,11 @@ class MangleNames
     public function __construct(
         #[Field(serializedName: 'renamed')]
         public string $customName = '',
-        #[Field(caseFold: Cases::UPPERCASE)]
+        #[Field(renamingStrategy: Cases::UPPERCASE)]
         public string $toUpper = '',
-        #[Field(caseFold: Cases::lowercase)]
+        #[Field(renamingStrategy: Cases::lowercase)]
         public string $toLower = '',
+        #[Field(renamingStrategy: new Prefix('beep_'))]
+        public string $prefix = '',
     ) {}
 }

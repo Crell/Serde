@@ -2,9 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Renaming;
 
-enum Cases
+use Crell\Serde\Renaming\RenamingStrategy;
+
+/**
+ * Case fold property names in various ways.
+ *
+ * "Case" would be a more convenient and literate name for this enum,
+ * but that's a reserved word.
+ */
+enum Cases implements RenamingStrategy
 {
     case Unchanged;
     case UPPERCASE;
