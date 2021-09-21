@@ -6,6 +6,7 @@ namespace Crell\Serde;
 
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\PropertyHandler\DateTimePropertyReader;
 use Crell\Serde\PropertyHandler\DictionaryPropertyReader;
 use Crell\Serde\PropertyHandler\ObjectPropertyReader;
@@ -19,38 +20,29 @@ use function Crell\fp\first;
 
 class RustSerializer
 {
-    protected readonly ClassAnalyzer $analyzer;
-
     /** @var PropertyReader[]  */
-    protected array $readers = [];
+    protected readonly array $readers;
 
     /** @var PropertyWriter[] */
-    protected array $writers = [];
+    protected readonly array $writers;
 
-    // @todo Make the analyzer required.
-    public function __construct(?ClassAnalyzer $analyzer = null, array $handlers = [])
-    {
-        $this->analyzer = $analyzer ?? new Analyzer();
+    public function __construct(
+        protected readonly ?ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
+        /** array<int, PropertyReader|PropertyWriter> */
+        array $handlers = []
+    ) {
+        // Slot any custom handlers in before the generic object reader.
+        $handlers = [
+            new ScalarPropertyReader(),
+            new SequencePropertyReader(),
+            new DictionaryPropertyReader(),
+            new DateTimePropertyReader(),
+            ...$handlers,
+            new ObjectPropertyReader(),
+        ];
 
-        array_map(fn (PropertyWriter|PropertyReader $handler) => $this->addPropertyHandler($handler), $handlers);
-
-        $this->addPropertyHandler(new ScalarPropertyReader());
-        $this->addPropertyHandler(new SequencePropertyReader());
-        $this->addPropertyHandler(new DictionaryPropertyReader());
-        $this->addPropertyHandler(new DateTimePropertyReader());
-        $this->addPropertyHandler(new ObjectPropertyReader());
-    }
-
-    public function addPropertyHandler(PropertyReader|PropertyWriter $handler): static
-    {
-        if ($handler instanceof PropertyReader) {
-            $this->readers[] = $handler;
-        }
-        if ($handler instanceof PropertyWriter) {
-            $this->writers[] = $handler;
-        }
-
-        return $this;
+        $this->readers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyReader);
+        $this->writers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyWriter);
     }
 
     public function serialize(object $object, string $format): string

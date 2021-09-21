@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+// @todo This should probably not be a trait, and we just suck up the duplication.
 trait HasTypeMap
 {
     public readonly ?TypeMapper $typeMap;
