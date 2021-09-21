@@ -6,14 +6,17 @@ namespace Crell\Serde;
 
 use Attribute;
 use Crell\AttributeUtils\FromReflectionClass;
+use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\ParseProperties;
 
 /**
  * @internal
  */
 #[Attribute(Attribute::TARGET_CLASS)]
-class ClassDef implements FromReflectionClass, ParseProperties
+class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
 {
+    use HasTypeMap;
+
     /** @var Field[] */
     public readonly array $properties;
 
@@ -42,4 +45,5 @@ class ClassDef implements FromReflectionClass, ParseProperties
     {
         return Field::class;
     }
+
 }

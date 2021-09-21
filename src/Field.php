@@ -6,14 +6,16 @@ namespace Crell\Serde;
 
 use Attribute;
 use Crell\AttributeUtils\FromReflectionProperty;
+use Crell\AttributeUtils\HasSubAttributes;
 use Crell\Serde\Renaming\Cases;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class Field implements FromReflectionProperty
+class Field implements FromReflectionProperty, HasSubAttributes
 {
     use Evolvable;
+    use HasTypeMap;
 
     /**
      * The native PHP type, as the reflection system defines it.

@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\PropertyHandler\CustomMappedObjectPropertyReader;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
-use Crell\Serde\PropertyHandler\ObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Point;
+use Crell\Serde\Records\Shapes\Box;
+use Crell\Serde\Records\Shapes\Circle;
+use Crell\Serde\Records\Shapes\TwoDPoint;
 use Crell\Serde\Records\Tasks\BigTask;
+use Crell\Serde\Records\Tasks\SmallTask;
 use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
 use PHPUnit\Framework\TestCase;
@@ -146,7 +150,13 @@ class RustTest extends TestCase
      */
     public function custom_object_reader(): void
     {
-        $customHandler = new MappedObjectPropertyReader();
+        $customHandler = new CustomMappedObjectPropertyReader(
+            supportedTypes: [Task::class],
+            typeMap: new TypeMap(key: 'size', map: [
+                'big' => BigTask::class,
+                'small' => SmallTask::class,
+            ]),
+        );
 
         $s = new RustSerializer(handlers: [$customHandler]);
 
@@ -162,6 +172,78 @@ class RustTest extends TestCase
         self::assertEquals('big', $toTest['task']['size']);
 
         $result = $s->deserialize($json, from: 'json', to: TaskContainer::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function dynamic_type_map(): void
+    {
+        $customHandler = new CustomMappedObjectPropertyReader(
+            supportedTypes: [Task::class],
+            typeMap: new class implements TypeMapper {
+                public function keyField(): string
+                {
+                    return 'size';
+                }
+
+                public function findClass(string $id): ?string
+                {
+                    // Or do a DB lookup or whatever.
+                    return match ($id) {
+                        'small' => SmallTask::class,
+                        'big' => BigTask::class,
+                    };
+                }
+
+                public function findIdentifier(string $class): ?string
+                {
+                    return match ($class) {
+                         SmallTask::class => 'small',
+                         BigTask::class => 'big',
+                    };
+                }
+
+            },
+        );
+
+        $s = new RustSerializer(handlers: [$customHandler]);
+
+        $data = new TaskContainer(
+            task: new BigTask('huge'),
+        );
+
+        $json = $s->serialize($data, 'json');
+
+        $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertEquals('huge', $toTest['task']['name']);
+        self::assertEquals('big', $toTest['task']['size']);
+
+        $result = $s->deserialize($json, from: 'json', to: TaskContainer::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function typemap_on_parent_class(): void
+    {
+        $s = new RustSerializer(handlers: [new MappedObjectPropertyReader()]);
+
+        $data = new Box(new Circle(new TwoDPoint(1, 2), 3));
+
+        $json = $s->serialize($data, 'json');
+
+        $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertEquals(3, $toTest['aShape']['radius']);
+        self::assertEquals('circle', $toTest['aShape']['shape']);
+
+        $result = $s->deserialize($json, from: 'json', to: Box::class);
 
         self::assertEquals($data, $result);
     }
