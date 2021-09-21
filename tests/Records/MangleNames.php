@@ -15,11 +15,11 @@ class MangleNames
     public function __construct(
         #[Field(serializedName: 'renamed')]
         public string $customName = '',
-        #[Field(renamingStrategy: Cases::UPPERCASE)]
+        #[Field(renameWith: Cases::UPPERCASE)]
         public string $toUpper = '',
-        #[Field(renamingStrategy: Cases::lowercase)]
+        #[Field(renameWith: Cases::lowercase)]
         public string $toLower = '',
-        #[Field(renamingStrategy: new Prefix('beep_'))]
+        #[Field(renameWith: new Prefix('beep_'))]
         public string $prefix = '',
     ) {}
 }

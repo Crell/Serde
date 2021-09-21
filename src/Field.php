@@ -39,7 +39,7 @@ class Field implements FromReflectionProperty, HasSubAttributes
     public function __construct(
         /** A custom name to use for this field */
         ?string $serializedName = null,
-        ?RenamingStrategy $renamingStrategy = null,
+        ?RenamingStrategy $renameWith = null,
         /** Specify a case folding strategy to use */
         public Cases $caseFold = Cases::Unchanged,
         /** Use this default value if none is specified. */
@@ -51,7 +51,7 @@ class Field implements FromReflectionProperty, HasSubAttributes
     ) {
         // Upcast the literal serialized name to a converter if appropriate.
         $this->rename ??=
-            $renamingStrategy
+            $renameWith
             ?? ($serializedName ? new LiteralName($serializedName) : null);
     }
 
