@@ -38,7 +38,7 @@ class RustSerializer
             new DictionaryPropertyReader(),
             new DateTimePropertyReader(),
             ...$handlers,
-            new ObjectPropertyReader(),
+            new ObjectPropertyReader($this->analyzer),
         ];
 
         $this->readers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyReader);

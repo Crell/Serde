@@ -49,6 +49,19 @@ class JsonFormatter
         return $runningValue;
     }
 
+    public function serializeDictionary(mixed $runningValue, Field $field, array $next, callable $recursor): mixed
+    {
+        $name = $field->serializedName();
+        foreach ($next as $k => $v) {
+            $runningValue[$name][$k] = match (true) {
+                is_object($v) => $recursor($v, []),
+                is_array($v) => $recursor($v, []),
+                default => $v,
+            };
+        }
+        return $runningValue;
+    }
+
     public function serializeObject(mixed $runningValue, Field $field, object $next, callable $recursor, array $extra = []): mixed
     {
         $runningValue[$field->serializedName()] = $recursor($next, []) + $extra;
