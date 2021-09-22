@@ -23,6 +23,7 @@ class AllFieldTypes
         public ?Point $simpleObject = null,
         #[Field(arrayType: Point::class)]
         public array $objectList = [],
+        public array $nestedArray = [],
 //        public $untyped = null,
 //        public $resource = null,
     ) {}

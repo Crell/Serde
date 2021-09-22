@@ -76,6 +76,14 @@ class RustTest extends TestCase
             assocArray: ['a' => 'A', 'b' => 'B', 'c' => 'C'],
             simpleObject: new Point(4, 5, 6),
             objectList: [new Point(1, 2, 3), new Point(4, 5, 6)],
+            nestedArray: [
+                'a' => [1, 2, 3],
+                'b' => ['a' => 1, 'b' => 2, 'c' => 3],
+                'c' => 'normal',
+                // I don't think this is even possible to support on deserialization,
+                // as there is nowhere to inject the necessary type information.
+                //'d' => [new Point(1, 2, 3), new Point(4, 5, 6)],
+            ],
 //            untyped: 'beep',
         );
 
