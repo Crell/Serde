@@ -64,18 +64,18 @@ class RustSerializer
 
         $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
 
-        $valueSerializer = fn (Field $field, mixed $runningVal, mixed $value): mixed
-        => $this->serializeValue($formatter, $format, $field, $runningVal, $value);
-
         $propertySerializer = fn (mixed $runningValue, Field $field): mixed
-        => $this->serializeProperty($valueSerializer, $object, $runningValue, $field);
+        => $this->serializeProperty($formatter, $format, $object, $runningValue, $field);
 
         return array_reduce($props, $propertySerializer, $runningValue);
     }
 
-    protected function serializeProperty(callable $valueSerializer, object $object, mixed $runningValue, Field $field): mixed
+    protected function serializeProperty(JsonFormatter $formatter, string $format, object $object, mixed $runningValue, Field $field): mixed
     {
         $propName = $field->phpName;
+
+        $valueSerializer = fn (Field $field, mixed $runningVal, mixed $value): mixed
+        => $this->serializeValue($formatter, $format, $field, $runningVal, $value);
 
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
