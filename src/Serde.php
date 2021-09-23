@@ -16,7 +16,7 @@ use Crell\Serde\PropertyHandler\PropertyWriter;
 use Crell\Serde\PropertyHandler\ScalarPropertyReader;
 use Crell\Serde\PropertyHandler\SequencePropertyReader;
 
-class RustSerializer
+class Serde
 {
     /** @var PropertyReader[]  */
     protected readonly array $readers;

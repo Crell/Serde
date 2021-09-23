@@ -22,14 +22,14 @@ use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
 use PHPUnit\Framework\TestCase;
 
-class RustTest extends TestCase
+class SerdeTest extends TestCase
 {
     /**
      * @test
      */
     public function point(): void
     {
-        $s = new RustSerializer();
+        $s = new Serde();
 
         $p1 = new Point(1, 2, 3);
 
@@ -47,7 +47,7 @@ class RustTest extends TestCase
      */
     public function optional_point(): void
     {
-        $s = new RustSerializer();
+        $s = new Serde();
 
         $p1 = new OptionalPoint(1, 2);
 
@@ -65,7 +65,7 @@ class RustTest extends TestCase
      */
     public function allFields(): void
     {
-        $s = new RustSerializer();
+        $s = new Serde();
 
         $data = new AllFieldTypes(
             anint: 5,
@@ -105,7 +105,7 @@ class RustTest extends TestCase
      */
     public function name_mangling(): void
     {
-        $s = new RustSerializer();
+        $s = new Serde();
 
         $data = new MangleNames(
             customName: 'Larry',
@@ -133,7 +133,7 @@ class RustTest extends TestCase
      */
     public function flattening(): void
     {
-        $s = new RustSerializer();
+        $s = new Serde();
 
         $data = new Flattening(
             first: 'Larry',
@@ -169,7 +169,7 @@ class RustTest extends TestCase
             ]),
         );
 
-        $s = new RustSerializer(handlers: [$customHandler]);
+        $s = new Serde(handlers: [$customHandler]);
 
         $data = new TaskContainer(
             task: new BigTask('huge'),
@@ -220,7 +220,7 @@ class RustTest extends TestCase
             },
         );
 
-        $s = new RustSerializer(handlers: [$customHandler]);
+        $s = new Serde(handlers: [$customHandler]);
 
         $data = new TaskContainer(
             task: new BigTask('huge'),
@@ -243,7 +243,7 @@ class RustTest extends TestCase
      */
     public function typemap_on_parent_class(): void
     {
-        $s = new RustSerializer(handlers: [new MappedObjectPropertyReader()]);
+        $s = new Serde(handlers: [new MappedObjectPropertyReader()]);
 
         $data = new Box(new Circle(new TwoDPoint(1, 2), 3));
 
