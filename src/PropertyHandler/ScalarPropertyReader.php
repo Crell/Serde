@@ -6,6 +6,7 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
+use Crell\Serde\TypeCategory;
 
 class ScalarPropertyReader implements PropertyReader, PropertyWriter
 {
@@ -31,11 +32,11 @@ class ScalarPropertyReader implements PropertyReader, PropertyWriter
 
     public function canRead(Field $field, mixed $value, string $format): bool
     {
-        return is_scalar($value);
+        return $field->typeCategory === TypeCategory::Scalar;
     }
 
     public function canWrite(Field $field, string $format): bool
     {
-        return in_array($field->phpType, ['int', 'float', 'bool', 'string']);
+        return $field->typeCategory === TypeCategory::Scalar;
     }
 }

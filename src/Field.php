@@ -34,6 +34,8 @@ class Field implements FromReflectionProperty, HasSubAttributes
 
     protected readonly ?RenamingStrategy $rename;
 
+    public readonly TypeCategory $typeCategory;
+
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
     public function __construct(
@@ -61,6 +63,17 @@ class Field implements FromReflectionProperty, HasSubAttributes
 //        $this->renameTo ??= $subject->name;
         $this->phpType ??= $this->getNativeType($subject);
         $this->default ??= $subject->getDefaultValue();
+
+        $this->typeCategory ??= $this->deriveTypeCategory();
+    }
+
+    protected function enumType(string $phpType): TypeCategory
+    {
+        return match ((new \ReflectionEnum($phpType))?->getBackingType()?->getName()) {
+            'int' => TypeCategory::IntEnum,
+            'string' => TypeCategory::StringEnum,
+            null => TypeCategory::UnitEnum,
+        };
     }
 
     /**
@@ -79,7 +92,18 @@ class Field implements FromReflectionProperty, HasSubAttributes
         $new = new static(serializedName: $name, caseFold: $caseFold);
         $new->phpType = $phpType;
         $new->phpName = $phpName;
+        $new->typeCategory = $new->deriveTypeCategory();
         return $new;
+    }
+
+    protected function deriveTypeCategory(): TypeCategory
+    {
+        return match (true) {
+            in_array($this->phpType, ['int', 'float', 'bool', 'string'], true) => TypeCategory::Scalar,
+            $this->phpType === 'array' => TypeCategory::Array,
+            \enum_exists($this->phpType) => $this->enumType($this->phpType),
+            $this->phpType === 'object', \class_exists($this->phpType), \interface_exists($this->phpType) => TypeCategory::Object,
+        };
     }
 
     protected function getNativeType(\ReflectionProperty $property): string

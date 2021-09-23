@@ -10,6 +10,7 @@ use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
+use Crell\Serde\TypeCategory;
 use function Crell\fp\afilter;
 use function Crell\fp\keyedMap;
 use function Crell\fp\pipe;
@@ -60,7 +61,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
     public function canRead(Field $field, mixed $value, string $format): bool
     {
-        return is_object($value);
+        return $field->typeCategory === TypeCategory::Object;
     }
 
     public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
@@ -70,6 +71,6 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
     public function canWrite(Field $field, string $format): bool
     {
-        return $field->phpType === 'object' || class_exists($field->phpType);
+        return $field->typeCategory === TypeCategory::Object;
     }
 }

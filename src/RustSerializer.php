@@ -9,6 +9,7 @@ use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\PropertyHandler\DateTimePropertyReader;
 use Crell\Serde\PropertyHandler\DictionaryPropertyReader;
+use Crell\Serde\PropertyHandler\EnumPropertyReader;
 use Crell\Serde\PropertyHandler\ObjectPropertyReader;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
@@ -37,6 +38,7 @@ class RustSerializer
             new SequencePropertyReader(),
             new DictionaryPropertyReader(),
             new DateTimePropertyReader(),
+            new EnumPropertyReader(),
             ...$handlers,
             new ObjectPropertyReader($this->analyzer),
         ];

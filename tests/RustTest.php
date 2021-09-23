@@ -7,6 +7,7 @@ namespace Crell\Serde;
 use Crell\Serde\PropertyHandler\CustomMappedObjectPropertyReader;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
+use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\OptionalPoint;
@@ -14,6 +15,7 @@ use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Shapes\Box;
 use Crell\Serde\Records\Shapes\Circle;
 use Crell\Serde\Records\Shapes\TwoDPoint;
+use Crell\Serde\Records\Size;
 use Crell\Serde\Records\Tasks\BigTask;
 use Crell\Serde\Records\Tasks\SmallTask;
 use Crell\Serde\Records\Tasks\Task;
@@ -84,13 +86,14 @@ class RustTest extends TestCase
                 // as there is nowhere to inject the necessary type information.
                 //'d' => [new Point(1, 2, 3), new Point(4, 5, 6)],
             ],
+            size: Size::Large,
+            backedSize: BackedSize::Large,
 //            untyped: 'beep',
         );
 
         $json = $s->serialize($data, 'json');
 
 //        var_dump($json);
-        //self::assertEquals('{"x":1,"y":2,"z":3}', $json);
 
         $result = $s->deserialize($json, from: 'json', to: AllFieldTypes::class);
 
