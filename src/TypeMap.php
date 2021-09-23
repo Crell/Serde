@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Attribute;
-use Crell\AttributeUtils\FromReflectionClass;
-use Crell\AttributeUtils\ParseProperties;
 
 
 #[Attribute(Attribute::TARGET_CLASS, Attribute::TARGET_PROPERTY)]

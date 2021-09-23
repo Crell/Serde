@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Renaming;
 
-use Crell\Serde\Renaming\RenamingStrategy;
-
 /**
  * Case fold property names in various ways.
  *
