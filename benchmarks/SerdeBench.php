@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Crell\Rekodi\Benchmarks;
+namespace Crell\Serde\Benchmarks;
 
+use Crell\Serde\Records\Point;
+use Crell\Serde\Serde;
 use PhpBench\Benchmark\Metadata\Annotations\AfterMethods;
 use PhpBench\Benchmark\Metadata\Annotations\BeforeMethods;
 use PhpBench\Benchmark\Metadata\Annotations\Iterations;
@@ -19,9 +21,21 @@ use PhpBench\Benchmark\Metadata\Annotations\Warmup;
  * @AfterMethods({"tearDown"})
  * @OutputTimeUnit("milliseconds", precision=3)
  */
-class RekodiBenchmarks
+class SerdeBench
 {
     public function setUp(): void {}
 
     public function tearDown(): void {}
+
+    public function benchPoint(): void
+    {
+        $s = new Serde();
+
+        $p1 = new Point(1, 2, 3);
+
+        $json = $s->serialize($p1, 'json');
+
+        $result = $s->deserialize($json, from: 'json', to: Point::class);
+    }
+
 }

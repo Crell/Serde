@@ -1,13 +1,5 @@
 {
-    "bootstrap": "vendor/autoload.php",
-    "path": "benchmarks",
-    "retry_threshold": 5,
-    "reports": {
-        "short": {
-            "title": "Short summary",
-            "extends": "aggregate",
-            "cols": ["benchmark", "subject", "mode", "mean", "stdev", "rstdev", "mem_peak"],
-            "break": ["benchmark"]
-        }
-    }
+    "runner.path": "benchmarks",
+    "$schema":"./vendor/phpbench/phpbench/phpbench.schema.json",
+    "runner.bootstrap": "vendor/autoload.php"
 }
