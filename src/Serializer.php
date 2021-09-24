@@ -66,8 +66,7 @@ class Serializer
         $reader = pipe($this->readers, first(fn (PropertyReader $r) => $r->canRead($field, $value, $this->format)))
             ?? throw new \RuntimeException('No reader for ' . $field->phpType);
 
-        $recursor = fn (mixed $value, mixed $runValue) => $this->serialize($value, $runValue);
-        return $reader->readValue($this->formatter, $recursor, $field, $value, $runningValue);
+        return $reader->readValue($this->formatter, $this->serialize(...), $field, $value, $runningValue);
     }
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable

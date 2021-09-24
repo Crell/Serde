@@ -86,7 +86,6 @@ class Deserializer
             pipe($this->writers, first(fn (PropertyWriter $w): bool => $w->canWrite($field, $this->format)))
             ?? throw new \RuntimeException('No writer for ' . $field->phpType);
 
-        $recursor = fn (mixed $value, $target) => $this->deserialize($value, $target);
-        return $writer->writeValue($this->formatter, $recursor, $field, $source);
+        return $writer->writeValue($this->formatter, $this->deserialize(...), $field, $source);
     }
 }
