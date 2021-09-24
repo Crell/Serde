@@ -8,6 +8,7 @@ use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\PropertyHandler\DateTimePropertyReader;
+use Crell\Serde\PropertyHandler\DateTimeZonePropertyReader;
 use Crell\Serde\PropertyHandler\DictionaryPropertyReader;
 use Crell\Serde\PropertyHandler\EnumPropertyReader;
 use Crell\Serde\PropertyHandler\ObjectPropertyReader;
@@ -35,6 +36,7 @@ class Serde
             new SequencePropertyReader(),
             new DictionaryPropertyReader(),
             new DateTimePropertyReader(),
+            new DateTimeZonePropertyReader(),
             new EnumPropertyReader(),
             ...$handlers,
             new ObjectPropertyReader($this->analyzer),

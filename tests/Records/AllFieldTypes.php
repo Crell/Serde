@@ -18,6 +18,7 @@ class AllFieldTypes
         public bool $bool = true,
         public ?\DateTimeImmutable $dateTimeImmutable = null,
         public ?\DateTime $dateTime = null,
+        public ?\DateTimeZone $dateTimeZone = null,
         public array $simpleArray = [],
         public array $assocArray = [],
         public ?Point $simpleObject = null,

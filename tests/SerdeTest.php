@@ -74,6 +74,7 @@ class SerdeTest extends TestCase
             bool: true,
             dateTimeImmutable: new \DateTimeImmutable('2021-05-01 08:30:45', new \DateTimeZone('America/Chicago')),
             dateTime: new \DateTime('2021-05-01 08:30:45', new \DateTimeZone('America/Chicago')),
+            dateTimeZone: new \DateTimeZone('America/Chicago'),
             simpleArray: ['a', 'b', 'c', 1, 2, 3],
             assocArray: ['a' => 'A', 'b' => 'B', 'c' => 'C'],
             simpleObject: new Point(4, 5, 6),
