@@ -102,7 +102,10 @@ class JsonFormatter
 
     public function deserializeObject(mixed $decoded, Field $field, callable $recursor, string $targetType): object
     {
-        $valueToDeserialize = $decoded[$field->serializedName()];
+        $valueToDeserialize = $decoded[$field->serializedName()] ?? SerdeError::Missing;
+        if ($valueToDeserialize === SerdeError::Missing) {
+            return $valueToDeserialize;
+        }
         return $recursor($valueToDeserialize, $targetType);
     }
 

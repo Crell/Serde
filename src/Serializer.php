@@ -42,7 +42,7 @@ class Serializer
         $propName = $field->phpName;
 
         // This lets us read private values without messing with the Reflection API.
-        $propReader = (fn (string $prop) => $this->$prop)->bindTo($object);
+        $propReader = (fn (string $prop) => $this->$prop)->bindTo($object, $object);
 
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
@@ -67,9 +67,12 @@ class Serializer
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
     {
+        // This lets us read private values without messing with the Reflection API.
+        $propReader = (fn (string $prop) => $this->$prop)->bindTo($object, $object);
+
         // @todo Do we serialize nulls or no? Right now we don't.
         return static fn (Field $field) =>
             $rObject->getProperty($field->phpName)->isInitialized($object)
-            && !is_null($object->{$field->phpName});
+            && !is_null($propReader($field->phpName));
     }
 }

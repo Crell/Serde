@@ -20,6 +20,7 @@ use Crell\Serde\Records\Tasks\BigTask;
 use Crell\Serde\Records\Tasks\SmallTask;
 use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
+use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\TestCase;
 
 class SerdeTest extends TestCase
@@ -38,6 +39,24 @@ class SerdeTest extends TestCase
         self::assertEquals('{"x":1,"y":2,"z":3}', $json);
 
         $result = $s->deserialize($json, from: 'json', to: Point::class);
+
+        self::assertEquals($p1, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function visibility(): void
+    {
+        $s = new Serde();
+
+        $p1 = new Visibility(1, 2, 3, new Visibility(4, 5, 6));
+
+        $json = $s->serialize($p1, 'json');
+
+        self::assertEquals('{"public":1,"protected":2,"private":3,"visibility":{"public":4,"protected":5,"private":6}}', $json);
+
+        $result = $s->deserialize($json, from: 'json', to: Visibility::class);
 
         self::assertEquals($p1, $result);
     }

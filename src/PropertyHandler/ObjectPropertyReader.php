@@ -37,7 +37,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         $objectMetadata = $this->analyzer->analyze($value, ClassDef::class);
 
         // This lets us read private values without messing with the Reflection API.
-        $propReader = (fn (string $prop) => $this->$prop)->bindTo($value);
+        $propReader = (fn (string $prop) => $this->$prop)->bindTo($value, $value);
 
         $dict = pipe(
             $objectMetadata->properties,
@@ -53,10 +53,13 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
     {
+        // This lets us read private values without messing with the Reflection API.
+        $propReader = (fn (string $prop) => $this->$prop)->bindTo($object, $object);
+
         // @todo Do we serialize nulls or no? Right now we don't.
         return static fn (Field $field): bool =>
             $rObject->getProperty($field->phpName)->isInitialized($object)
-            && !is_null($object->{$field->phpName});
+            && !is_null($propReader($field->phpName));
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool
