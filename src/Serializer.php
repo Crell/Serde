@@ -37,7 +37,6 @@ class Serializer
         return array_reduce($props, $propertySerializer, $runningValue);
     }
 
-
     protected function serializeProperty(object $object, mixed $runningValue, Field $field): mixed
     {
         $propName = $field->phpName;
@@ -45,19 +44,16 @@ class Serializer
         // This lets us read private values without messing with the Reflection API.
         $propReader = (fn (string $prop) => $this->$prop)->bindTo($object);
 
-        $valueSerializer = fn (Field $field, mixed $runningVal, mixed $value): mixed
-        => $this->serializeValue($field, $runningVal, $value);
-
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
             foreach ($propReader($propName) as $k => $v) {
                 $f = Field::create(name: $k, phpName: $k, phpType: \get_debug_type($v));
-                $runningValue = $valueSerializer($f, $runningValue, $v);
+                $runningValue = $this->serializeValue($f, $runningValue, $v);
             }
             return $runningValue;
         }
 
-        return $valueSerializer($field, $runningValue, $propReader($propName));
+        return $this->serializeValue($field, $runningValue, $propReader($propName));
     }
 
     protected function serializeValue(Field $field, mixed $runningValue, mixed $value): mixed
