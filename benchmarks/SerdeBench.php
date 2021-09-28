@@ -15,8 +15,8 @@ use PhpBench\Benchmark\Metadata\Annotations\Revs;
 use PhpBench\Benchmark\Metadata\Annotations\Warmup;
 
 /**
- * @Revs(10)
- * @Iterations(3)
+ * @Revs(100)
+ * @Iterations(10)
  * @Warmup(2)
  * @BeforeMethods({"setUp"})
  * @AfterMethods({"tearDown"})
@@ -24,19 +24,22 @@ use PhpBench\Benchmark\Metadata\Annotations\Warmup;
  */
 class SerdeBench
 {
-    public function setUp(): void {}
+    protected readonly Serde $serde;
+
+    public function setUp(): void
+    {
+        $this->serde = new Serde(formatters: [new JsonFormatter()]);
+    }
 
     public function tearDown(): void {}
 
     public function benchPoint(): void
     {
-        $s = new Serde(formatters: [new JsonFormatter()]);
-
         $p1 = new Point(1, 2, 3);
 
-        $json = $s->serialize($p1, 'json');
+        $json = $this->serde->serialize($p1, 'json');
 
-        $result = $s->deserialize($json, from: 'json', to: Point::class);
+        $result = $this->serde->deserialize($json, from: 'json', to: Point::class);
     }
 
 }
