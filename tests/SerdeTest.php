@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\PropertyHandler\CustomMappedObjectPropertyReader;
-use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Flattening;
@@ -263,7 +262,7 @@ class SerdeTest extends TestCase
      */
     public function typemap_on_parent_class(): void
     {
-        $s = new Serde(handlers: [new MappedObjectPropertyReader()]);
+        $s = new Serde();
 
         $data = new Box(new Circle(new TwoDPoint(1, 2), 3));
 

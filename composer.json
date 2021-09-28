@@ -30,7 +30,7 @@
         "php": "~8.0"
     },
     "require-dev": {
-        "crell/attributeutils": ">= 0.2.0",
+        "crell/attributeutils": ">= 0.3.0",
         "crell/fp": ">= 0.2.0",
         "phpbench/phpbench": "^1.1",
         "phpunit/phpunit": "~9.0",

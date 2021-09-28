@@ -10,6 +10,7 @@ use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
+use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use function Crell\fp\afilter;
 use function Crell\fp\keyedMap;
@@ -22,8 +23,6 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
     ) {}
 
     /**
-     *
-     *
      * @param JsonFormatter $formatter
      * @param callable $recursor
      * @param Field $field
@@ -48,6 +47,10 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             ),
         );
 
+        if ($field->typeMap) {
+            $dict[$field->typeMap->keyField()] = $field->typeMap->findIdentifier($value::class);
+        }
+
         return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
     }
 
@@ -69,7 +72,20 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
     public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
-        return $formatter->deserializeObject($source, $field, $recursor, $field->phpType);
+        $dict = $formatter->deserializeDictionary($source, $field, $recursor);
+
+        if ($dict === SerdeError::Missing) {
+            return null;
+        }
+
+        $class = $field->phpType;
+        if ($field->typeMap) {
+            $keyField = $field->typeMap->keyField();
+            $class = $field->typeMap->findClass($dict[$keyField]);
+            unset($dict[$keyField]);
+        }
+
+        return $recursor($dict, $class);
     }
 
     public function canWrite(Field $field, string $format): bool

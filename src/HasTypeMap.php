@@ -11,7 +11,7 @@ trait HasTypeMap
 
     public function subAttributes(): array
     {
-        return [TypeMapper::class => 'fromTypeMap'];
+        return [TypeMap::class => 'fromTypeMap'];
     }
 
     public function fromTypeMap(?TypeMapper $map): void

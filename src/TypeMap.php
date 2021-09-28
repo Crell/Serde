@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Attribute;
+use Crell\AttributeUtils\Inheritable;
+use Crell\AttributeUtils\TransitiveProperty;
 
 
 #[Attribute(Attribute::TARGET_CLASS, Attribute::TARGET_PROPERTY)]
-class TypeMap implements TypeMapper
+class TypeMap implements TypeMapper, Inheritable, TransitiveProperty
 {
     public function __construct(
         public readonly string $key,
@@ -19,7 +21,6 @@ class TypeMap implements TypeMapper
     {
         return $this->key;
     }
-
 
     public function findClass(string $id): ?string
     {

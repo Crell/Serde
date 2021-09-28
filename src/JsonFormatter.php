@@ -109,6 +109,11 @@ class JsonFormatter
         return $recursor($valueToDeserialize, $targetType);
     }
 
+    public function deserializeDictionary(mixed $decoded, Field $field): array|SerdeError
+    {
+        return $decoded[$field->serializedName()] ?? SerdeError::Missing;
+    }
+
     public function getRemainingData(mixed $source, array $used): mixed
     {
         return array_diff_key($source, array_flip($used));
