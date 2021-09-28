@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
-use Crell\Serde\JsonFormatter;
+use Crell\Serde\Formatter\Deformatter;
+use Crell\Serde\Formatter\Formatter;
 
 class SequencePropertyReader implements PropertyReader, PropertyWriter
 {
-    public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
         return $formatter->serializeArray($runningValue, $field, $value, $recursor);
     }
@@ -19,7 +20,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
         return $field->phpType === 'array' && \array_is_list($value);
     }
 
-    public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         return $formatter->deserializeArray($source, $field, $recursor);
     }

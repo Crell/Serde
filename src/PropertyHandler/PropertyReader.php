@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
-use Crell\Serde\JsonFormatter;
+use Crell\Serde\Formatter\Formatter;
 
 interface PropertyReader
 {
     public function readValue(
-        JsonFormatter $formatter,
+        Formatter $formatter,
         callable $recursor,
         Field $field,
         mixed $value,

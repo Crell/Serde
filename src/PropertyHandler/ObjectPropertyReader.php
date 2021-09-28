@@ -9,10 +9,10 @@ use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
-use Crell\Serde\JsonFormatter;
+use Crell\Serde\Formatter\Deformatter;
+use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
-use Crell\Serde\TypeMap;
 use Crell\Serde\TypeMapper;
 use function Crell\fp\afilter;
 use function Crell\fp\keyedMap;
@@ -25,14 +25,14 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
     ) {}
 
     /**
-     * @param JsonFormatter $formatter
+     * @param Formatter $formatter
      * @param callable $recursor
      * @param Field $field
      * @param object $value
      * @param mixed $runningValue
      * @return mixed
      */
-    public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($value, ClassDef::class);
@@ -77,7 +77,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return $field->typeCategory === TypeCategory::Object;
     }
 
-    public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         $dict = $formatter->deserializeDictionary($source, $field, $recursor);
 

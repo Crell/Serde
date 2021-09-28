@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
-use Crell\Serde\JsonFormatter;
+use Crell\Serde\Formatter\Formatter;
 
 class DictionaryPropertyReader implements PropertyReader
 {
-    public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
         // @todo Differentiate this from sequences.
         return $formatter->serializeArray($runningValue, $field, $value, $recursor);

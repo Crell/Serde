@@ -2,16 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Formatter;
 
-class JsonFormatter
+use Crell\Serde\Field;
+use Crell\Serde\SerdeError;
+
+class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
 {
-    public function initialize(): mixed
+    public function format(): string
+    {
+        return 'json';
+    }
+
+    public function serializeInitialize(): mixed
     {
         return [];
     }
 
-    public function finalize(mixed $runningValue): string
+    public function serializeFinalize(mixed $runningValue): string
     {
         return json_encode($runningValue, JSON_THROW_ON_ERROR);
     }
@@ -104,7 +112,7 @@ class JsonFormatter
         return array_diff_key($source, array_flip($used));
     }
 
-    public function finalizeDeserialize(mixed $decoded): void
+    public function deserializeFinalize(mixed $decoded): void
     {
 
     }

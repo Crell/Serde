@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
 use function Crell\fp\first;
 use function Crell\fp\pipe;
 
-// This exists mainly just to create a closure over the format and formatter.
+// This exists mainly just to create a closure over the formatter.
 // But that does simplify a number of functions.
 class Serializer
 {
@@ -20,8 +21,7 @@ class Serializer
         protected readonly array $readers,
         /** @var PropertyWriter[] */
         protected readonly array $writers,
-        protected readonly JsonFormatter $formatter,
-        protected readonly string $format,
+        protected readonly Formatter $formatter,
     ) {}
 
     public function serialize(object $object, mixed $runningValue): mixed
@@ -59,7 +59,7 @@ class Serializer
     protected function serializeValue(Field $field, mixed $runningValue, mixed $value): mixed
     {
         /** @var PropertyReader $reader */
-        $reader = pipe($this->readers, first(fn (PropertyReader $r) => $r->canRead($field, $value, $this->format)))
+        $reader = pipe($this->readers, first(fn (PropertyReader $r) => $r->canRead($field, $value, $this->formatter->format())))
             ?? throw new \RuntimeException('No reader for ' . $field->phpType);
 
         return $reader->readValue($this->formatter, $this->serialize(...), $field, $value, $runningValue);

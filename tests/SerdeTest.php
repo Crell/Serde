@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Formatter\JsonFormatter;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
@@ -29,7 +30,7 @@ class SerdeTest extends TestCase
      */
     public function point(): void
     {
-        $s = new Serde();
+        $s = new Serde(formatters: [new JsonFormatter()]);
 
         $p1 = new Point(1, 2, 3);
 
@@ -47,7 +48,7 @@ class SerdeTest extends TestCase
      */
     public function visibility(): void
     {
-        $s = new Serde();
+        $s = new Serde(formatters: [new JsonFormatter()]);
 
         $p1 = new Visibility(1, 2, 3, new Visibility(4, 5, 6));
 
@@ -65,7 +66,7 @@ class SerdeTest extends TestCase
      */
     public function optional_point(): void
     {
-        $s = new Serde();
+        $s = new Serde(formatters: [new JsonFormatter()]);
 
         $p1 = new OptionalPoint(1, 2);
 
@@ -83,7 +84,7 @@ class SerdeTest extends TestCase
      */
     public function allFields(): void
     {
-        $s = new Serde();
+        $s = new Serde(formatters: [new JsonFormatter()]);
 
         $data = new AllFieldTypes(
             anint: 5,
@@ -124,7 +125,7 @@ class SerdeTest extends TestCase
      */
     public function name_mangling(): void
     {
-        $s = new Serde();
+        $s = new Serde(formatters: [new JsonFormatter()]);
 
         $data = new MangleNames(
             customName: 'Larry',
@@ -152,7 +153,7 @@ class SerdeTest extends TestCase
      */
     public function flattening(): void
     {
-        $s = new Serde();
+        $s = new Serde(formatters: [new JsonFormatter()]);
 
         $data = new Flattening(
             first: 'Larry',
@@ -188,7 +189,7 @@ class SerdeTest extends TestCase
             ]),
         );
 
-        $s = new Serde(handlers: [$customHandler]);
+        $s = new Serde(handlers: [$customHandler], formatters: [new JsonFormatter()]);
 
         $data = new TaskContainer(
             task: new BigTask('huge'),
@@ -239,7 +240,7 @@ class SerdeTest extends TestCase
             },
         );
 
-        $s = new Serde(handlers: [$customHandler]);
+        $s = new Serde(handlers: [$customHandler], formatters: [new JsonFormatter()]);
 
         $data = new TaskContainer(
             task: new BigTask('huge'),
@@ -262,7 +263,7 @@ class SerdeTest extends TestCase
      */
     public function typemap_on_parent_class(): void
     {
-        $s = new Serde();
+        $s = new Serde(formatters: [new JsonFormatter()]);
 
         $data = new Box(new Circle(new TwoDPoint(1, 2), 3));
 

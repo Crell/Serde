@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Field;
-use Crell\Serde\JsonFormatter;
+use Crell\Serde\Formatter\Deformatter;
+use Crell\Serde\Formatter\Formatter;
 
 class DateTimeZonePropertyReader implements PropertyReader, PropertyWriter
 {
     /**
-     * @param JsonFormatter $formatter
+     * @param Formatter $formatter
      * @param callable $recursor
      * @param Field $field
      * @param \DateTimeZone $value
      * @param mixed $runningValue
      * @return mixed
      */
-    public function readValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $string = $value->getName();
         return $formatter->serializeString($runningValue, $field, $string);
@@ -28,7 +29,7 @@ class DateTimeZonePropertyReader implements PropertyReader, PropertyWriter
         return $field->phpType === \DateTimeZone::class;
     }
 
-    public function writeValue(JsonFormatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         $string = $formatter->deserializeString($source, $field);
 

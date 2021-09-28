@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
 use function Crell\fp\first;
@@ -20,8 +21,7 @@ class Deserializer
         protected readonly array $readers,
         /** @var PropertyWriter[] */
         protected readonly array $writers,
-        protected readonly JsonFormatter $formatter,
-        protected readonly string $format,
+        protected readonly Deformatter $formatter,
     ) {}
 
 
@@ -83,7 +83,7 @@ class Deserializer
         // @todo Better exception.
         /** @var PropertyWriter $writer */
         $writer =
-            pipe($this->writers, first(fn (PropertyWriter $w): bool => $w->canWrite($field, $this->format)))
+            pipe($this->writers, first(fn (PropertyWriter $w): bool => $w->canWrite($field, $this->formatter->format())))
             ?? throw new \RuntimeException('No writer for ' . $field->phpType);
 
         return $writer->writeValue($this->formatter, $this->deserialize(...), $field, $source);
