@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-use Crell\Serde\Formatter\JsonFormatter;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
@@ -23,24 +22,43 @@ use Crell\Serde\Records\Tasks\TaskContainer;
 use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\TestCase;
 
-class SerdeTest extends TestCase
+/**
+ * Testing base class.
+ *
+ * To test a specific formatter:
+ *
+ * - Extend this class.
+ * - In setUp(), set the $formatters and $format property accordingly.
+ * - Override any of the *_validate() methods desired to introspect
+ *   the serialized data for that test in a format-specific way.
+ */
+abstract class SerdeTest extends TestCase
 {
+    protected array $formatters;
+
+    protected string $format;
+
     /**
      * @test
      */
     public function point(): void
     {
-        $s = new Serde(formatters: [new JsonFormatter()]);
+        $s = new Serde(formatters: $this->formatters);
 
         $p1 = new Point(1, 2, 3);
 
-        $json = $s->serialize($p1, 'json');
+        $serialized = $s->serialize($p1, $this->format);
 
-        self::assertEquals('{"x":1,"y":2,"z":3}', $json);
+        $this->point_validate($serialized);
 
-        $result = $s->deserialize($json, from: 'json', to: Point::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: Point::class);
 
         self::assertEquals($p1, $result);
+    }
+
+    protected function point_validate(mixed $serialized): void
+    {
+
     }
 
     /**
@@ -48,17 +66,22 @@ class SerdeTest extends TestCase
      */
     public function visibility(): void
     {
-        $s = new Serde(formatters: [new JsonFormatter()]);
+        $s = new Serde(formatters: $this->formatters);
 
         $p1 = new Visibility(1, 2, 3, new Visibility(4, 5, 6));
 
-        $json = $s->serialize($p1, 'json');
+        $serialized = $s->serialize($p1, $this->format);
 
-        self::assertEquals('{"public":1,"protected":2,"private":3,"visibility":{"public":4,"protected":5,"private":6}}', $json);
+        $this->visibility_validate($serialized);
 
-        $result = $s->deserialize($json, from: 'json', to: Visibility::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: Visibility::class);
 
         self::assertEquals($p1, $result);
+    }
+
+    protected function visibility_validate(mixed $serialized): void
+    {
+
     }
 
     /**
@@ -66,17 +89,22 @@ class SerdeTest extends TestCase
      */
     public function optional_point(): void
     {
-        $s = new Serde(formatters: [new JsonFormatter()]);
+        $s = new Serde(formatters: $this->formatters);
 
         $p1 = new OptionalPoint(1, 2);
 
-        $json = $s->serialize($p1, 'json');
+        $serialized = $s->serialize($p1, $this->format);
 
-        self::assertEquals('{"x":1,"y":2,"z":0}', $json);
+        $this->optional_point_validate($serialized);
 
-        $result = $s->deserialize($json, from: 'json', to: OptionalPoint::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: OptionalPoint::class);
 
         self::assertEquals($p1, $result);
+    }
+
+    protected function optional_point_validate(mixed $serialized): void
+    {
+
     }
 
     /**
@@ -84,7 +112,7 @@ class SerdeTest extends TestCase
      */
     public function allFields(): void
     {
-        $s = new Serde(formatters: [new JsonFormatter()]);
+        $s = new Serde(formatters: $this->formatters);
 
         $data = new AllFieldTypes(
             anint: 5,
@@ -111,13 +139,18 @@ class SerdeTest extends TestCase
 //            untyped: 'beep',
         );
 
-        $json = $s->serialize($data, 'json');
+        $serialized = $s->serialize($data, $this->format);
 
-//        var_dump($json);
+        $this->allFields_validate($serialized);
 
-        $result = $s->deserialize($json, from: 'json', to: AllFieldTypes::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
 
         self::assertEquals($data, $result);
+    }
+
+    protected function allFields_validate(mixed $serialized): void
+    {
+
     }
 
     /**
@@ -125,7 +158,7 @@ class SerdeTest extends TestCase
      */
     public function name_mangling(): void
     {
-        $s = new Serde(formatters: [new JsonFormatter()]);
+        $s = new Serde(formatters: $this->formatters);
 
         $data = new MangleNames(
             customName: 'Larry',
@@ -134,18 +167,18 @@ class SerdeTest extends TestCase
             prefix: 'value',
         );
 
-        $json = $s->serialize($data, 'json');
+        $serialized = $s->serialize($data, $this->format);
 
-        $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->name_mangling_validate($serialized);
 
-        self::assertEquals('Larry', $toTest['renamed']);
-        self::assertEquals('value', $toTest['TOUPPER']);
-        self::assertEquals('value', $toTest['tolower']);
-        self::assertEquals('value', $toTest['beep_prefix']);
-
-        $result = $s->deserialize($json, from: 'json', to: MangleNames::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: MangleNames::class);
 
         self::assertEquals($data, $result);
+    }
+
+    protected function name_mangling_validate(mixed $serialized): void
+    {
+
     }
 
     /**
@@ -153,7 +186,7 @@ class SerdeTest extends TestCase
      */
     public function flattening(): void
     {
-        $s = new Serde(formatters: [new JsonFormatter()]);
+        $s = new Serde(formatters: $this->formatters);
 
         $data = new Flattening(
             first: 'Larry',
@@ -161,19 +194,18 @@ class SerdeTest extends TestCase
             other: ['a' => 'A', 'b' => 2, 'c' => 'C'],
         );
 
-        $json = $s->serialize($data, 'json');
+        $serialized = $s->serialize($data, $this->format);
 
-        $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->flattening_validate($serialized);
 
-        self::assertEquals('Larry', $toTest['first']);
-        self::assertEquals('Garfield', $toTest['last']);
-        self::assertEquals('A', $toTest['a']);
-        self::assertEquals(2, $toTest['b']);
-        self::assertEquals('C', $toTest['c']);
-
-        $result = $s->deserialize($json, from: 'json', to: Flattening::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: Flattening::class);
 
         self::assertEquals($data, $result);
+    }
+
+    protected function flattening_validate(mixed $serialized): void
+    {
+
     }
 
     /**
@@ -189,22 +221,24 @@ class SerdeTest extends TestCase
             ]),
         );
 
-        $s = new Serde(handlers: [$customHandler], formatters: [new JsonFormatter()]);
+        $s = new Serde(handlers: [$customHandler], formatters: $this->formatters);
 
         $data = new TaskContainer(
             task: new BigTask('huge'),
         );
 
-        $json = $s->serialize($data, 'json');
+        $serialized = $s->serialize($data, $this->format);
 
-        $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->custom_object_reader_validate($serialized);
 
-        self::assertEquals('huge', $toTest['task']['name']);
-        self::assertEquals('big', $toTest['task']['size']);
-
-        $result = $s->deserialize($json, from: 'json', to: TaskContainer::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: TaskContainer::class);
 
         self::assertEquals($data, $result);
+    }
+
+    protected function custom_object_reader_validate(mixed $serialized): void
+    {
+
     }
 
     /**
@@ -240,22 +274,24 @@ class SerdeTest extends TestCase
             },
         );
 
-        $s = new Serde(handlers: [$customHandler], formatters: [new JsonFormatter()]);
+        $s = new Serde(handlers: [$customHandler], formatters: $this->formatters);
 
         $data = new TaskContainer(
             task: new BigTask('huge'),
         );
 
-        $json = $s->serialize($data, 'json');
+        $serialized = $s->serialize($data, $this->format);
 
-        $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->custom_type_map_validate($serialized);
 
-        self::assertEquals('huge', $toTest['task']['name']);
-        self::assertEquals('big', $toTest['task']['size']);
-
-        $result = $s->deserialize($json, from: 'json', to: TaskContainer::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: TaskContainer::class);
 
         self::assertEquals($data, $result);
+    }
+
+    protected function custom_type_map_validate(mixed $serialized): void
+    {
+
     }
 
     /**
@@ -263,19 +299,21 @@ class SerdeTest extends TestCase
      */
     public function typemap_on_parent_class(): void
     {
-        $s = new Serde(formatters: [new JsonFormatter()]);
+        $s = new Serde(formatters: $this->formatters);
 
         $data = new Box(new Circle(new TwoDPoint(1, 2), 3));
 
-        $json = $s->serialize($data, 'json');
+        $serialized = $s->serialize($data, $this->format);
 
-        $toTest = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->typemap_on_parent_class_validate($serialized);
 
-        self::assertEquals(3, $toTest['aShape']['radius']);
-        self::assertEquals('circle', $toTest['aShape']['shape']);
-
-        $result = $s->deserialize($json, from: 'json', to: Box::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: Box::class);
 
         self::assertEquals($data, $result);
+    }
+
+    protected function typemap_on_parent_class_validate(mixed $serialized): void
+    {
+
     }
 }

@@ -11,7 +11,7 @@
     </report>
   </coverage>
   <testsuites>
-    <testsuite name="Rekodi Test Suite">
+    <testsuite name="Serde Test Suite">
       <directory>tests</directory>
     </testsuite>
   </testsuites>
