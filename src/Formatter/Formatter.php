@@ -12,7 +12,7 @@ interface Formatter
 
     public function serializeInitialize(): mixed;
 
-    public function serializeFinalize(mixed $runningValue): string;
+    public function serializeFinalize(mixed $runningValue): mixed;
 
     public function serializeInt(mixed $runningValue, Field $field, int $next): mixed;
 

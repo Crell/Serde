@@ -16,12 +16,6 @@ use Crell\Serde\SerdeError;
  */
 trait ArrayBasedDeformatter
 {
-
-    public function deserializeInitialize(string $serialized): mixed
-    {
-        return json_decode($serialized, true, 512, JSON_THROW_ON_ERROR);
-    }
-
     public function deserializeInt(mixed $decoded, Field $field): int|SerdeError
     {
         return $decoded[$field->serializedName()];
@@ -54,4 +48,8 @@ trait ArrayBasedDeformatter
         return $decoded[$field->serializedName()] ?? SerdeError::Missing;
     }
 
+    public function getRemainingData(mixed $source, array $used): mixed
+    {
+        return array_diff_key($source, array_flip($used));
+    }
 }

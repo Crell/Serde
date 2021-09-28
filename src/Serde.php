@@ -71,7 +71,7 @@ class Serde
         );
     }
 
-    public function serialize(object $object, string $format): string
+    public function serialize(object $object, string $format): mixed
     {
         $formatter = $this->formatters[$format] ?? throw UnsupportedFormat::create($format, Direction::Serialize);
 
@@ -89,7 +89,7 @@ class Serde
         return $formatter->serializeFinalize($serializedValue);
     }
 
-    public function deserialize(string $serialized, string $from, string $to): object
+    public function deserialize(mixed $serialized, string $from, string $to): object
     {
         $formatter = $this->formatters[$from] ?? throw UnsupportedFormat::create($from, Direction::Serialize);
 

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
-class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
+class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 {
     use ArrayBasedFormatter;
     use ArrayBasedDeformatter;
 
     public function format(): string
     {
-        return 'json';
+        return 'array';
     }
 
     public function serializeInitialize(): mixed
@@ -21,12 +21,17 @@ class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
 
     public function serializeFinalize(mixed $runningValue): mixed
     {
-        return json_encode($runningValue, JSON_THROW_ON_ERROR);
+        return $runningValue;
+    }
+
+    public function getRemainingData(mixed $source, array $used): mixed
+    {
+        return array_diff_key($source, array_flip($used));
     }
 
     public function deserializeInitialize(mixed $serialized): mixed
     {
-        return json_decode($serialized, true, 512, JSON_THROW_ON_ERROR);
+        return $serialized;
     }
 
     public function deserializeFinalize(mixed $decoded): void
