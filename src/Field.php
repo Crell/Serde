@@ -32,13 +32,23 @@ class Field implements FromReflectionProperty, HasSubAttributes
     public readonly string $phpName;
 
     /**
+     * The category of type this Field refers to.
+     */
+    public readonly TypeCategory $typeCategory;
+
+    /**
      * The serialized name of this field.
      */
     public readonly string $serializedName;
 
-    protected readonly ?RenamingStrategy $rename;
+    /**
+     * The renaming mechanism used for this field.
+     *
+     * This property is unset after the analysis phase to minimize
+     * the serialized size of this object.
+     */
+    protected ?RenamingStrategy $rename;
 
-    public readonly TypeCategory $typeCategory;
 
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
@@ -77,6 +87,10 @@ class Field implements FromReflectionProperty, HasSubAttributes
         // and cached.
         $this->typeCategory ??= $this->deriveTypeCategory();
         $this->serializedName ??= $this->deriveSerializedName();
+
+        // We don't need this object anymore, so clear it to minimize
+        // the serialized size of this object.
+        unset($this->rename);
     }
 
     protected function enumType(string $phpType): TypeCategory
