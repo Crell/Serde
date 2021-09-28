@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-use Crell\Serde\PropertyHandler\CustomMappedObjectPropertyReader;
+use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Flattening;
@@ -180,7 +180,7 @@ class SerdeTest extends TestCase
      */
     public function custom_object_reader(): void
     {
-        $customHandler = new CustomMappedObjectPropertyReader(
+        $customHandler = new MappedObjectPropertyReader(
             supportedTypes: [Task::class],
             typeMap: new TypeMap(key: 'size', map: [
                 'big' => BigTask::class,
@@ -211,7 +211,7 @@ class SerdeTest extends TestCase
      */
     public function dynamic_type_map(): void
     {
-        $customHandler = new CustomMappedObjectPropertyReader(
+        $customHandler = new MappedObjectPropertyReader(
             supportedTypes: [Task::class],
             typeMap: new class implements TypeMapper {
                 public function keyField(): string

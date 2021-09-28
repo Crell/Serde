@@ -12,6 +12,8 @@ use Crell\Serde\Field;
 use Crell\Serde\JsonFormatter;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
+use Crell\Serde\TypeMap;
+use Crell\Serde\TypeMapper;
 use function Crell\fp\afilter;
 use function Crell\fp\keyedMap;
 use function Crell\fp\pipe;
@@ -47,11 +49,16 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             ),
         );
 
-        if ($field->typeMap) {
-            $dict[$field->typeMap->keyField()] = $field->typeMap->findIdentifier($value::class);
+        if ($map = $this->typeMap($field)) {
+            $dict[$map->keyField()] = $map->findIdentifier($value::class);
         }
 
         return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
+    }
+
+    protected function typeMap(Field $field): ?TypeMapper
+    {
+        return $field->typeMap;
     }
 
     protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
@@ -79,9 +86,9 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         }
 
         $class = $field->phpType;
-        if ($field->typeMap) {
-            $keyField = $field->typeMap->keyField();
-            $class = $field->typeMap->findClass($dict[$keyField]);
+        if ($map = $this->typeMap($field)) {
+            $keyField = $map->keyField();
+            $class = $map->findClass($dict[$keyField]);
             unset($dict[$keyField]);
         }
 
