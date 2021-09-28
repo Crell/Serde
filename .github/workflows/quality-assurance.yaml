@@ -12,7 +12,7 @@ jobs:
             matrix:
                 php: [ '8.1' ]
                 composer-flags: [ '' ]
-                phpunit-flags: [ '--coverage-text' ]
+#                phpunit-flags: [ '--coverage-text' ]
         steps:
             - uses: actions/checkout@v2
             - uses: shivammathur/setup-php@v2
