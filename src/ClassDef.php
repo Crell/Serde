@@ -15,7 +15,10 @@ use Crell\AttributeUtils\ParseProperties;
 #[Attribute(Attribute::TARGET_CLASS)]
 class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
 {
-    use HasTypeMap;
+    /**
+     * The type map, if any, that applies to this class.
+     */
+    public readonly ?TypeMapper $typeMap;
 
     /** @var Field[] */
     public readonly array $properties;
@@ -46,4 +49,15 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
         return Field::class;
     }
 
+    public function subAttributes(): array
+    {
+        return [TypeMap::class => 'fromTypeMap'];
+    }
+
+    public function fromTypeMap(?TypeMapper $map): void
+    {
+        // This may assign to null, which is OK as that will
+        // evaluate to false when we need it to.
+        $this->typeMap = $map;
+    }
 }

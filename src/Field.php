@@ -15,7 +15,11 @@ use Crell\Serde\Renaming\RenamingStrategy;
 class Field implements FromReflectionProperty, HasSubAttributes
 {
     use Evolvable;
-    use HasTypeMap;
+
+    /**
+     * The type map, if any, that applies to this field.
+     */
+    public readonly ?TypeMapper $typeMap;
 
     /**
      * The native PHP type, as the reflection system defines it.
@@ -74,6 +78,18 @@ class Field implements FromReflectionProperty, HasSubAttributes
             'string' => TypeCategory::StringEnum,
             null => TypeCategory::UnitEnum,
         };
+    }
+
+    public function subAttributes(): array
+    {
+        return [TypeMap::class => 'fromTypeMap'];
+    }
+
+    public function fromTypeMap(?TypeMapper $map): void
+    {
+        // This may assign to null, which is OK as that will
+        // evaluate to false when we need it to.
+        $this->typeMap = $map;
     }
 
     /**
