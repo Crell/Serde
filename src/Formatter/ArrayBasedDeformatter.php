@@ -18,29 +18,29 @@ trait ArrayBasedDeformatter
 {
     public function deserializeInt(mixed $decoded, Field $field): int|SerdeError
     {
-        return $decoded[$field->serializedName()];
+        return $decoded[$field->serializedName()] ?? SerdeError::Missing;
     }
 
     public function deserializeFloat(mixed $decoded, Field $field): float|SerdeError
     {
-        return $decoded[$field->serializedName()];
+        return $decoded[$field->serializedName()] ?? SerdeError::Missing;
     }
 
     public function deserializeBool(mixed $decoded, Field $field): bool|SerdeError
     {
-        return $decoded[$field->serializedName()];
+        return $decoded[$field->serializedName()] ?? SerdeError::Missing;
     }
 
     public function deserializeString(mixed $decoded, Field $field): string|SerdeError
     {
-        return $decoded[$field->serializedName()];
+        return $decoded[$field->serializedName()] ?? SerdeError::Missing;
     }
 
     public function deserializeArray(mixed $decoded, Field $field, callable $recursor): array|SerdeError
     {
         return ($field->arrayType && class_exists($field->arrayType))
             ? array_map(static fn (mixed $value) => $recursor($value, $field->arrayType), $decoded[$field->serializedName()])
-            : $decoded[$field->serializedName()];
+            : $decoded[$field->serializedName()] ?? SerdeError::Missing;
     }
 
     public function deserializeDictionary(mixed $decoded, Field $field): array|SerdeError
