@@ -47,7 +47,7 @@ class Serializer
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
             foreach ($propReader($propName) as $k => $v) {
-                $f = Field::create(name: $k, phpName: $k, phpType: \get_debug_type($v));
+                $f = Field::create(serializedName: $k, phpName: $k, phpType: \get_debug_type($v));
                 $runningValue = $this->serializeValue($f, $runningValue, $v);
             }
             return $runningValue;

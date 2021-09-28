@@ -45,7 +45,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             afilter($this->shouldSerialize(new \ReflectionObject($value), $value)),
             keyedMap(
                 values: static fn ($i, Field $field) => $propReader($field->phpName),
-                keys: static fn ($i, Field $field) => $field->serializedName(),
+                keys: static fn ($i, Field $field) => $field->serializedName,
             ),
         );
 

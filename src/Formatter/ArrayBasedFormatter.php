@@ -18,31 +18,31 @@ trait ArrayBasedFormatter
 
     public function serializeInt(mixed $runningValue, Field $field, int $next): array
     {
-        $runningValue[$field->serializedName()] = $next;
+        $runningValue[$field->serializedName] = $next;
         return $runningValue;
     }
 
     public function serializeFloat(mixed $runningValue, Field $field, float $next): array
     {
-        $runningValue[$field->serializedName()] = $next;
+        $runningValue[$field->serializedName] = $next;
         return $runningValue;
     }
 
     public function serializeString(mixed $runningValue, Field $field, string $next): array
     {
-        $runningValue[$field->serializedName()] = $next;
+        $runningValue[$field->serializedName] = $next;
         return $runningValue;
     }
 
     public function serializeBool(mixed $runningValue, Field $field, bool $next): array
     {
-        $runningValue[$field->serializedName()] = $next;
+        $runningValue[$field->serializedName] = $next;
         return $runningValue;
     }
 
     public function serializeArray(mixed $runningValue, Field $field, array $next, callable $recursor): array
     {
-        $name = $field->serializedName();
+        $name = $field->serializedName;
         foreach ($next as $k => $v) {
             $runningValue[$name][$k] = is_object($v) ? $recursor($v, []) : $v;
         }
@@ -51,7 +51,7 @@ trait ArrayBasedFormatter
 
     public function serializeDictionary(mixed $runningValue, Field $field, array $next, callable $recursor): array
     {
-        $name = $field->serializedName();
+        $name = $field->serializedName;
         foreach ($next as $k => $v) {
             $runningValue[$name][$k] = match (true) {
                 is_object($v) => $recursor($v, []),

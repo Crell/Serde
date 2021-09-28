@@ -32,9 +32,9 @@ class Field implements FromReflectionProperty, HasSubAttributes
     public readonly string $phpName;
 
     /**
-     * Cached copy of the serialized name this field should use.
+     * The serialized name of this field.
      */
-    protected readonly string $serializedName;
+    public readonly string $serializedName;
 
     protected readonly ?RenamingStrategy $rename;
 
@@ -64,11 +64,19 @@ class Field implements FromReflectionProperty, HasSubAttributes
     public function fromReflection(\ReflectionProperty $subject): void
     {
         $this->phpName = $subject->name;
-//        $this->renameTo ??= $subject->name;
         $this->phpType ??= $this->getNativeType($subject);
         $this->default ??= $subject->getDefaultValue();
 
+        $this->finalize();
+    }
+
+    protected function finalize(): void
+    {
+        // We cannot compute these until we have the PHP type,
+        // but they can still be determined entirely at analysis time
+        // and cached.
         $this->typeCategory ??= $this->deriveTypeCategory();
+        $this->serializedName ??= $this->deriveSerializedName();
     }
 
     protected function enumType(string $phpType): TypeCategory
@@ -99,16 +107,16 @@ class Field implements FromReflectionProperty, HasSubAttributes
      * for nested values when flattening and collecting. Do not call it directly.
      */
     public static function create(
-        ?string $name = null,
+        ?string $serializedName = null,
         Cases $caseFold = Cases::Unchanged,
         string $phpName = null,
         string $phpType = null,
     ): static
     {
-        $new = new static(serializedName: $name, caseFold: $caseFold);
+        $new = new static(serializedName: $serializedName, caseFold: $caseFold);
         $new->phpType = $phpType;
         $new->phpName = $phpName;
-        $new->typeCategory = $new->deriveTypeCategory();
+        $new->finalize();
         return $new;
     }
 
@@ -134,10 +142,9 @@ class Field implements FromReflectionProperty, HasSubAttributes
         };
     }
 
-    public function serializedName(): string
+    public function deriveSerializedName(): string
     {
-        return $this->serializedName ??=
-            $this->rename?->convert($this->phpName)
+        return $this->rename?->convert($this->phpName)
             ?? $this->phpName;
     }
 }
