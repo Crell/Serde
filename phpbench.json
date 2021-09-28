@@ -1,5 +1,7 @@
 {
     "runner.path": "benchmarks",
     "$schema":"./vendor/phpbench/phpbench/phpbench.schema.json",
-    "runner.bootstrap": "vendor/autoload.php"
+    "runner.bootstrap": "vendor/autoload.php",
+    "runner.remote_script_remove": false,
+    "runner.remote_script_path": "benchscripts"
 }

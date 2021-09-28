@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Benchmarks;
 
+use Crell\Serde\Formatter\JsonFormatter;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Serde;
 use PhpBench\Benchmark\Metadata\Annotations\AfterMethods;
@@ -29,7 +30,7 @@ class SerdeBench
 
     public function benchPoint(): void
     {
-        $s = new Serde();
+        $s = new Serde(formatters: [new JsonFormatter()]);
 
         $p1 = new Point(1, 2, 3);
 
