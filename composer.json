@@ -32,7 +32,7 @@
     "require-dev": {
         "crell/attributeutils": ">= 0.3.0",
         "crell/fp": ">= 0.2.0",
-        "phpbench/phpbench": "^1.1",
+        "phpbench/phpbench": "^1.1.2",
         "phpunit/phpunit": "~9.0",
         "vishnubob/wait-for-it": "dev-master"
     },
