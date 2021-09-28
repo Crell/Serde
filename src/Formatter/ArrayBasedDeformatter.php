@@ -48,7 +48,7 @@ trait ArrayBasedDeformatter
         return $decoded[$field->serializedName()] ?? SerdeError::Missing;
     }
 
-    public function getRemainingData(mixed $source, array $used): mixed
+    public function getRemainingData(mixed $source, array $used): array
     {
         return array_diff_key($source, array_flip($used));
     }

@@ -16,31 +16,31 @@ use Crell\Serde\Field;
 trait ArrayBasedFormatter
 {
 
-    public function serializeInt(mixed $runningValue, Field $field, int $next): mixed
+    public function serializeInt(mixed $runningValue, Field $field, int $next): array
     {
         $runningValue[$field->serializedName()] = $next;
         return $runningValue;
     }
 
-    public function serializeFloat(mixed $runningValue, Field $field, float $next): mixed
+    public function serializeFloat(mixed $runningValue, Field $field, float $next): array
     {
         $runningValue[$field->serializedName()] = $next;
         return $runningValue;
     }
 
-    public function serializeString(mixed $runningValue, Field $field, string $next): mixed
+    public function serializeString(mixed $runningValue, Field $field, string $next): array
     {
         $runningValue[$field->serializedName()] = $next;
         return $runningValue;
     }
 
-    public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed
+    public function serializeBool(mixed $runningValue, Field $field, bool $next): array
     {
         $runningValue[$field->serializedName()] = $next;
         return $runningValue;
     }
 
-    public function serializeArray(mixed $runningValue, Field $field, array $next, callable $recursor): mixed
+    public function serializeArray(mixed $runningValue, Field $field, array $next, callable $recursor): array
     {
         $name = $field->serializedName();
         foreach ($next as $k => $v) {
@@ -49,7 +49,7 @@ trait ArrayBasedFormatter
         return $runningValue;
     }
 
-    public function serializeDictionary(mixed $runningValue, Field $field, array $next, callable $recursor): mixed
+    public function serializeDictionary(mixed $runningValue, Field $field, array $next, callable $recursor): array
     {
         $name = $field->serializedName();
         foreach ($next as $k => $v) {
