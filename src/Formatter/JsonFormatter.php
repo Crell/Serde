@@ -14,12 +14,12 @@ class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
         return 'json';
     }
 
-    public function serializeInitialize(): mixed
+    public function serializeInitialize(): array
     {
         return [];
     }
 
-    public function serializeFinalize(mixed $runningValue): mixed
+    public function serializeFinalize(mixed $runningValue): string
     {
         return json_encode($runningValue, JSON_THROW_ON_ERROR);
     }

@@ -14,7 +14,7 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
         return 'array';
     }
 
-    public function serializeInitialize(): mixed
+    public function serializeInitialize(): array
     {
         return [];
     }
@@ -24,7 +24,7 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
         return $runningValue;
     }
 
-    public function getRemainingData(mixed $source, array $used): mixed
+    public function getRemainingData(mixed $source, array $used): array
     {
         return array_diff_key($source, array_flip($used));
     }

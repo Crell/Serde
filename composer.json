@@ -34,7 +34,11 @@
         "crell/fp": ">= 0.2.0",
         "phpbench/phpbench": "^1.1.2",
         "phpunit/phpunit": "~9.0",
+        "symfony/yaml": "^5.3",
         "vishnubob/wait-for-it": "dev-master"
+    },
+    "suggest": {
+        "symfony/yaml": "Enables serializing to/from YAML files."
     },
     "autoload": {
         "psr-4": {
