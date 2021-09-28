@@ -26,7 +26,7 @@ class Serde
     protected readonly array $writers;
 
     public function __construct(
-        protected readonly ?ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
+        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
         /** array<int, PropertyReader|PropertyWriter> */
         array $handlers = []
     ) {
