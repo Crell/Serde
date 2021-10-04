@@ -8,6 +8,7 @@ use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\CircularReference;
+use Crell\Serde\Records\EmptyData;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\NestedObject;
@@ -360,8 +361,30 @@ abstract class SerdeTest extends TestCase
         self::assertEquals($data, $result);
     }
 
-    public function nested_objects_support_functionality_at_all_levels_validate(mixed $serialized): void
+    protected function nested_objects_support_functionality_at_all_levels_validate(mixed $serialized): void
     {
 
+    }
+
+    /**
+     * @test
+     */
+    public function empty_values(): void
+    {
+        $s = new Serde(formatters: $this->formatters);
+
+        $data = new EmptyData('beep');
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->empty_values_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: EmptyData::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    protected function empty_values_validate(mixed $serialized): void
+    {
     }
 }

@@ -108,5 +108,15 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         $testFlattened($toTest['child']['child']['child']);
     }
 
+    protected function empty_values_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
 
+        self::assertEquals('narf', $toTest['nonConstructorDefault']);
+        self::assertEquals('beep', $toTest['required']);
+        self::assertEquals('boop', $toTest['withDefault']);
+        self::assertArrayNotHasKey('nullableUninitialized', $toTest);
+        self::assertArrayNotHasKey('uninitialized', $toTest);
+        self::assertArrayNotHasKey('roNullable', $toTest);
+    }
 }

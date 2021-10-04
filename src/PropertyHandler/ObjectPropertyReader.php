@@ -38,11 +38,10 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         $objectMetadata = $this->analyzer->analyze($value, ClassDef::class);
 
         // This lets us read private values without messing with the Reflection API.
-        $propReader = (fn (string $prop) => $this->$prop)->bindTo($value, $value);
+        $propReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
 
         $dict = pipe(
             $objectMetadata->properties,
-            afilter($this->shouldSerialize(new \ReflectionObject($value), $value)),
             reduce([], fn(array $dict, Field $f) => $this->flattenValue($dict, $f, $propReader)),
         );
 
@@ -55,13 +54,18 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
     protected function flattenValue(array $dict, Field $field, callable $propReader): array
     {
+        $value = $propReader($field->phpName);
+        if ($value === null) {
+            return $dict;
+        }
+
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
-            foreach ($propReader($field->phpName) as $k => $v) {
+            foreach ($value as $k => $v) {
                 $dict[$k] = $v;
             }
         } else {
-            $dict[$field->serializedName] = $propReader($field->phpName);
+            $dict[$field->serializedName] = $value;
         }
 
         return $dict;
@@ -70,17 +74,6 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
     protected function typeMap(Field $field): ?TypeMapper
     {
         return $field->typeMap;
-    }
-
-    protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
-    {
-        // This lets us read private values without messing with the Reflection API.
-        $propReader = (fn (string $prop) => $this->$prop)->bindTo($object, $object);
-
-        // @todo Do we serialize nulls or no? Right now we don't.
-        return static fn (Field $field): bool =>
-            $rObject->getProperty($field->phpName)->isInitialized($object)
-            && !is_null($propReader($field->phpName));
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool

@@ -41,7 +41,7 @@ class Serializer
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($object, ClassDef::class);
 
-        $props = array_filter($objectMetadata->properties, $this->shouldSerialize(new \ReflectionObject($object), $object));
+        $props = array_filter($objectMetadata->properties, $this->fieldHasValue($object));
 
         $propertySerializer = fn (mixed $runningValue, Field $field): mixed
         => $this->serializeProperty($object, $runningValue, $field);
@@ -80,14 +80,13 @@ class Serializer
         return $reader->readValue($this->formatter, $this->serialize(...), $field, $value, $runningValue);
     }
 
-    protected function shouldSerialize(\ReflectionObject $rObject, object $object): callable
+    protected function fieldHasValue(object $object): callable
     {
         // This lets us read private values without messing with the Reflection API.
-        $propReader = (fn (string $prop) => $this->$prop)->bindTo($object, $object);
+        $propReader = (fn (string $prop) => $this->$prop ?? null)->bindTo($object, $object);
 
         // @todo Do we serialize nulls or no? Right now we don't.
         return static fn (Field $field) =>
-            $rObject->getProperty($field->phpName)->isInitialized($object)
-            && !is_null($propReader($field->phpName));
+            !is_null($propReader($field->phpName));
     }
 }

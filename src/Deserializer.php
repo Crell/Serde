@@ -41,7 +41,15 @@ class Deserializer
             if ($field->flatten) {
                 $collectingField = $field;
             } else {
-                $props[$field->phpName] = $this->deserializeValue($field, $decoded);
+                $value = $this->deserializeValue($field, $decoded);
+                if ($value === SerdeError::Missing) {
+                    if ($field->shouldUseDefault) {
+                        $value = $field->defaultValue;
+                        $props[$field->phpName] = $value;
+                    }
+                } else {
+                    $props[$field->phpName] = $value;
+                }
             }
         }
 
@@ -60,12 +68,6 @@ class Deserializer
         $rClass = new \ReflectionClass($targetType);
         $new = $rClass->newInstanceWithoutConstructor();
 
-        // Get defaults from the constructor if necessary and possible.
-        foreach ($rClass->getConstructor()?->getParameters() ?? [] as $param) {
-            if ($props[$param->name] === SerdeError::Missing) {
-                $props[$param->name] = $param->getDefaultValue();
-            }
-        }
 
         $populate = function (array $props) {
             foreach ($props as $k => $v) {

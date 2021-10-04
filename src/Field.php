@@ -10,6 +10,9 @@ use Crell\AttributeUtils\HasSubAttributes;
 use Crell\Serde\Renaming\Cases;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
+use function Crell\fp\first;
+use function Crell\fp\indexBy;
+use function Crell\fp\pipe;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class Field implements FromReflectionProperty, HasSubAttributes
@@ -42,13 +45,19 @@ class Field implements FromReflectionProperty, HasSubAttributes
     public readonly string $serializedName;
 
     /**
+     * The default value this field should be assigned, if any.
+     */
+    public readonly mixed $defaultValue;
+
+    public readonly bool $shouldUseDefault;
+
+    /**
      * The renaming mechanism used for this field.
      *
      * This property is unset after the analysis phase to minimize
      * the serialized size of this object.
      */
     protected ?RenamingStrategy $rename;
-
 
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
@@ -59,12 +68,16 @@ class Field implements FromReflectionProperty, HasSubAttributes
         /** Specify a case folding strategy to use */
         public Cases $caseFold = Cases::Unchanged,
         /** Use this default value if none is specified. */
-        //public mixed $default = null,
+        mixed $default = null,
+        protected bool $useDefault = true,
         /** True to flatten an array on serialization and collect into it when deserializing. */
         public bool $flatten = false,
         /** For an array property, specifies the class type of each item in the array. */
         public ?string $arrayType = null,
     ) {
+        if ($default) {
+            $this->defaultValue = $this->default;
+        }
         // Upcast the literal serialized name to a converter if appropriate.
         $this->rename ??=
             $renameWith
@@ -75,9 +88,36 @@ class Field implements FromReflectionProperty, HasSubAttributes
     {
         $this->phpName = $subject->name;
         $this->phpType ??= $this->getNativeType($subject);
-        $this->default ??= $subject->getDefaultValue();
+
+        $constructorDefault = $this->getDefaultValueFromConstructor($subject);
+
+        $this->shouldUseDefault
+            ??= $this->useDefault
+            && ($subject->hasDefaultValue() || $constructorDefault !== SerdeError::NoDefaultValue)
+        ;
+
+        if ($this->shouldUseDefault) {
+            $this->defaultValue
+                ??= $subject->getDefaultValue()
+                ?? $constructorDefault
+            ;
+        }
 
         $this->finalize();
+    }
+
+    protected function getDefaultValueFromConstructor(\ReflectionProperty $subject): mixed
+    {
+        /** @var array<string, \ReflectionParameter> $params */
+        $params = pipe($subject->getDeclaringClass()?->getConstructor()?->getParameters() ?? [],
+            indexBy(fn(\ReflectionParameter $p) => $p->getName()),
+        );
+
+        $param = $params[$subject->getName()] ?? null;
+
+        return $param?->isDefaultValueAvailable()
+            ? $param->getDefaultValue()
+            : SerdeError::NoDefaultValue;
     }
 
     protected function finalize(): void
