@@ -7,15 +7,6 @@
 
 version: "3"
 services:
-    php80:
-        build: ./docker/php/80
-        volumes:
-            - .:/usr/src/myapp
-            - ./docker/php/80/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-            - ./docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
-        environment:
-            XDEBUG_MODE: "develop,debug"
-            XDEBUG_CONFIG: "client_host=${HOST_IP} idekey=${IDE_KEY} client_port=${XDEBUG_PORT} discover_client_host=1 start_with_request=1"
     php81:
         build: ./docker/php/81
         volumes:
