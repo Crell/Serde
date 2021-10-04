@@ -10,6 +10,7 @@ use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\CircularReference;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
+use Crell\Serde\Records\NestedObject;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Shapes\Box;
@@ -336,5 +337,31 @@ abstract class SerdeTest extends TestCase
 
         // This should throw an error when the loop is detected.
         $serialized = $s->serialize($a, $this->format);
+    }
+
+    /**
+     * @test
+     */
+    public function nested_objects_support_functionality_at_all_levels(): void
+    {
+        $s = new Serde(formatters: $this->formatters);
+
+        $data = new NestedObject('First', ['a' => 'A', 'b' => 'B'],
+            new NestedObject('Second', ['a' => 'A', 'b' => 'B'],
+                new NestedObject('Third', ['a' => 'A', 'b' => 'B'],
+                    new NestedObject('Fourth', ['a' => 'A', 'b' => 'B']))));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->nested_objects_support_functionality_at_all_levels_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: NestedObject::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function nested_objects_support_functionality_at_all_levels_validate(mixed $serialized): void
+    {
+
     }
 }

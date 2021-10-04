@@ -88,4 +88,25 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals(3, $toTest['aShape']['radius']);
         self::assertEquals('circle', $toTest['aShape']['shape']);
     }
+
+    public function nested_objects_support_functionality_at_all_levels_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        $testFlattened = static function ($arr) {
+            self::assertEquals('A', $arr['a']);
+            self::assertEquals('B', $arr['b']);
+        };
+
+        self::assertEquals('First', $toTest['name']);
+        $testFlattened($toTest);
+        self::assertEquals('Second', $toTest['child']['name']);
+        $testFlattened($toTest['child']);
+        self::assertEquals('Third', $toTest['child']['child']['name']);
+        $testFlattened($toTest['child']['child']);
+        self::assertEquals('Fourth', $toTest['child']['child']['child']['name']);
+        $testFlattened($toTest['child']['child']['child']);
+    }
+
+
 }

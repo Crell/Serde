@@ -15,8 +15,8 @@ use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMapper;
 use function Crell\fp\afilter;
-use function Crell\fp\keyedMap;
 use function Crell\fp\pipe;
+use function Crell\fp\reduce;
 
 class ObjectPropertyReader implements PropertyWriter, PropertyReader
 {
@@ -43,10 +43,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         $dict = pipe(
             $objectMetadata->properties,
             afilter($this->shouldSerialize(new \ReflectionObject($value), $value)),
-            keyedMap(
-                values: static fn ($i, Field $field) => $propReader($field->phpName),
-                keys: static fn ($i, Field $field) => $field->serializedName,
-            ),
+            reduce([], fn(array $dict, Field $f) => $this->flattenValue($dict, $f, $propReader)),
         );
 
         if ($map = $this->typeMap($field)) {
@@ -54,6 +51,20 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         }
 
         return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
+    }
+
+    protected function flattenValue(array $dict, Field $field, callable $propReader): array
+    {
+        // @todo Figure out if we care about flattening/collecting objects.
+        if ($field->flatten && $field->phpType === 'array') {
+            foreach ($propReader($field->phpName) as $k => $v) {
+                $dict[$k] = $v;
+            }
+        } else {
+            $dict[$field->serializedName] = $propReader($field->phpName);
+        }
+
+        return $dict;
     }
 
     protected function typeMap(Field $field): ?TypeMapper
