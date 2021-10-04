@@ -23,15 +23,15 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
     /** @var Field[] */
     public readonly array $properties;
 
+    public readonly string $phpType;
+
     public function __construct(
-        public ?string $name = null,
-        public ?string $fullName = null,
-    ){}
+        public readonly bool $includeFieldsByDefault = true,
+    ) {}
 
     public function fromReflection(\ReflectionClass $subject): void
     {
-        $this->name ??= $subject->getShortName();
-        $this->fullName ??= $subject->name;
+        $this->phpType ??= $subject->getName();
     }
 
     public function setProperties(array $properties): void
@@ -41,7 +41,7 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
 
     public function includeByDefault(): bool
     {
-        return true;
+        return $this->includeFieldsByDefault;
     }
 
     public static function propertyAttribute(): string
