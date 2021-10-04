@@ -20,6 +20,8 @@ class Serializer
      */
     protected array $seenObjects = [];
 
+    protected \Closure $recursor;
+
     public function __construct(
         protected readonly ClassAnalyzer $analyzer,
         /** @var PropertyReader[]  */
@@ -27,7 +29,9 @@ class Serializer
         /** @var PropertyWriter[] */
         protected readonly array $writers,
         protected readonly Formatter $formatter,
-    ) {}
+    ) {
+        $this->recursor = $this->serialize(...);
+    }
 
     public function serialize(object $object, mixed $runningValue): mixed
     {
@@ -77,7 +81,7 @@ class Serializer
         $reader = pipe($this->readers, first(fn (PropertyReader $r) => $r->canRead($field, $value, $this->formatter->format())))
             ?? throw new \RuntimeException('No reader for ' . $field->phpType);
 
-        return $reader->readValue($this->formatter, $this->serialize(...), $field, $value, $runningValue);
+        return $reader->readValue($this->formatter, $this->recursor, $field, $value, $runningValue);
     }
 
     protected function fieldHasValue(object $object): callable
