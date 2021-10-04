@@ -5,4 +5,4 @@ CMD [ "vendor/bin/phpunit" ]
 #CMD [ "ls", "-alF" ]
 #CMD ["pwd"]
 
-RUN pecl install xdebug-3.1.0beta2
+RUN pecl install xdebug-3.1.0
