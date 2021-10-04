@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-use Crell\Serde\Formatter\JsonFormatter;
-
 abstract class ArrayBasedFormatterTest extends SerdeTest
 {
     abstract protected function arrayify(mixed $serialized): array;
