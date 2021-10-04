@@ -15,6 +15,11 @@ use function Crell\fp\pipe;
 // But that does simplify a number of functions.
 class Serializer
 {
+    /**
+     * Used for circular reference loop detection.
+     */
+    protected array $seenObjects = [];
+
     public function __construct(
         protected readonly ClassAnalyzer $analyzer,
         /** @var PropertyReader[]  */
@@ -26,6 +31,13 @@ class Serializer
 
     public function serialize(object $object, mixed $runningValue): mixed
     {
+        // Had we partial application, we could easily factor the loop detection
+        // out to its own method. Sadly it's needlessly convoluted to do otherwise.
+        if (in_array($object, $this->seenObjects, true)) {
+            throw CircularReferenceDetected::create($object);
+        }
+        $this->seenObjects[] = $object;
+
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($object, ClassDef::class);
 
@@ -34,7 +46,10 @@ class Serializer
         $propertySerializer = fn (mixed $runningValue, Field $field): mixed
         => $this->serializeProperty($object, $runningValue, $field);
 
-        return array_reduce($props, $propertySerializer, $runningValue);
+        $result = array_reduce($props, $propertySerializer, $runningValue);
+
+        array_pop($this->seenObjects);
+        return $result;
     }
 
     protected function serializeProperty(object $object, mixed $runningValue, Field $field): mixed

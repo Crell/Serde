@@ -7,6 +7,7 @@ namespace Crell\Serde;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\CircularReference;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\OptionalPoint;
@@ -315,5 +316,25 @@ abstract class SerdeTest extends TestCase
     protected function typemap_on_parent_class_validate(mixed $serialized): void
     {
 
+    }
+
+    /**
+     * @test
+     */
+    public function circular_detection(): void
+    {
+        $this->expectException(CircularReferenceDetected::class);
+
+        $s = new Serde(formatters: $this->formatters);
+
+        $a = new CircularReference('A');
+        $b = new CircularReference('B');
+        $c = new CircularReference('C');
+        $a->ref = $b;
+        $b->ref  =$c;
+        $c->ref  =$a;
+
+        // This should throw an error when the loop is detected.
+        $serialized = $s->serialize($a, $this->format);
     }
 }
