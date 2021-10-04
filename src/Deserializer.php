@@ -6,6 +6,7 @@ namespace Crell\Serde;
 
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Formatter\Deformatter;
+use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
 use function Crell\fp\first;
@@ -30,9 +31,6 @@ class Deserializer
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($targetType, ClassDef::class);
 
-        $valueDeserializer = fn(Field $field, mixed $source): mixed
-            => $this->deserializeValue($field, $source);
-
         $props = [];
         $usedNames = [];
         $collectingField = null;
@@ -43,16 +41,16 @@ class Deserializer
             if ($field->flatten) {
                 $collectingField = $field;
             } else {
-                $props[$field->phpName] = $valueDeserializer($field, $decoded);
+                $props[$field->phpName] = $this->deserializeValue($field, $decoded);
             }
         }
 
-        if ($collectingField) {
+        if ($collectingField && $this->formatter instanceof SupportsCollecting) {
             $remaining = $this->formatter->getRemainingData($decoded, $usedNames);
             if ($collectingField->phpType === 'array') {
                 foreach ($remaining as $k => $v) {
                     $f = Field::create(serializedName: $k, phpName: $k, phpType: \get_debug_type($v));
-                    $props[$collectingField->phpName][$k] = $valueDeserializer($f, $remaining, $k);
+                    $props[$collectingField->phpName][$k] = $this->deserializeValue($f, $remaining);
                 }
             }
             // @todo Do we support collecting into objects? Does that even make sense?
