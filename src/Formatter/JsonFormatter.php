@@ -16,12 +16,12 @@ class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
 
     public function serializeInitialize(): array
     {
-        return [];
+        return ['root' => []];
     }
 
     public function serializeFinalize(mixed $runningValue): string
     {
-        return json_encode($runningValue, JSON_THROW_ON_ERROR);
+        return json_encode($runningValue['root'], JSON_THROW_ON_ERROR);
     }
 
     public function deserializeInitialize(mixed $serialized): mixed

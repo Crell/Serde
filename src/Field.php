@@ -171,6 +171,7 @@ class Field implements FromReflectionProperty, HasSubAttributes
         $new = new static(serializedName: $serializedName);
         $new->phpType = $phpType;
         $new->phpName = $phpName;
+        $new->typeMap = null;
         $new->finalize();
         return $new;
     }

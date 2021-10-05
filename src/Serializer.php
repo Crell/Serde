@@ -40,7 +40,7 @@ class Serializer
         $this->recursor = $this->serialize(...);
     }
 
-    public function serialize(object $object, mixed $runningValue): mixed
+    public function serialize(object $object, mixed $runningValue, ?Field $field = null): mixed
     {
         // Had we partial application, we could easily factor the loop detection
         // out to its own method. Sadly it's needlessly convoluted to do otherwise.
@@ -48,6 +48,12 @@ class Serializer
             throw CircularReferenceDetected::create($object);
         }
         $this->seenObjects[] = $object;
+
+        // For the initial call, there will be no field yet.  Instead, make a
+        // fake one that assumes it is the root.
+        $field ??= Field::create(serializedName: 'root', phpName: 'root', phpType: $object::class);
+
+        return $this->serializeValue($field, $runningValue, $object);
 
         /** @var ClassDef $objectMetadata */
         $objectMetadata = $this->analyzer->analyze($object, ClassDef::class);

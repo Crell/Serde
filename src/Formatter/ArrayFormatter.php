@@ -16,12 +16,12 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 
     public function serializeInitialize(): array
     {
-        return [];
+        return ['root' => []];
     }
 
     public function serializeFinalize(mixed $runningValue): mixed
     {
-        return $runningValue;
+        return $runningValue['root'];
     }
 
     public function getRemainingData(mixed $source, array $used): array

@@ -44,7 +44,7 @@ trait ArrayBasedFormatter
     {
         $name = $field->serializedName;
         foreach ($next as $k => $v) {
-            $runningValue[$name][$k] = is_object($v) ? $recursor($v, []) : $v;
+            $runningValue[$name][$k] = is_object($v) ? $recursor($v, [], $field) : $v;
         }
         return $runningValue;
     }
@@ -53,7 +53,7 @@ trait ArrayBasedFormatter
     {
         $name = $field->serializedName;
         foreach ($next as $k => $v) {
-            $runningValue[$name][$k] = is_object($v) ? $recursor($v, []) : $v;
+            $runningValue[$name][$k] = is_object($v) ? $recursor($v, [], $field) : $v;
         }
         return $runningValue;
     }
