@@ -9,6 +9,7 @@ use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\CircularReference;
 use Crell\Serde\Records\EmptyData;
+use Crell\Serde\Records\Exclusions;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\NestedObject;
@@ -386,5 +387,29 @@ abstract class SerdeTest extends TestCase
 
     protected function empty_values_validate(mixed $serialized): void
     {
+    }
+
+    /**
+     * @test
+     */
+    public function exclude_values(): void
+    {
+        $s = new Serde(formatters: $this->formatters);
+
+        $data = new Exclusions('one', 'two');
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->exclude_values_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Exclusions::class);
+
+        self::assertEquals('one', $result->one);
+        self::assertNull($result->two ?? null);
+    }
+
+    public function exclude_values_validate(mixed $serialized): void
+    {
+
     }
 }

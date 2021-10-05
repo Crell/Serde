@@ -119,4 +119,13 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertArrayNotHasKey('uninitialized', $toTest);
         self::assertArrayNotHasKey('roNullable', $toTest);
     }
+
+    public function exclude_values_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals('one', $toTest['one']);
+        self::assertArrayNotHasKey('two', $toTest);
+    }
+
 }

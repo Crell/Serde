@@ -69,11 +69,14 @@ class Field implements FromReflectionProperty, HasSubAttributes
         public Cases $caseFold = Cases::Unchanged,
         /** Use this default value if none is specified. */
         mixed $default = null,
+        /** True to use the default value on deserialization. False to skip setting it entirely. */
         protected bool $useDefault = true,
         /** True to flatten an array on serialization and collect into it when deserializing. */
         public bool $flatten = false,
         /** For an array property, specifies the class type of each item in the array. */
-        public ?string $arrayType = null,
+        public readonly ?string $arrayType = null,
+        /** Set true to exclude this field from serialization entirely. */
+        public readonly bool $exclude = false,
     ) {
         if ($default) {
             $this->defaultValue = $this->default;
