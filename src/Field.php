@@ -64,9 +64,8 @@ class Field implements FromReflectionProperty, HasSubAttributes
     public function __construct(
         /** A custom name to use for this field */
         ?string $serializedName = null,
+        /** Specify a field renaming strategy. Usually you can use the Cases enum. */
         ?RenamingStrategy $renameWith = null,
-        /** Specify a case folding strategy to use */
-        public Cases $caseFold = Cases::Unchanged,
         /** Use this default value if none is specified. */
         mixed $default = null,
         /** True to use the default value on deserialization. False to skip setting it entirely. */
@@ -165,12 +164,11 @@ class Field implements FromReflectionProperty, HasSubAttributes
      */
     public static function create(
         ?string $serializedName = null,
-        Cases $caseFold = Cases::Unchanged,
         string $phpName = null,
         string $phpType = null,
     ): static
     {
-        $new = new static(serializedName: $serializedName, caseFold: $caseFold);
+        $new = new static(serializedName: $serializedName);
         $new->phpType = $phpType;
         $new->phpName = $phpName;
         $new->finalize();
