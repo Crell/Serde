@@ -36,7 +36,7 @@ trait ArrayBasedDeformatter
         return $decoded[$field->serializedName] ?? SerdeError::Missing;
     }
 
-    public function deserializeArray(mixed $decoded, Field $field, callable $recursor): array|SerdeError
+    public function deserializeSequence(mixed $decoded, Field $field, callable $recursor): array|SerdeError
     {
         return ($field->arrayType && class_exists($field->arrayType))
             ? array_map(static fn (mixed $value) => $recursor($value, $field->arrayType), $decoded[$field->serializedName])

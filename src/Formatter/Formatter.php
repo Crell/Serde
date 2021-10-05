@@ -24,7 +24,7 @@ interface Formatter
 
     public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed;
 
-    public function serializeArray(mixed $runningValue, Field $field, Sequence $next, callable $recursor): mixed;
+    public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, callable $recursor): mixed;
 
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, callable $recursor): mixed;
 }

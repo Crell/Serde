@@ -43,7 +43,7 @@ trait ArrayBasedFormatter
         return $runningValue;
     }
 
-    public function serializeArray(mixed $runningValue, Field $field, Sequence $next, callable $recursor): array
+    public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, callable $recursor): array
     {
         $name = $field->serializedName;
         $runningValue[$name] = [];

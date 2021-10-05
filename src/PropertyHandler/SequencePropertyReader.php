@@ -20,7 +20,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
             $seq->items[] = new CollectionItem(field: $f, value: $v);
         }
 
-        return $formatter->serializeArray($runningValue, $field, $seq, $recursor);
+        return $formatter->serializeSequence($runningValue, $field, $seq, $recursor);
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool
@@ -30,7 +30,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
 
     public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
-        return $formatter->deserializeArray($source, $field, $recursor);
+        return $formatter->deserializeSequence($source, $field, $recursor);
     }
 
     public function canWrite(Field $field, string $format): bool
