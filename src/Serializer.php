@@ -40,52 +40,28 @@ class Serializer
         $this->recursor = $this->serialize(...);
     }
 
-    public function serialize(object $object, mixed $runningValue, ?Field $field = null): mixed
+    public function serialize(mixed $value, mixed $runningValue, ?Field $field = null): mixed
     {
         // Had we partial application, we could easily factor the loop detection
         // out to its own method. Sadly it's needlessly convoluted to do otherwise.
-        if (in_array($object, $this->seenObjects, true)) {
-            throw CircularReferenceDetected::create($object);
+        if (is_object($value)) {
+            if (in_array($value, $this->seenObjects, true)) {
+                throw CircularReferenceDetected::create($value);
+            }
+            $this->seenObjects[] = $value;
         }
-        $this->seenObjects[] = $object;
 
         // For the initial call, there will be no field yet.  Instead, make a
         // fake one that assumes it is the root.
-        $field ??= Field::create(serializedName: 'root', phpName: 'root', phpType: $object::class);
+        $field ??= Field::create(serializedName: 'root', phpType: $value::class);
 
-        return $this->serializeValue($field, $runningValue, $object);
+        $result = $this->serializeValue($field, $runningValue, $value);
 
-        /** @var ClassDef $objectMetadata */
-        $objectMetadata = $this->analyzer->analyze($object, ClassDef::class);
-
-        $props = array_filter($objectMetadata->properties, $this->fieldHasValue($object));
-
-        $propertySerializer = fn (mixed $runningValue, Field $field): mixed
-        => $this->serializeProperty($object, $runningValue, $field);
-
-        $result = array_reduce($props, $propertySerializer, $runningValue);
-
-        array_pop($this->seenObjects);
-        return $result;
-    }
-
-    protected function serializeProperty(object $object, mixed $runningValue, Field $field): mixed
-    {
-        $propName = $field->phpName;
-
-        // This lets us read private values without messing with the Reflection API.
-        $propReader = (fn (string $prop) => $this->$prop)->bindTo($object, $object);
-
-        // @todo Figure out if we care about flattening/collecting objects.
-        if ($field->flatten && $field->phpType === 'array') {
-            foreach ($propReader($propName) as $k => $v) {
-                $f = Field::create(serializedName: $k, phpName: $k, phpType: \get_debug_type($v));
-                $runningValue = $this->serializeValue($f, $runningValue, $v);
-            }
-            return $runningValue;
+        if (is_object($value)) {
+            array_pop($this->seenObjects);
         }
 
-        return $this->serializeValue($field, $runningValue, $propReader($propName));
+        return $result;
     }
 
     protected function serializeValue(Field $field, mixed $runningValue, mixed $value): mixed
@@ -95,15 +71,5 @@ class Serializer
             ?? throw new \RuntimeException('No reader for ' . $field->phpType);
 
         return $reader->readValue($this->formatter, $this->recursor, $field, $value, $runningValue);
-    }
-
-    protected function fieldHasValue(object $object): callable
-    {
-        // This lets us read private values without messing with the Reflection API.
-        $propReader = (fn (string $prop) => $this->$prop ?? null)->bindTo($object, $object);
-
-        // @todo Do we serialize nulls or no? Right now we don't.
-        return static fn (Field $field) =>
-            !is_null($propReader($field->phpName));
     }
 }

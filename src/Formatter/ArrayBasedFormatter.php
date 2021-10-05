@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Field;
+use Crell\Serde\Dict;
+use Crell\Serde\CollectionItem;
+use Crell\Serde\Sequence;
 
 /**
  * Utility implementations for array-based formats.
@@ -40,20 +43,25 @@ trait ArrayBasedFormatter
         return $runningValue;
     }
 
-    public function serializeArray(mixed $runningValue, Field $field, array $next, callable $recursor): array
+    public function serializeArray(mixed $runningValue, Field $field, Sequence $next, callable $recursor): array
     {
         $name = $field->serializedName;
-        foreach ($next as $k => $v) {
-            $runningValue[$name][$k] = is_object($v) ? $recursor($v, [], $field) : $v;
+        $runningValue[$name] = [];
+        /** @var CollectionItem $item */
+        foreach ($next->items as $item) {
+            $runningValue[$name] = [...$runningValue[$name], ...$recursor($item->value, [], $item->field)];
         }
+        $runningValue[$name] = array_values($runningValue[$name]);
         return $runningValue;
     }
 
-    public function serializeDictionary(mixed $runningValue, Field $field, array $next, callable $recursor): array
+    public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, callable $recursor): array
     {
         $name = $field->serializedName;
-        foreach ($next as $k => $v) {
-            $runningValue[$name][$k] = is_object($v) ? $recursor($v, [], $field) : $v;
+        $runningValue[$name] = [];
+        /** @var CollectionItem $item */
+        foreach ($next->items as $item) {
+            $runningValue[$name] = [...$runningValue[$name], ...$recursor($item->value, [], $item->field)];
         }
         return $runningValue;
     }

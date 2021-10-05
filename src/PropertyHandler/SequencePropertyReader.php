@@ -4,15 +4,23 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
+use Crell\Serde\CollectionItem;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
+use Crell\Serde\Sequence;
 
 class SequencePropertyReader implements PropertyReader, PropertyWriter
 {
     public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        return $formatter->serializeArray($runningValue, $field, $value, $recursor);
+        $seq = new Sequence();
+        foreach ($value as $k => $v) {
+            $f = Field::create(serializedName: uniqid('dummy_'), phpType: \get_debug_type($v));
+            $seq->items[] = new CollectionItem(field: $f, value: $v);
+        }
+
+        return $formatter->serializeArray($runningValue, $field, $seq, $recursor);
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool
@@ -31,3 +39,4 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
         return $field->phpType === 'array';
     }
 }
+

@@ -164,13 +164,12 @@ class Field implements FromReflectionProperty, HasSubAttributes
      */
     public static function create(
         ?string $serializedName = null,
-        string $phpName = null,
         string $phpType = null,
     ): static
     {
-        $new = new static(serializedName: $serializedName);
+        $new = new static();
+        $new->serializedName = $serializedName;
         $new->phpType = $phpType;
-        $new->phpName = $phpName;
         $new->typeMap = null;
         $new->finalize();
         return $new;

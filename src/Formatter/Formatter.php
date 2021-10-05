@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Field;
+use Crell\Serde\Dict;
+use Crell\Serde\Sequence;
 
 interface Formatter
 {
@@ -22,7 +24,7 @@ interface Formatter
 
     public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed;
 
-    public function serializeArray(mixed $runningValue, Field $field, array $next, callable $recursor): mixed;
+    public function serializeArray(mixed $runningValue, Field $field, Sequence $next, callable $recursor): mixed;
 
-    public function serializeDictionary(mixed $runningValue, Field $field, array $next, callable $recursor): mixed;
+    public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, callable $recursor): mixed;
 }

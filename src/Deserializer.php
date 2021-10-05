@@ -67,7 +67,7 @@ class Deserializer
             $remaining = $this->formatter->getRemainingData($decoded, $usedNames);
             if ($collectingField->phpType === 'array') {
                 foreach ($remaining as $k => $v) {
-                    $f = Field::create(serializedName: $k, phpName: $k, phpType: \get_debug_type($v));
+                    $f = Field::create(serializedName: $k, phpType: \get_debug_type($v));
                     $props[$collectingField->phpName][$k] = $this->deserializeValue($f, $remaining);
                 }
             }

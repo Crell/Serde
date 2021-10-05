@@ -40,19 +40,21 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         // This lets us read private values without messing with the Reflection API.
         $propReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
 
+        /** @var \Crell\Serde\Dict $dict */
         $dict = pipe(
             $objectMetadata->properties,
-            reduce([], fn(array $dict, Field $f) => $this->flattenValue($dict, $f, $propReader)),
+            reduce(new \Crell\Serde\Dict, fn(\Crell\Serde\Dict $dict, Field $f) => $this->flattenValue($dict, $f, $propReader)),
         );
 
         if ($map = $this->typeMap($field)) {
-            $dict[$map->keyField()] = $map->findIdentifier($value::class);
+            $f = Field::create(serializedName: $map->keyField(), phpType: 'string');
+            $dict->items[] = new \Crell\Serde\CollectionItem(field: $f, value: $map->findIdentifier($value::class));
         }
 
         return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
     }
 
-    protected function flattenValue(array $dict, Field $field, callable $propReader): array
+    protected function flattenValue(\Crell\Serde\Dict $dict, Field $field, callable $propReader): \Crell\Serde\Dict
     {
         $value = $propReader($field->phpName);
         if ($value === null) {
@@ -62,10 +64,11 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
             foreach ($value as $k => $v) {
-                $dict[$k] = $v;
+                $f = Field::create(serializedName: $k, phpType: \get_debug_type($v));
+                $dict->items[] = new \Crell\Serde\CollectionItem(field: $f, value: $v);
             }
         } else {
-            $dict[$field->serializedName] = $value;
+            $dict->items[] = new \Crell\Serde\CollectionItem(field: $field, value: $value);
         }
 
         return $dict;
