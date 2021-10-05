@@ -18,6 +18,10 @@ use Crell\Serde\Sequence;
  */
 trait ArrayBasedFormatter
 {
+    public function initialField(string $type): Field
+    {
+        return Field::create('root', $type);
+    }
 
     public function serializeInt(mixed $runningValue, Field $field, int $next): array
     {

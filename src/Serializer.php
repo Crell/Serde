@@ -53,7 +53,8 @@ class Serializer
 
         // For the initial call, there will be no field yet.  Instead, make a
         // fake one that assumes it is the root.
-        $field ??= Field::create(serializedName: 'root', phpType: $value::class);
+        $field ??= $this->formatter->initialField($value::class);
+//        $field ??= Field::create(serializedName: 'root', phpType: $value::class);
 
         $result = $this->serializeValue($field, $runningValue, $value);
 

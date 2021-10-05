@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Formatter\Deformatter;
+use Crell\Serde\Formatter\Formatter;
+use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
@@ -12,6 +15,7 @@ use Crell\Serde\Records\EmptyData;
 use Crell\Serde\Records\Exclusions;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
+use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Point;
@@ -190,6 +194,12 @@ abstract class SerdeTest extends TestCase
      */
     public function flattening(): void
     {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
         $s = new Serde(formatters: $this->formatters);
 
         $data = new Flattening(
@@ -344,25 +354,57 @@ abstract class SerdeTest extends TestCase
     /**
      * @test
      */
-    public function nested_objects_support_functionality_at_all_levels(): void
+    public function nested_objects(): void
     {
         $s = new Serde(formatters: $this->formatters);
 
-        $data = new NestedObject('First', ['a' => 'A', 'b' => 'B'],
-            new NestedObject('Second', ['a' => 'A', 'b' => 'B'],
-                new NestedObject('Third', ['a' => 'A', 'b' => 'B'],
-                    new NestedObject('Fourth', ['a' => 'A', 'b' => 'B']))));
+        $data = new NestedObject('First',
+            new NestedObject('Second',
+                new NestedObject('Third',
+                    new NestedObject('Fourth'))));
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->nested_objects_support_functionality_at_all_levels_validate($serialized);
+        $this->nested_objects_validate($serialized);
 
         $result = $s->deserialize($serialized, from: $this->format, to: NestedObject::class);
 
         self::assertEquals($data, $result);
     }
 
-    protected function nested_objects_support_functionality_at_all_levels_validate(mixed $serialized): void
+    protected function nested_objects_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function nested_objects_with_flattening(): void
+    {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
+        $s = new Serde(formatters: $this->formatters);
+
+        $data = new NestedFlattenObject('First', ['a' => 'A', 'b' => 'B'],
+            new NestedFlattenObject('Second', ['a' => 'A', 'b' => 'B'],
+                new NestedFlattenObject('Third', ['a' => 'A', 'b' => 'B'],
+                    new NestedFlattenObject('Fourth', ['a' => 'A', 'b' => 'B']))));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->nested_objects_with_flattening_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: NestedFlattenObject::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    protected function nested_objects_with_flattening_validate(mixed $serialized): void
     {
 
     }

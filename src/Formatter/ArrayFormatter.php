@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
+use Crell\AttributeUtils\Analyzer;
+use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\AttributeUtils\MemoryCacheAnalyzer;
+
 class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 {
     use ArrayBasedFormatter;
     use ArrayBasedDeformatter;
+
+    public function __construct(
+        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
+    ) {}
 
     public function format(): string
     {
@@ -31,11 +39,16 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 
     public function deserializeInitialize(mixed $serialized): mixed
     {
-        return $serialized;
+        return ['root' => $serialized];
     }
 
     public function deserializeFinalize(mixed $decoded): void
     {
 
+    }
+
+    protected function getAnalyzer(): ClassAnalyzer
+    {
+        return $this->analyzer;
     }
 }

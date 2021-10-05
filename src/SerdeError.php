@@ -8,4 +8,5 @@ enum SerdeError
 {
     case Missing;
     case NoDefaultValue;
+    case FormatError;
 }

@@ -6,10 +6,12 @@ namespace Crell\Serde\Records;
 
 use Crell\Serde\Field;
 
-class NestedObject
+class NestedFlattenObject
 {
     public function __construct(
         public string $name,
-        public ?NestedObject $child = null,
+        #[Field(flatten: true)]
+        public array $other,
+        public ?NestedFlattenObject $child = null,
     ) {}
 }

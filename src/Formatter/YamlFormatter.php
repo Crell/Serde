@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
+use Crell\AttributeUtils\Analyzer;
+use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Symfony\Component\Yaml\Yaml;
 
 class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
@@ -31,6 +34,7 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
         protected readonly int $indent = 4,
         protected readonly int $dumpFlags = 0,
         protected readonly int $parseFlags = 0,
+        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
     ) {}
 
     public function format(): string
@@ -50,11 +54,16 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
 
     public function deserializeInitialize(mixed $serialized): mixed
     {
-        return Yaml::parse($serialized, $this->parseFlags);
+        return ['root' => Yaml::parse($serialized, $this->parseFlags)];
     }
 
     public function deserializeFinalize(mixed $decoded): void
     {
 
+    }
+
+    protected function getAnalyzer(): ClassAnalyzer
+    {
+        return $this->analyzer;
     }
 }

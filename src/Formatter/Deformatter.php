@@ -23,7 +23,9 @@ interface Deformatter
 
     public function deserializeSequence(mixed $decoded, Field $field, callable $recursor): array|SerdeError;
 
-    public function deserializeDictionary(mixed $decoded, Field $field): array|SerdeError;
+    public function deserializeDictionary(mixed $decoded, Field $field, callable $recursor): array|SerdeError;
+
+    public function deserializeObject(mixed $decoded, Field $field, callable $recursor, array $properties): array|SerdeError;
 
     public function deserializeFinalize(mixed $decoded): void;
 }

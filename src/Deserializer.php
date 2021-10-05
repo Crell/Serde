@@ -36,11 +36,19 @@ class Deserializer
         $this->recursor = $this->deserialize(...);
     }
 
-    public function deserialize(mixed $decoded, string $targetType): mixed
+    public function deserialize(mixed $decoded, string $targetType, ?Field $field = null): mixed
     {
-        /** @var ClassDef $objectMetadata */
-        $objectMetadata = $this->analyzer->analyze($targetType, ClassDef::class);
+        $field ??= $this->formatter->initialField($targetType);
 
+        $result = $this->deserializeValue($field, $decoded);
+
+        return $result;
+
+
+        /** @var ClassDef $objectMetadata */
+//        $objectMetadata = $this->analyzer->analyze($targetType, ClassDef::class);
+
+        /*
         $props = [];
         $usedNames = [];
         $collectingField = null;
@@ -86,6 +94,7 @@ class Deserializer
         };
         $populate->bindTo($new, $new)($props);
         return $new;
+        */
     }
 
     protected function deserializeValue(Field $field, mixed $source): mixed
