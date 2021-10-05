@@ -20,7 +20,14 @@ class Serializer
      */
     protected array $seenObjects = [];
 
-    protected \Closure $recursor;
+    /**
+     * Reference to the serialize() method.
+     *
+     * This recursor gets passed through to the formatter, and may
+     * get called recursively.  Storing a single reference rather than
+     * making a new one each time is a minor performance optimization.
+     */
+    protected readonly \Closure $recursor;
 
     public function __construct(
         protected readonly ClassAnalyzer $analyzer,

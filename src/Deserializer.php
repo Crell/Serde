@@ -16,6 +16,15 @@ use function Crell\fp\pipe;
 // But that does simplify a number of functions.
 class Deserializer
 {
+    /**
+     * Reference to the deserialize() method.
+     *
+     * This recursor gets passed through to the formatter, and may
+     * get called recursively.  Storing a single reference rather than
+     * making a new one each time is a minor performance optimization.
+     */
+    protected readonly \Closure $recursor;
+
     public function __construct(
         protected readonly ClassAnalyzer $analyzer,
         /** @var PropertyReader[]  */
@@ -23,8 +32,9 @@ class Deserializer
         /** @var PropertyWriter[] */
         protected readonly array $writers,
         protected readonly Deformatter $formatter,
-    ) {}
-
+    ) {
+        $this->recursor = $this->deserialize(...);
+    }
 
     public function deserialize(mixed $decoded, string $targetType): mixed
     {
@@ -86,6 +96,6 @@ class Deserializer
             pipe($this->writers, first(fn (PropertyWriter $w): bool => $w->canWrite($field, $this->formatter->format())))
             ?? throw new \RuntimeException('No writer for ' . $field->phpType);
 
-        return $writer->writeValue($this->formatter, $this->deserialize(...), $field, $source);
+        return $writer->writeValue($this->formatter, $this->recursor, $field, $source);
     }
 }
