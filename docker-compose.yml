@@ -16,3 +16,21 @@ services:
         environment:
             XDEBUG_MODE: "develop,debug"
             XDEBUG_CONFIG: "client_host=${HOST_IP} idekey=${IDE_KEY} client_port=${XDEBUG_PORT} discover_client_host=1 start_with_request=1"
+    profile:
+        build: ./docker/php/81
+        volumes:
+            - .:/usr/src/myapp
+            - ./docker/php/81/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+            - ./docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
+        environment:
+            XDEBUG_MODE: "develop,profile"
+            XDEBUG_CONFIG: "client_host=${HOST_IP} idekey=${IDE_KEY} client_port=${XDEBUG_PORT} discover_client_host=1 start_with_request=1"
+    blackfire:
+        image: blackfire/blackfire:2
+        ports: ["8307"]
+        environment:
+            # Exposes BLACKFIRE_* environment variables from the host
+            BLACKFIRE_SERVER_ID: ~
+            BLACKFIRE_SERVER_TOKEN: ~
+            BLACKFIRE_CLIENT_ID: ~
+            BLACKFIRE_CLIENT_TOKEN: ~
