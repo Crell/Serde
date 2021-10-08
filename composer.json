@@ -29,7 +29,7 @@
     "require": {
         "php": "~8.0",
         "crell/attributeutils": ">= 0.3.0",
-        "crell/fp": ">= 0.2.0"
+        "crell/fp": ">= 0.2.3"
     },
     "require-dev": {
         "phpbench/phpbench": "^1.1.2",
