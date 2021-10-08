@@ -6,8 +6,11 @@ namespace Crell\Serde\Renaming;
 
 use function Crell\fp\afilter;
 use function Crell\fp\amap;
+use function Crell\fp\flatten;
 use function Crell\fp\pipe;
 use function Crell\fp\implode;
+use function Crell\fp\explode;
+use function Crell\fp\replace;
 
 /**
  * Case fold property names in various ways.
@@ -21,9 +24,9 @@ enum Cases implements RenamingStrategy
     case UPPERCASE;
     case lowercase;
     case snake_case;
+    case kebab_case;
     case CamelCase;
     case lowerCamelCase;
-    case kebab_case;
 
     public function convert(string $name): string
     {
@@ -33,24 +36,41 @@ enum Cases implements RenamingStrategy
             self::lowercase => strtolower($name),
             self::snake_case => pipe($name,
                 $this->splitString(...),
-                amap(trim(...)),
                 implode('_'),
                 strtolower(...)
+            ),
+            self::kebab_case => pipe($name,
+                $this->splitString(...),
+                implode('-'),
+                strtolower(...)
+            ),
+            self::CamelCase => pipe($name,
+                $this->splitString(...),
+                amap(ucfirst(...)),
+                implode(''),
             ),
             // @todo The more interesting ones.
         };
     }
 
+    // @todo This can almost certainly be better.
     protected function splitString(string $input): array
     {
-        $input = str_replace('_', ' ', $input);
-
-        return preg_split(
+        $words = preg_split(
             '/(^[^A-Z]+|[A-Z][^A-Z]+)/',
             $input,
             -1, /* no limit for replacement count */
-            PREG_SPLIT_NO_EMPTY /*don't return empty elements*/
-            | PREG_SPLIT_DELIM_CAPTURE /*don't strip anything from output array*/
+            PREG_SPLIT_NO_EMPTY /* don't return empty elements */
+            | PREG_SPLIT_DELIM_CAPTURE /* don't strip anything from output array */
         );
+
+        return pipe($words,
+            amap(replace('_', ' ')),
+            amap(explode(' ')),
+            flatten(...),
+            amap(trim(...)),
+            afilter(),
+        );
+
     }
 }

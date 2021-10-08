@@ -54,5 +54,41 @@ class CasesTest extends TestCase
             'expected' => 'beep_boop',
         ];
 
+        yield [
+            'case' => Cases::kebab_case,
+            'in' => 'beepBeep',
+            'expected' => 'beep-beep',
+        ];
+
+        yield [
+            'case' => Cases::kebab_case,
+            'in' => 'beep_Beep',
+            'expected' => 'beep-beep',
+        ];
+
+        yield [
+            'case' => Cases::kebab_case,
+            'in' => 'BeepBoop',
+            'expected' => 'beep-boop',
+        ];
+
+        yield [
+            'case' => Cases::CamelCase,
+            'in' => 'BeepBoop',
+            'expected' => 'BeepBoop',
+        ];
+
+        yield [
+            'case' => Cases::CamelCase,
+            'in' => 'beepboop',
+            'expected' => 'Beepboop',
+        ];
+
+        yield [
+            'case' => Cases::CamelCase,
+            'in' => 'beep_boop',
+            'expected' => 'BeepBoop',
+        ];
+
     }
 }
