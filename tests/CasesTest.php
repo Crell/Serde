@@ -90,5 +90,23 @@ class CasesTest extends TestCase
             'expected' => 'BeepBoop',
         ];
 
+        yield [
+            'case' => Cases::lowerCamelCase,
+            'in' => 'BeepBoop',
+            'expected' => 'beepBoop',
+        ];
+
+        yield [
+            'case' => Cases::lowerCamelCase,
+            'in' => 'beepboop',
+            'expected' => 'beepboop',
+        ];
+
+        yield [
+            'case' => Cases::lowerCamelCase,
+            'in' => 'beep_boop',
+            'expected' => 'beepBoop',
+        ];
+
     }
 }

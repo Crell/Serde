@@ -49,6 +49,12 @@ enum Cases implements RenamingStrategy
                 amap(ucfirst(...)),
                 implode(''),
             ),
+            self::lowerCamelCase => pipe($name,
+                $this->splitString(...),
+                amap(ucfirst(...)),
+                implode(''),
+                lcfirst(...),
+            ),
             // @todo The more interesting ones.
         };
     }
