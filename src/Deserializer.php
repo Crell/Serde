@@ -40,71 +40,21 @@ class Deserializer
     {
         $field ??= $this->formatter->initialField($targetType);
 
-        $result = $this->deserializeValue($field, $decoded);
+        $writer = $this->findWriter($field);
+        $result = $writer->writeValue($this->formatter, $this->recursor, $field, $decoded);
 
         return $result;
-
-
-        /** @var ClassDef $objectMetadata */
-//        $objectMetadata = $this->analyzer->analyze($targetType, ClassDef::class);
-
-        /*
-        $props = [];
-        $usedNames = [];
-        $collectingField = null;
-
-        // Build up an array of properties that we can then assign all at once.
-        foreach ($objectMetadata->properties as $field) {
-            $usedNames[] = $field->serializedName;
-            if ($field->flatten) {
-                $collectingField = $field;
-            } else {
-                $value = $this->deserializeValue($field, $decoded);
-                if ($value === SerdeError::Missing) {
-                    if ($field->shouldUseDefault) {
-                        $value = $field->defaultValue;
-                        $props[$field->phpName] = $value;
-                    }
-                } else {
-                    $props[$field->phpName] = $value;
-                }
-            }
-        }
-
-        if ($collectingField && $this->formatter instanceof SupportsCollecting) {
-            $remaining = $this->formatter->getRemainingData($decoded, $usedNames);
-            if ($collectingField->phpType === 'array') {
-                foreach ($remaining as $k => $v) {
-                    $f = Field::create(serializedName: $k, phpType: \get_debug_type($v));
-                    $props[$collectingField->phpName][$k] = $this->deserializeValue($f, $remaining);
-                }
-            }
-            // @todo Do we support collecting into objects? Does that even make sense?
-        }
-
-        // @todo What should happen if something is still set to Missing?
-        $rClass = new \ReflectionClass($targetType);
-        $new = $rClass->newInstanceWithoutConstructor();
-
-
-        $populate = function (array $props) {
-            foreach ($props as $k => $v) {
-                $this->$k = $v;
-            }
-        };
-        $populate->bindTo($new, $new)($props);
-        return $new;
-        */
     }
 
-    protected function deserializeValue(Field $field, mixed $source): mixed
+    protected function findWriter(Field $field): PropertyWriter
     {
-        // @todo Better exception.
-        /** @var PropertyWriter $writer */
-        $writer =
-            pipe($this->writers, first(fn (PropertyWriter $w): bool => $w->canWrite($field, $this->formatter->format())))
-            ?? throw new \RuntimeException('No writer for ' . $field->phpType);
+        foreach ($this->writers as $w) {
+            if ($w->canWrite($field, $this->formatter->format())) {
+                return $w;
+            }
+        }
 
-        return $writer->writeValue($this->formatter, $this->recursor, $field, $source);
+        // @todo Better exception.
+        throw new \RuntimeException('No writer for ' . $field->phpType);
     }
 }

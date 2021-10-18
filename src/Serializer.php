@@ -54,9 +54,9 @@ class Serializer
         // For the initial call, there will be no field yet.  Instead, make a
         // fake one that assumes it is the root.
         $field ??= $this->formatter->initialField($value::class);
-//        $field ??= Field::create(serializedName: 'root', phpType: $value::class);
 
-        $result = $this->serializeValue($field, $runningValue, $value);
+        $reader = $this->findReader($field, $value);
+        $result = $reader->readValue($this->formatter, $this->recursor, $field, $value, $runningValue);
 
         if (is_object($value)) {
             array_pop($this->seenObjects);
@@ -65,12 +65,15 @@ class Serializer
         return $result;
     }
 
-    protected function serializeValue(Field $field, mixed $runningValue, mixed $value): mixed
+    protected function findReader(Field $field, mixed $value): PropertyReader
     {
-        /** @var PropertyReader $reader */
-        $reader = pipe($this->readers, first(fn (PropertyReader $r) => $r->canRead($field, $value, $this->formatter->format())))
-            ?? throw new \RuntimeException('No reader for ' . $field->phpType);
+        foreach ($this->readers as $r) {
+            if ($r->canRead($field, $value, $this->formatter->format())) {
+                return $r;
+            }
+        }
 
-        return $reader->readValue($this->formatter, $this->recursor, $field, $value, $runningValue);
+        // @todo Better exception.
+        throw new \RuntimeException('No reader for ' . $field->phpType);
     }
 }
