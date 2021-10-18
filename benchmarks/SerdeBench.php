@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Benchmarks;
 
+use Crell\AttributeUtils\Analyzer;
+use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\Formatter\JsonFormatter;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
@@ -31,7 +33,11 @@ class SerdeBench
 
     public function setUp(): void
     {
-        $this->serde = new Serde(formatters: [new JsonFormatter()]);
+        $analyzer = new MemoryCacheAnalyzer(new Analyzer());
+        $this->serde = new Serde(
+            analyzer: $analyzer,
+            formatters: [new JsonFormatter(analyzer: $analyzer)]
+        );
     }
 
     public function tearDown(): void {}
