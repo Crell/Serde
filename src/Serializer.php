@@ -63,13 +63,13 @@ class Serializer
 
     protected function findReader(Field $field, mixed $value): PropertyReader
     {
+        $format = $this->formatter->format();
         foreach ($this->readers as $r) {
-            if ($r->canRead($field, $value, $this->formatter->format())) {
+            if ($r->canRead($field, $value, $format)) {
                 return $r;
             }
         }
 
-        // @todo Better exception.
-        throw new \RuntimeException('No reader for ' . $field->phpType);
+        throw NoReaderFound::create($field->phpType, $format);
     }
 }

@@ -46,13 +46,13 @@ class Deserializer
 
     protected function findWriter(Field $field): PropertyWriter
     {
+        $format = $this->formatter->format();
         foreach ($this->writers as $w) {
-            if ($w->canWrite($field, $this->formatter->format())) {
+            if ($w->canWrite($field, $format)) {
                 return $w;
             }
         }
 
-        // @todo Better exception.
-        throw new \RuntimeException('No writer for ' . $field->phpType);
+        throw NoWriterFound::create($field->phpType, $format);
     }
 }
