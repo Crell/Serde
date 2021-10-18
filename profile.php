@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use Crell\AttributeUtils\Analyzer;
+use Crell\AttributeUtils\MemoryCacheAnalyzer;
+use Crell\Serde\ClassDef;
 use Crell\Serde\Formatter\JsonFormatter;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
@@ -13,7 +16,17 @@ require 'vendor/autoload.php';
 
 function run(): void
 {
-    $serde = new Serde(formatters: [new JsonFormatter()]);
+    $analyzer = new MemoryCacheAnalyzer(new Analyzer());
+
+    $analyzer->analyze(AllFieldTypes::class, ClassDef::class);
+    $analyzer->analyze(Point::class, ClassDef::class);
+    $analyzer->analyze(Size::class, ClassDef::class);
+    $analyzer->analyze(BackedSize::class, ClassDef::class);
+
+    $serde = new Serde(
+        analyzer: $analyzer,
+        formatters: [new JsonFormatter($analyzer)]
+    );
 
     $data = new AllFieldTypes(
         anint: 5,
