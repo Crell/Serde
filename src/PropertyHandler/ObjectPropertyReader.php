@@ -17,12 +17,13 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMapper;
-use function Crell\fp\afilter;
 use function Crell\fp\pipe;
 use function Crell\fp\reduce;
 
 class ObjectPropertyReader implements PropertyWriter, PropertyReader
 {
+    protected \Closure $populator;
+
     public function __construct(
         protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
     ) {}
@@ -59,7 +60,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
     }
 
-    protected function flattenValue(\Crell\Serde\Dict $dict, Field $field, callable $propReader): \Crell\Serde\Dict
+    protected function flattenValue(Dict $dict, Field $field, callable $propReader): \Crell\Serde\Dict
     {
         $value = $propReader($field->phpName);
         if ($value === null) {
@@ -70,10 +71,10 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         if ($field->flatten && $field->phpType === 'array') {
             foreach ($value as $k => $v) {
                 $f = Field::create(serializedName: $k, phpType: \get_debug_type($v));
-                $dict->items[] = new \Crell\Serde\CollectionItem(field: $f, value: $v);
+                $dict->items[] = new CollectionItem(field: $f, value: $v);
             }
         } else {
-            $dict->items[] = new \Crell\Serde\CollectionItem(field: $field, value: $value);
+            $dict->items[] = new CollectionItem(field: $field, value: $value);
         }
 
         return $dict;
@@ -91,30 +92,24 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
     public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
-        /** @var ClassDef $objectMetadata */
-        $objectMetadata = $this->analyzer->analyze($field->phpType, ClassDef::class);
-
-        $dict = $formatter->deserializeObject($source, $field, $recursor, $objectMetadata->properties);
+        // Get the raw data as an array from the source.
+        $dict = $formatter->deserializeObject($source, $field, $recursor);
 
         if ($dict === SerdeError::Missing) {
             return null;
         }
 
-        $class = $field->phpType;
-        if ($map = $this->typeMap($field)) {
-            $keyField = $map->keyField();
-            $class = $map->findClass($dict[$keyField]);
-            unset($dict[$keyField]);
-        }
+        $class = $this->getTargetClass($field, $dict);
 
-        /** @var ClassDef $objectMetadata */
-        $objectMetadata = $this->analyzer->analyze($class, ClassDef::class);
+        // Get the list of properties on the target class, taking
+        // type maps into account.
+        $properties = $this->analyzer->analyze($class, ClassDef::class)->properties;
 
         $props = [];
         $usedNames = [];
         $collectingField = null;
 
-        foreach ($objectMetadata->properties as $propField) {
+        foreach ($properties as $propField) {
             $usedNames[] = $propField->serializedName;
             if ($propField->flatten) {
                 $collectingField = $propField;
@@ -139,16 +134,36 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         }
 
         // @todo What should happen if something is still set to Missing?
+
+        return $this->createObject($class, $props);
+    }
+
+    protected function createObject(string $class, array $props): object
+    {
+        // Make an empty instance of the target class.
         $rClass = new \ReflectionClass($class);
         $new = $rClass->newInstanceWithoutConstructor();
 
-        $populate = function (array $props) {
+        // Cache the populator template since it will be rebound
+        // for every object. Micro-optimization.
+        $this->populator ??= function (array $props) {
             foreach ($props as $k => $v) {
                 $this->$k = $v;
             }
         };
-        $populate->bindTo($new, $new)($props);
+
+        // Bind the populator to the object to bypass visibility rules,
+        // then invoke it on the object to populate it.
+        $this->populator->bindTo($new, $new)($props);
         return $new;
+    }
+
+    protected function getTargetClass(Field $field, array $dict): string
+    {
+        if ($map = $this->typeMap($field)) {
+            return $map->findClass($dict[$map->keyField()]);
+        }
+        return $field->phpType;
     }
 
     public function canWrite(Field $field, string $format): bool

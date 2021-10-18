@@ -18,4 +18,9 @@ enum TypeCategory
     {
         return in_array($this, [self::UnitEnum, self::IntEnum, self::StringEnum], true);
     }
+
+    public function isCompound(): bool
+    {
+        return in_array($this, [self::Object, self::Array], true);
+    }
 }

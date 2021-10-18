@@ -80,15 +80,12 @@ trait ArrayBasedDeformatter
     }
 
     /**
-     *
-     *
      * @param mixed $decoded
      * @param Field $field
      * @param callable $recursor
-     * @param Field[] $properties
      * @return array|SerdeError
      */
-    public function deserializeObject(mixed $decoded, Field $field, callable $recursor, array $properties): array|SerdeError
+    public function deserializeObject(mixed $decoded, Field $field, callable $recursor): array|SerdeError
     {
         if (!isset($decoded[$field->serializedName])) {
             return SerdeError::Missing;
@@ -100,21 +97,26 @@ trait ArrayBasedDeformatter
 
         $data = $decoded[$field->serializedName];
 
+        // We need to know the object properties to deserialize to, so
+        // get the property list, taking a type map into account.
+        // The key field is kept in the data so that the property writer
+        // can also look up the right type.
+        $class = $field->phpType;
         if ($map = $field->typeMap) {
-            $keyField = $map->keyField();
-            $class = $map->findClass($data[$keyField]);
-            $properties = $this->getAnalyzer()->analyze($class, ClassDef::class)->properties;
+            $class = $map->findClass($data[$map->keyField()]);
         }
 
-        foreach ($properties as $p) {
-            $lookup[$p->serializedName] = $p;
+        // Index the properties by serialized name, not native name.
+        foreach ($this->getAnalyzer()->analyze($class, ClassDef::class)->properties as $p) {
+            $properties[$p->serializedName] = $p;
         }
 
         $ret = [];
         foreach ($data as $k => $v) {
-            $f = $lookup[$k] ?? null;
+            /** @var ?Field $f */
+            $f = $properties[$k] ?? null;
             $key = $f?->serializedName ?? $k;
-            $ret[$key] = in_array($f?->typeCategory, [TypeCategory::StringEnum, TypeCategory::UnitEnum, TypeCategory::IntEnum, TypeCategory::Object, TypeCategory::Array], strict: true)
+            $ret[$key] = ($f?->typeCategory->isEnum() || $f?->typeCategory->isCompound())
                 ? $recursor($data, $f->phpType, $f)
                 : $v;
         }
@@ -122,10 +124,17 @@ trait ArrayBasedDeformatter
         return $ret;
     }
 
-    abstract protected function getAnalyzer(): ClassAnalyzer;
-
     public function getRemainingData(mixed $source, array $used): array
     {
         return array_diff_key($source, array_flip($used));
     }
+
+    /**
+     * Returns a class analyzer.
+     *
+     * Classes using this trait must provide a class analyzer via this method.
+     *
+     * @return ClassAnalyzer
+     */
+    abstract protected function getAnalyzer(): ClassAnalyzer;
 }
