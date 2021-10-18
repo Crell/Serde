@@ -11,6 +11,8 @@ interface Deformatter
 {
     public function format(): string;
 
+    public function initialField(string $targetType);
+
     public function deserializeInitialize(mixed $serialized): mixed;
 
     public function deserializeInt(mixed $decoded, Field $field): int|SerdeError;
