@@ -9,9 +9,6 @@ use Crell\AttributeUtils\FromReflectionClass;
 use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\ParseProperties;
 
-/**
- * @internal
- */
 #[Attribute(Attribute::TARGET_CLASS)]
 class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
 {
