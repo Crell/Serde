@@ -40,7 +40,7 @@ class Serializer
         $this->recursor = $this->serialize(...);
     }
 
-    public function serialize(mixed $value, mixed $runningValue, ?Field $field = null): mixed
+    public function serialize(mixed $value, mixed $runningValue, Field $field): mixed
     {
         // Had we partial application, we could easily factor the loop detection
         // out to its own method. Sadly it's needlessly convoluted to do otherwise.
@@ -50,10 +50,6 @@ class Serializer
             }
             $this->seenObjects[] = $value;
         }
-
-        // For the initial call, there will be no field yet.  Instead, make a
-        // fake one that assumes it is the root.
-        $field ??= $this->formatter->initialField($value::class);
 
         $reader = $this->findReader($field, $value);
         $result = $reader->readValue($this->formatter, $this->recursor, $field, $value, $runningValue);

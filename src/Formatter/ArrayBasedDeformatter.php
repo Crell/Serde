@@ -50,7 +50,7 @@ trait ArrayBasedDeformatter
             $ret = [];
             foreach ($decoded[$field->serializedName] as $k => $v) {
                 $f = Field::create(serializedName: "$k", phpType: $field->arrayType);
-                $ret[$k] = $recursor($decoded[$field->serializedName], $f->phpType, $f);
+                $ret[$k] = $recursor($decoded[$field->serializedName], $f);
             }
             return $ret;
         }
@@ -73,7 +73,7 @@ trait ArrayBasedDeformatter
         $ret = [];
         foreach ($data as $k => $v) {
             $f = Field::create(serializedName: $k, phpType: get_debug_type($v));
-            $ret[$k] = $recursor($data, $f->phpType, $f);
+            $ret[$k] = $recursor($data, $f);
         }
 
         return $ret;
@@ -117,7 +117,7 @@ trait ArrayBasedDeformatter
             $f = $properties[$k] ?? null;
             $key = $f?->serializedName ?? $k;
             $ret[$key] = ($f?->typeCategory->isEnum() || $f?->typeCategory->isCompound())
-                ? $recursor($data, $f->phpType, $f)
+                ? $recursor($data, $f)
                 : $v;
         }
 

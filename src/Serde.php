@@ -84,7 +84,7 @@ class Serde
             formatter: $formatter,
         );
 
-        $serializedValue = $inner->serialize($object, $init);
+        $serializedValue = $inner->serialize($object, $init, $formatter->initialField($object::class));
 
         return $formatter->serializeFinalize($serializedValue);
     }
@@ -102,7 +102,7 @@ class Serde
             formatter: $formatter,
         );
 
-        $new = $inner->deserialize($decoded, $to);
+        $new = $inner->deserialize($decoded, $formatter->initialField($to));
 
         $formatter->deserializeFinalize($decoded);
 

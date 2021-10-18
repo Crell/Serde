@@ -36,10 +36,8 @@ class Deserializer
         $this->recursor = $this->deserialize(...);
     }
 
-    public function deserialize(mixed $decoded, string $targetType, ?Field $field = null): mixed
+    public function deserialize(mixed $decoded, Field $field): mixed
     {
-        $field ??= $this->formatter->initialField($targetType);
-
         $writer = $this->findWriter($field);
         $result = $writer->writeValue($this->formatter, $this->recursor, $field, $decoded);
 
