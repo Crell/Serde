@@ -9,27 +9,7 @@ use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Size;
 use Crell\Serde\Serde;
 
-
-function setup(): void
-{
-    require 'vendor/autoload.php';
-
-    class_exists(Serde::class);
-    class_exists(AllFieldTypes::class);
-    class_exists(Point::class);
-    class_exists(JsonFormatter::class);
-    class_exists(\Crell\Serde\PropertyHandler\ObjectPropertyReader::class);
-    class_exists(\Crell\Serde\PropertyHandler\SequencePropertyReader::class);
-    class_exists(\Crell\Serde\PropertyHandler\ScalarPropertyReader::class);
-    class_exists(\Crell\Serde\PropertyHandler\DictionaryPropertyReader::class);
-    class_exists(\Crell\Serde\PropertyHandler\EnumPropertyReader::class);
-    class_exists(\Crell\Serde\PropertyHandler\DateTimePropertyReader::class);
-    class_exists(\Crell\Serde\PropertyHandler\DateTimeZonePropertyReader::class);
-    class_exists(\Crell\Serde\PropertyHandler\PropertyReader::class);
-    class_exists(\Crell\Serde\PropertyHandler\PropertyWriter::class);
-    enum_exists(BackedSize::class);
-    enum_exists(Size::class);
-}
+require 'vendor/autoload.php';
 
 function run(): void
 {
@@ -61,8 +41,6 @@ function run(): void
     $result = $serde->deserialize($serialized, from: 'json', to: AllFieldTypes::class);
 }
 
-setup();
-
-for ($i=0; $i < 200; ++$i) {
+for ($i=0; $i < 100; ++$i) {
     run();
 }
