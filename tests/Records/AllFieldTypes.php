@@ -24,6 +24,8 @@ class AllFieldTypes
         public ?Point $simpleObject = null,
         #[Field(arrayType: Point::class)]
         public array $objectList = [],
+        #[Field(arrayType: Point::class)]
+        public array $objectMap = [],
         public array $nestedArray = [],
         public Size $size = Size::Small,
         public BackedSize $backedSize = BackedSize::Small,

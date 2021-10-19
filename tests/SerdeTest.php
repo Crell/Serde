@@ -132,6 +132,7 @@ abstract class SerdeTest extends TestCase
             assocArray: ['a' => 'A', 'b' => 'B', 'c' => 'C'],
             simpleObject: new Point(4, 5, 6),
             objectList: [new Point(1, 2, 3), new Point(4, 5, 6)],
+            objectMap: ['a' => new Point(1, 2, 3), 'b' => new Point(4, 5, 6)],
             nestedArray: [
                 'a' => [1, 2, 3],
                 'b' => ['a' => 1, 'b' => 2, 'c' => 3],
