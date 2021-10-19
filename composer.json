@@ -1,7 +1,7 @@
 {
     "name": "crell/serde",
     "type": "library",
-    "description": "WIP",
+    "description": "A general purpose serialization and deserialization library",
     "keywords": [
         "Serde",
         "Database"
@@ -28,7 +28,7 @@
     ],
     "require": {
         "php": "~8.0",
-        "crell/attributeutils": ">= 0.3.0",
+        "crell/attributeutils": ">= 0.3.1",
         "crell/fp": ">= 0.2.3"
     },
     "require-dev": {
