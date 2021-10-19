@@ -9,6 +9,12 @@ use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\CircularReference;
+use Crell\Serde\Records\Drupal\EmailItem;
+use Crell\Serde\Records\Drupal\FieldItemList;
+use Crell\Serde\Records\Drupal\LinkItem;
+use Crell\Serde\Records\Drupal\Node;
+use Crell\Serde\Records\Drupal\StringItem;
+use Crell\Serde\Records\Drupal\TextItem;
 use Crell\Serde\Records\EmptyData;
 use Crell\Serde\Records\Exclusions;
 use Crell\Serde\Records\Flattening;
@@ -283,7 +289,6 @@ abstract class SerdeTest extends TestCase
                          BigTask::class => 'big',
                     };
                 }
-
             },
         );
 
@@ -453,4 +458,76 @@ abstract class SerdeTest extends TestCase
     {
 
     }
+
+    /**
+     * @test
+     */
+    public function drupal_example(): void
+    {
+        $customHandler = new MappedObjectPropertyReader(
+            supportedTypes: [Records\Drupal\Field::class],
+            typeMap: new class implements TypeMapper {
+                public function keyField(): string
+                {
+                    return 'type';
+                }
+
+                public function findClass(string $id): ?string
+                {
+                    // Or do a DB lookup or whatever.
+                    return match ($id) {
+                        'string' => StringItem::class,
+                        'email' => EmailItem::class,
+                        'LinkItem' => LinkItem::class,
+                        'text' => TextItem::class,
+                    };
+                }
+
+                public function findIdentifier(string $class): ?string
+                {
+                    return match ($class) {
+                         StringItem::class => 'string',
+                         EmailItem::class => 'email',
+                         LinkItem::class => 'LinkItem',
+                         TextItem::class => 'text',
+                    };
+                }
+            },
+        );
+
+        $s = new Serde(handlers: [$customHandler], formatters: $this->formatters);
+
+        $data = new Node('A node', 3, false, false);
+        $data->fields[] = new FieldItemList('en', [
+            new StringItem('foo'),
+            new StringItem('bar'),
+        ]);
+        $data->fields[] = new FieldItemList('en', [
+            new EmailItem('me@example.com'),
+            new EmailItem('you@example.com'),
+        ]);
+        $data->fields[] = new FieldItemList('en', [
+            new TextItem('Stuff here', 'plain'),
+            new TextItem('More things', 'raw_html'),
+        ]);
+        $data->fields[] = new FieldItemList('en', [
+            new LinkItem(uri: 'https://typo3.com', title: 'TYPO3'),
+            new LinkItem(uri: 'https://google.com', title: 'Big Evil'),
+        ]);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->drupal_example_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Node::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function drupal_example_validate(mixed $serialized): void
+    {
+
+    }
+
+
 }
