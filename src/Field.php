@@ -7,10 +7,8 @@ namespace Crell\Serde;
 use Attribute;
 use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
-use Crell\Serde\Renaming\Cases;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
-use function Crell\fp\first;
 use function Crell\fp\indexBy;
 use function Crell\fp\pipe;
 

@@ -6,11 +6,8 @@ namespace Crell\Serde;
 
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Formatter\Deformatter;
-use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
-use function Crell\fp\first;
-use function Crell\fp\pipe;
 
 // This exists mainly just to create a closure over the format and formatter.
 // But that does simplify a number of functions.

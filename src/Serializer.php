@@ -8,8 +8,6 @@ use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
-use function Crell\fp\first;
-use function Crell\fp\pipe;
 
 // This exists mainly just to create a closure over the formatter.
 // But that does simplify a number of functions.

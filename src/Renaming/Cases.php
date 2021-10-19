@@ -6,10 +6,10 @@ namespace Crell\Serde\Renaming;
 
 use function Crell\fp\afilter;
 use function Crell\fp\amap;
-use function Crell\fp\flatten;
-use function Crell\fp\pipe;
-use function Crell\fp\implode;
 use function Crell\fp\explode;
+use function Crell\fp\flatten;
+use function Crell\fp\implode;
+use function Crell\fp\pipe;
 use function Crell\fp\replace;
 
 /**

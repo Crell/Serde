@@ -7,9 +7,7 @@ namespace Crell\Serde\Formatter;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
-use Crell\Serde\Serde;
 use Crell\Serde\SerdeError;
-use Crell\Serde\TypeCategory;
 
 /**
  * Utility implementations for array-based formats.

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
-use Crell\Serde\Field;
 use Crell\Serde\Dict;
+use Crell\Serde\Field;
 use Crell\Serde\Sequence;
 
 interface Formatter
