@@ -79,7 +79,7 @@ class Field implements FromReflectionProperty, HasSubAttributes
         public readonly bool $exclude = false,
     ) {
         if ($default) {
-            $this->defaultValue = $this->default;
+            $this->defaultValue = $default;
         }
         // Upcast the literal serialized name to a converter if appropriate.
         $this->rename ??=
@@ -183,6 +183,7 @@ class Field implements FromReflectionProperty, HasSubAttributes
             $this->phpType === 'array' => TypeCategory::Array,
             \enum_exists($this->phpType) => $this->enumType($this->phpType),
             $this->phpType === 'object', \class_exists($this->phpType), \interface_exists($this->phpType) => TypeCategory::Object,
+            default => throw UnsupportedType::create($this->phpType),
         };
     }
 
