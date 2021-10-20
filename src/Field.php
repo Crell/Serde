@@ -47,6 +47,9 @@ class Field implements FromReflectionProperty, HasSubAttributes
      */
     public readonly mixed $defaultValue;
 
+    /**
+     * Whether or not to use the code-defined default on deserialization if a value is not provided.
+     */
     public readonly bool $shouldUseDefault;
 
     /**
