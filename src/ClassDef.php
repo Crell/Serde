@@ -36,7 +36,7 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
         $this->properties = $properties;
     }
 
-    public function includeByDefault(): bool
+    public function includePropertiesByDefault(): bool
     {
         return $this->includeFieldsByDefault;
     }
