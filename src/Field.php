@@ -65,6 +65,8 @@ class Field implements FromReflectionProperty, HasSubAttributes
      *
      * Only viable on object properties, and really not something
      * you should use yourself.
+     *
+     * @internal
      */
     public readonly array $extraProperties;
 
