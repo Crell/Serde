@@ -9,7 +9,7 @@ use Crell\AttributeUtils\Inheritable;
 use Crell\AttributeUtils\TransitiveProperty;
 
 
-#[Attribute(Attribute::TARGET_CLASS, Attribute::TARGET_PROPERTY)]
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
 class TypeMap implements TypeMapper, Inheritable, TransitiveProperty
 {
     public function __construct(
