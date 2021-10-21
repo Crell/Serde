@@ -97,56 +97,60 @@ trait ArrayBasedDeformatter
 
         $data = $decoded[$field->serializedName];
 
-        // We need to know the object properties to deserialize to, so
-        // get the property list, taking a type map into account.
-        // The key field is kept in the data so that the property writer
-        // can also look up the right type.
-        $class = $typeMap
-            ? $typeMap->findClass($data[$typeMap->keyField()])
-            : $field->phpType;
-
         $collectingField = null;
         $usedNames = [];
 
-        // Index the properties by serialized name, not native name.
-        foreach ($this->getAnalyzer()->analyze($class, ClassDef::class)->properties as $p) {
-            $properties[$p->serializedName] = $p;
-            if ($p->flatten) {
-                $collectingField = $p;
-            }
-        }
-
         $ret = [];
 
+        $properties = $this->propertyList($field, $typeMap, $data);
+
         // First pull out the properties we know about.
-        foreach ($properties as $p) {
-            $usedNames[] = $p->serializedName;
-            if ($p === $collectingField) {
+        /** @var Field $prop */
+        foreach ($properties as $prop) {
+            $usedNames[] = $prop->serializedName;
+            if ($prop->flatten) {
+                $collectingField = $prop;
                 continue;
             }
-            $ret[$p->serializedName] = ($p?->typeCategory->isEnum() || $p?->typeCategory->isCompound())
-                ? $recursor($data, $p)
-                : $data[$p->serializedName] ?? SerdeError::Missing;
+            $ret[$prop->serializedName] = ($prop->typeCategory->isEnum() || $prop->typeCategory->isCompound())
+                ? $recursor($data, $prop)
+                : $data[$prop->serializedName] ?? SerdeError::Missing;
         }
 
         // Any other values are for a collecting field, if any,
         // but may need further processing according to the collecting field.
-        if ($collectingField && $collectingField->phpType === 'array' && $collectingField->typeMap) {
-            $remaining = $this->getRemainingData($data, $usedNames);
+        $remaining = $this->getRemainingData($data, $usedNames);
+        // @todo This may change if we decide to support object collecting.
+        if ($collectingField?->phpType === 'array' && $collectingField?->typeMap) {
             foreach ($remaining as $k => $v) {
                 $class = $collectingField->typeMap->findClass($v[$collectingField->typeMap->keyField()]);
-                $f = Field::create(serializedName: "$k", phpType: $class);
-                $obj = $recursor($remaining, $f);
-                $ret[$k] = $obj;
+                $ret[$k] = $recursor($remaining, Field::create(serializedName: "$k", phpType: $class));
             }
         } else {
-            $remaining = $this->getRemainingData($data, $usedNames);
             foreach ($remaining as $k => $v) {
                 $ret[$k] = $v;
             }
         }
 
         return $ret;
+    }
+
+    /**
+     * Gets the property list for a given object.
+     *
+     * We need to know the object properties to deserialize to.
+     * However, that list may be modified by the type map, as
+     * the type map is in the incoming data.
+     * The key field is kept in the data so that the property writer
+     * can also look up the right type.
+     */
+    protected function propertyList(Field $field, ?TypeMapper $map, array $data): array
+    {
+        $class = $map
+            ? $map->findClass($data[$map->keyField()])
+            : $field->phpType;
+
+        return $this->getAnalyzer()->analyze($class, ClassDef::class)->properties;
     }
 
     public function getRemainingData(mixed $source, array $used): array
