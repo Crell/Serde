@@ -7,6 +7,7 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
+use Crell\Serde\SerdeError;
 
 class DateTimeZonePropertyReader implements PropertyReader, PropertyWriter
 {
@@ -32,6 +33,10 @@ class DateTimeZonePropertyReader implements PropertyReader, PropertyWriter
     public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         $string = $formatter->deserializeString($source, $field);
+
+        if ($string === SerdeError::Missing) {
+            return null;
+        }
 
         return new \DateTimeZone($string);
     }
