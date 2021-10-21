@@ -16,7 +16,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
     {
         $seq = new Sequence();
         foreach ($value as $k => $v) {
-            $f = Field::create(serializedName: uniqid('dummy_'), phpType: \get_debug_type($v));
+            $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
             $seq->items[] = new CollectionItem(field: $f, value: $v);
         }
 
