@@ -70,7 +70,11 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
             foreach ($value as $k => $v) {
-                $f = Field::create(serializedName: $k, phpType: \get_debug_type($v));
+                $extra = [];
+                if ($map = $this->typeMap($field)) {
+                    $extra[$map->keyField()] = $map->findIdentifier($v::class);
+                }
+                $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v), extraProperties: $extra);
                 $dict->items[] = new CollectionItem(field: $f, value: $v);
             }
         } else {

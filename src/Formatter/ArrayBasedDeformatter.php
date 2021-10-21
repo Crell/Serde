@@ -105,19 +105,45 @@ trait ArrayBasedDeformatter
             ? $typeMap->findClass($data[$typeMap->keyField()])
             : $field->phpType;
 
+        $collectingField = null;
+        $usedNames = [];
+
         // Index the properties by serialized name, not native name.
         foreach ($this->getAnalyzer()->analyze($class, ClassDef::class)->properties as $p) {
             $properties[$p->serializedName] = $p;
+            if ($p->flatten) {
+                $collectingField = $p;
+            }
         }
 
         $ret = [];
-        foreach ($data as $k => $v) {
-            /** @var ?Field $f */
-            $f = $properties[$k] ?? null;
-            $key = $f?->serializedName ?? $k;
-            $ret[$key] = ($f?->typeCategory->isEnum() || $f?->typeCategory->isCompound())
-                ? $recursor($data, $f)
-                : $v;
+
+        // First pull out the properties we know about.
+        foreach ($properties as $p) {
+            $usedNames[] = $p->serializedName;
+            if ($p === $collectingField) {
+                continue;
+            }
+            $ret[$p->serializedName] = ($p?->typeCategory->isEnum() || $p?->typeCategory->isCompound())
+                ? $recursor($data, $p)
+                : $data[$p->serializedName] ?? SerdeError::Missing;
+        }
+
+        // Any other values are for a collecting field, if any,
+        // but may need further processing according to the collecting field.
+        if ($collectingField && $collectingField->phpType === 'array' && $collectingField->typeMap) {
+            $remaining = $this->getRemainingData($data, $usedNames);
+            foreach ($remaining as $k => $v) {
+                $class = $collectingField->typeMap->findClass($v[$collectingField->typeMap->keyField()]);
+                $f = Field::create(serializedName: "$k", phpType: $class);
+                $obj = $recursor($remaining, $f);
+                $ret[$k] = $obj;
+            }
+        } else {
+            $remaining = $this->getRemainingData($data, $usedNames);
+            foreach ($remaining as $k => $v) {
+                $ret[$k] = $v;
+            }
         }
 
         return $ret;

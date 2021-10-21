@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Records\MappedCollected\ThingA;
+use Crell\Serde\Records\MappedCollected\ThingB;
+use Crell\Serde\Records\MappedCollected\ThingC;
 use Crell\Serde\Records\Shapes\Circle;
 
 abstract class ArrayBasedFormatterTest extends SerdeTest
@@ -147,4 +150,12 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals(Circle::class, $toTest['aShape']['class']);
     }
 
+    public function mapped_collected_dictionary_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals(ThingA::class, $toTest['A']['class']);
+        self::assertEquals(ThingB::class, $toTest['B']['class']);
+        self::assertEquals(ThingC::class, $toTest['C']['class']);
+    }
 }

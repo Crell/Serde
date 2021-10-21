@@ -60,6 +60,14 @@ class Field implements FromReflectionProperty, HasSubAttributes
      */
     protected ?RenamingStrategy $rename;
 
+    /**
+     * Additional key/value pairs to be included with an object.
+     *
+     * Only viable on object properties, and really not something
+     * you should use yourself.
+     */
+    public readonly array $extraProperties;
+
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
     public function __construct(
@@ -131,6 +139,9 @@ class Field implements FromReflectionProperty, HasSubAttributes
         $this->typeCategory ??= $this->deriveTypeCategory();
         $this->serializedName ??= $this->deriveSerializedName();
 
+        // Ensure a type-safe default.
+        $this->extraProperties ??= [];
+
         // We don't need this object anymore, so clear it to minimize
         // the serialized size of this object.
         unset($this->rename);
@@ -166,12 +177,14 @@ class Field implements FromReflectionProperty, HasSubAttributes
     public static function create(
         ?string $serializedName = null,
         string $phpType = null,
+        array $extraProperties = [],
     ): static
     {
         $new = new static();
         $new->serializedName = $serializedName;
         $new->phpType = $phpType;
         $new->typeMap = null;
+        $new->extraProperties = $extraProperties;
         $new->finalize();
         return $new;
     }

@@ -67,6 +67,9 @@ trait ArrayBasedFormatter
         foreach ($next->items as $item) {
             $runningValue[$name] = [...$runningValue[$name], ...$recursor($item->value, [], $item->field)];
         }
+        foreach ($field->extraProperties as $k => $v) {
+            $runningValue[$name][$k] = $v;
+        }
         return $runningValue;
     }
 }

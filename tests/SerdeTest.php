@@ -19,6 +19,10 @@ use Crell\Serde\Records\EmptyData;
 use Crell\Serde\Records\Exclusions;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
+use Crell\Serde\Records\MappedCollected\ThingA;
+use Crell\Serde\Records\MappedCollected\ThingB;
+use Crell\Serde\Records\MappedCollected\ThingC;
+use Crell\Serde\Records\MappedCollected\ThingList;
 use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
 use Crell\Serde\Records\OptionalPoint;
@@ -286,8 +290,8 @@ abstract class SerdeTest extends TestCase
                 public function findIdentifier(string $class): ?string
                 {
                     return match ($class) {
-                         SmallTask::class => 'small',
-                         BigTask::class => 'big',
+                        SmallTask::class => 'small',
+                        BigTask::class => 'big',
                     };
                 }
             },
@@ -377,8 +381,8 @@ abstract class SerdeTest extends TestCase
         $b = new CircularReference('B');
         $c = new CircularReference('C');
         $a->ref = $b;
-        $b->ref  =$c;
-        $c->ref  =$a;
+        $b->ref = $c;
+        $c->ref = $a;
 
         // This should throw an error when the loop is detected.
         $serialized = $s->serialize($a, $this->format);
@@ -515,10 +519,10 @@ abstract class SerdeTest extends TestCase
                 public function findIdentifier(string $class): ?string
                 {
                     return match ($class) {
-                         StringItem::class => 'string',
-                         EmailItem::class => 'email',
-                         LinkItem::class => 'LinkItem',
-                         TextItem::class => 'text',
+                        StringItem::class => 'string',
+                        EmailItem::class => 'email',
+                        LinkItem::class => 'LinkItem',
+                        TextItem::class => 'text',
                     };
                 }
             },
@@ -558,5 +562,57 @@ abstract class SerdeTest extends TestCase
 
     }
 
+    /**
+     * @test
+     */
+    public function mapped_collected_dictionary(): void
+    {
+        $s = new Serde(formatters: $this->formatters);
 
+        $data = new ThingList(name: 'list', things: [
+            'A' => new ThingA('a', 'b'),
+            'B' => new ThingB('d', 'd'),
+            'C' => new ThingC('e', 'f'),
+        ]);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->mapped_collected_dictionary_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: ThingList::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function mapped_collected_dictionary_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function mapped_collected_sequence(): void
+    {
+        $s = new Serde(formatters: $this->formatters);
+
+        $data = new ThingList(name: 'list', things: [
+            new ThingA('a', 'b'),
+            new ThingB('d', 'd'),
+            new ThingC('e', 'f'),
+        ]);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->mapped_collected_sequence_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: ThingList::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function mapped_collected_sequence_validate(mixed $serialized): void
+    {
+
+    }
 }
