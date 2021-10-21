@@ -6,6 +6,7 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Field;
 use Crell\Serde\SerdeError;
+use Crell\Serde\TypeMapper;
 
 interface Deformatter
 {
@@ -27,7 +28,7 @@ interface Deformatter
 
     public function deserializeDictionary(mixed $decoded, Field $field, callable $recursor): array|SerdeError;
 
-    public function deserializeObject(mixed $decoded, Field $field, callable $recursor): array|SerdeError;
+    public function deserializeObject( mixed $decoded, Field $field, callable $recursor, ?TypeMapper $typeMap): array|SerdeError;
 
     public function deserializeFinalize(mixed $decoded): void;
 }

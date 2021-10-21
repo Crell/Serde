@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Records\Shapes\Circle;
+
 abstract class ArrayBasedFormatterTest extends SerdeTest
 {
     abstract protected function arrayify(mixed $serialized): array;
@@ -136,6 +138,13 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
 
         self::assertEquals('one', $toTest['one']);
         self::assertArrayNotHasKey('two', $toTest);
+    }
+
+    protected function classname_typemap_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals(Circle::class, $toTest['aShape']['class']);
     }
 
 }

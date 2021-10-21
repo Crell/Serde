@@ -8,6 +8,7 @@ use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
 use Crell\Serde\SerdeError;
+use Crell\Serde\TypeMapper;
 
 /**
  * Utility implementations for array-based formats.
@@ -81,9 +82,10 @@ trait ArrayBasedDeformatter
      * @param mixed $decoded
      * @param Field $field
      * @param callable $recursor
+     * @param TypeMapper|null $typeMap
      * @return array|SerdeError
      */
-    public function deserializeObject(mixed $decoded, Field $field, callable $recursor): array|SerdeError
+    public function deserializeObject(mixed $decoded, Field $field, callable $recursor, ?TypeMapper $typeMap): array|SerdeError
     {
         if (!isset($decoded[$field->serializedName])) {
             return SerdeError::Missing;
@@ -99,10 +101,9 @@ trait ArrayBasedDeformatter
         // get the property list, taking a type map into account.
         // The key field is kept in the data so that the property writer
         // can also look up the right type.
-        $class = $field->phpType;
-        if ($map = $field->typeMap) {
-            $class = $map->findClass($data[$map->keyField()]);
-        }
+        $class = $typeMap
+            ? $typeMap->findClass($data[$typeMap->keyField()])
+            : $field->phpType;
 
         // Index the properties by serialized name, not native name.
         foreach ($this->getAnalyzer()->analyze($class, ClassDef::class)->properties as $p) {

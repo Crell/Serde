@@ -25,6 +25,7 @@ use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Shapes\Box;
 use Crell\Serde\Records\Shapes\Circle;
+use Crell\Serde\Records\Shapes\Shape;
 use Crell\Serde\Records\Shapes\TwoDPoint;
 use Crell\Serde\Records\Size;
 use Crell\Serde\Records\Tasks\BigTask;
@@ -331,6 +332,34 @@ abstract class SerdeTest extends TestCase
     }
 
     protected function typemap_on_parent_class_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function classname_typemap(): void
+    {
+        $customHandler = new MappedObjectPropertyReader(
+            supportedTypes: [Shape::class],
+            typeMap: new ClassNameTypeMap(key: 'class'),
+        );
+
+        $s = new Serde(handlers: [$customHandler], formatters: $this->formatters);
+
+        $data = new Box(new Circle(new TwoDPoint(1, 2), 3));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->classname_typemap_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Box::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    protected function classname_typemap_validate(mixed $serialized): void
     {
 
     }

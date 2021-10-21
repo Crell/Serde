@@ -93,7 +93,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
     public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         // Get the raw data as an array from the source.
-        $dict = $formatter->deserializeObject($source, $field, $recursor);
+        $dict = $formatter->deserializeObject($source, $field, $recursor, $this->typeMap($field));
 
         if ($dict === SerdeError::Missing) {
             return null;
