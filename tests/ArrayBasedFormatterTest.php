@@ -158,4 +158,14 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals(ThingB::class, $toTest['B']['class']);
         self::assertEquals(ThingC::class, $toTest['C']['class']);
     }
+
+    public function pagination_flatten_object_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals(500, $toTest['total']);
+        self::assertEquals(40, $toTest['offset']);
+        self::assertEquals(10, $toTest['limit']);
+        self::assertEquals('Widget', $toTest['products'][0]['name']);
+    }
 }

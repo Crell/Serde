@@ -26,6 +26,9 @@ use Crell\Serde\Records\MappedCollected\ThingList;
 use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
 use Crell\Serde\Records\OptionalPoint;
+use Crell\Serde\Records\Pagination\Pagination;
+use Crell\Serde\Records\Pagination\Product;
+use Crell\Serde\Records\Pagination\Results;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Shapes\Box;
 use Crell\Serde\Records\Shapes\Circle;
@@ -612,6 +615,41 @@ abstract class SerdeTest extends TestCase
     }
 
     public function mapped_collected_sequence_validate(mixed $serialized): void
+    {
+
+    }
+
+
+    /**
+     * @test
+     */
+    public function pagination_flatten_object(): void
+    {
+        $s = new Serde(formatters: $this->formatters);
+
+        $data = new Results(
+            pagination: new Pagination(
+                total: 500,
+                offset: 40,
+                limit: 10,
+            ),
+            products: [
+                new Product('Widget', 4.95),
+                new Product('Gadget', 99.99),
+                new Product('Dohickey', 11.50),
+            ]
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->pagination_flatten_object_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Results::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function pagination_flatten_object_validate(mixed $serialized): void
     {
 
     }

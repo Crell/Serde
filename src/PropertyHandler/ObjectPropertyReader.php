@@ -67,7 +67,6 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             return $dict;
         }
 
-        // @todo Figure out if we care about flattening/collecting objects.
         if ($field->flatten && $field->phpType === 'array') {
             foreach ($value as $k => $v) {
                 $extra = [];
@@ -76,6 +75,13 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
                 }
                 $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v), extraProperties: $extra);
                 $dict->items[] = new CollectionItem(field: $f, value: $v);
+            }
+        } elseif ($field->flatten && $field->typeCategory === TypeCategory::Object) {
+            /** @var ClassDef $props */
+            $props = $this->analyzer->analyze($field->phpType, ClassDef::class)->properties;
+            $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
+            foreach ($props as $prop) {
+                $dict->items[] = new CollectionItem(field: $prop, value: $subPropReader($prop->phpName));
             }
         } else {
             $dict->items[] = new CollectionItem(field: $field, value: $value);
@@ -134,7 +140,9 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             if ($collectingField->phpType === 'array') {
                 $props[$collectingField->phpName] = $remaining;
             }
-            // @todo Do we support collecting into objects? Does that even make sense?
+            if ($collectingField->typeCategory === TypeCategory::Object) {
+                $props[$collectingField->phpName] = $this->createObject($collectingField->phpType, $remaining);
+            }
         }
 
         // @todo What should happen if something is still set to Missing?
