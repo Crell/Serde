@@ -67,27 +67,44 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             return $dict;
         }
 
-        if ($field->flatten && $field->phpType === 'array') {
-            foreach ($value as $k => $v) {
-                $extra = [];
-                if ($map = $this->typeMap($field)) {
-                    $extra[$map->keyField()] = $map->findIdentifier($v::class);
-                }
-                $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v), extraProperties: $extra);
-                $dict->items[] = new CollectionItem(field: $f, value: $v);
-            }
-        } elseif ($field->flatten && $field->typeCategory === TypeCategory::Object) {
-            /** @var ClassDef $props */
-            $props = $this->analyzer->analyze($field->phpType, ClassDef::class)->properties;
-            $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
-            foreach ($props as $prop) {
-                $dict->items[] = new CollectionItem(field: $prop, value: $subPropReader($prop->phpName));
-            }
+        if ($field->flatten) {
+            $dict->items = match ($field->typeCategory) {
+                TypeCategory::Array => [...$dict->items, ...$this->flattenArray($field, $value)],
+                TypeCategory::Object => [...$dict->items, ...$this->flattenObject($field, $value)],
+                // @todo Better exception.
+                default => throw new \RuntimeException('Invalid flattening field type'),
+            };
         } else {
             $dict->items[] = new CollectionItem(field: $field, value: $value);
         }
 
         return $dict;
+    }
+
+    protected function flattenArray(Field $field, array $arrayValue): array
+    {
+        $items = [];
+        foreach ($arrayValue as $k => $v) {
+            $extra = [];
+            if ($map = $this->typeMap($field)) {
+                $extra[$map->keyField()] = $map->findIdentifier($v::class);
+            }
+            $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v), extraProperties: $extra);
+            $items[] = new CollectionItem(field: $f, value: $v);
+        }
+        return $items;
+    }
+
+    protected function flattenObject(Field $field, object $value): array
+    {
+        $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
+
+        // PHPStorm will complain about this, because it's stub file is out of date
+        // and has the wrong argument names. It works.
+        return array_map(
+            callback: static fn (Field $prop) => new CollectionItem(field: $prop, value: $subPropReader($prop->phpName)),
+            array: $this->analyzer->analyze($field->phpType, ClassDef::class)->properties,
+        );
     }
 
     protected function typeMap(Field $field): ?TypeMapper
@@ -137,12 +154,12 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
         if ($collectingField && $formatter instanceof SupportsCollecting) {
             $remaining = $formatter->getRemainingData($dict, $usedNames);
-            if ($collectingField->phpType === 'array') {
-                $props[$collectingField->phpName] = $remaining;
-            }
-            if ($collectingField->typeCategory === TypeCategory::Object) {
-                $props[$collectingField->phpName] = $this->createObject($collectingField->phpType, $remaining);
-            }
+            $props[$collectingField->phpName] = match ($collectingField->typeCategory) {
+                TypeCategory::Array => $remaining,
+                TypeCategory::Object => $this->createObject($collectingField->phpType, $remaining),
+                // @todo Better exception.
+                default => throw new \RuntimeException('Invalid flattening field type'),
+            };
         }
 
         // @todo What should happen if something is still set to Missing?
