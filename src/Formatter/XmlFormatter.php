@@ -4,14 +4,22 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
+use Crell\AttributeUtils\Analyzer;
+use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\AttributeUtils\MemoryCacheAnalyzer;
+use Crell\Serde\ClassDef;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Sequence;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeMapper;
 
-class XmlFormatter implements Formatter, Deformatter
+class XmlFormatter implements Formatter /*, Deformatter */
 {
+
+    public function __construct(
+        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
+    ) {}
 
     public function format(): string
     {
@@ -48,24 +56,30 @@ class XmlFormatter implements Formatter, Deformatter
      */
     public function serializeInt(mixed $runningValue, Field $field, int $next): \DOMNode
     {
-        $node = $runningValue->createElement($field->serializedName, $next);
+        $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
         $runningValue->appendChild($node);
-        return $runningValue;
+        return $node;
     }
 
     public function serializeFloat(mixed $runningValue, Field $field, float $next): mixed
     {
-        // TODO: Implement serializeFloat() method.
+        $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
+        $runningValue->appendChild($node);
+        return $node;
     }
 
     public function serializeString(mixed $runningValue, Field $field, string $next): mixed
     {
-        // TODO: Implement serializeString() method.
+        $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
+        $runningValue->appendChild($node);
+        return $node;
     }
 
     public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed
     {
-        // TODO: Implement serializeBool() method.
+        $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
+        $runningValue->appendChild($node);
+        return $node;
     }
 
     public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, callable $recursor): mixed
@@ -82,7 +96,8 @@ class XmlFormatter implements Formatter, Deformatter
      */
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, callable $recursor): \DOMNode
     {
-        $node = $runningValue->createElement($field->serializedName);
+        $doc = $runningValue->ownerDocument ?? $runningValue;
+        $node = $doc->createElement($field->serializedName);
         foreach ($next->items as $item) {
             $dat = $recursor($item->value, $node, $item->field);
             $node->appendChild($dat);
@@ -97,12 +112,19 @@ class XmlFormatter implements Formatter, Deformatter
 
     public function deserializeInitialize(mixed $serialized): mixed
     {
-        // TODO: Implement deserializeInitialize() method.
+        return new \DOMDocument($serialized);
     }
 
+    /**
+     *
+     *
+     * @param \DOMNode $decoded
+     * @param Field $field
+     * @return int|SerdeError
+     */
     public function deserializeInt(mixed $decoded, Field $field): int|SerdeError
     {
-        // TODO: Implement deserializeInt() method.
+        return (int)$decoded->textContent;
     }
 
     public function deserializeFloat(mixed $decoded, Field $field): float|SerdeError
@@ -130,13 +152,45 @@ class XmlFormatter implements Formatter, Deformatter
         // TODO: Implement deserializeDictionary() method.
     }
 
-    public function deserializeObject(
-        mixed $decoded,
-        Field $field,
-        callable $recursor,
-        ?TypeMapper $typeMap
-    ): array|SerdeError {
-        // TODO: Implement deserializeObject() method.
+    /**
+     * @param \DOMNode $decoded
+     * @param Field $field
+     * @param callable $recursor
+     * @param TypeMapper|null $typeMap
+     * @return array|SerdeError
+     */
+    public function deserializeObject(mixed $decoded, Field $field, callable $recursor, ?TypeMapper $typeMap): array|SerdeError
+    {
+        $data = [];
+
+        var_dump($decoded);
+
+        /** @var \DOMNode $node */
+        foreach ($decoded->childNodes as $node) {
+            $data[$node->nodeName] = $node;
+        }
+
+        $collectingField = null;
+        $usedNames = [];
+
+        $properties = $this->propertyList($field, $typeMap, (array)$data);
+
+        // First pull out the properties we know about.
+        /** @var Field $prop */
+        foreach ($properties as $prop) {
+            $usedNames = $prop->serializedName;
+            if ($prop->flatten) {
+                $collectingField = $prop;
+                continue;
+            }
+            $ret[$prop->serializedName] = $recursor($decoded, $prop);
+
+//            ($prop->typeCategory->isEnum() || $prop->typeCategory->isCompound())
+//                ? $recursor($decoded, $prop)
+//                : $data[$prop->serializedName] ?? SerdeError::Missing;
+        }
+
+        return $ret;
     }
 
     public function deserializeFinalize(mixed $decoded): void
@@ -145,4 +199,26 @@ class XmlFormatter implements Formatter, Deformatter
     }
 
 
+    /**
+     * Gets the property list for a given object.
+     *
+     * We need to know the object properties to deserialize to.
+     * However, that list may be modified by the type map, as
+     * the type map is in the incoming data.
+     * The key field is kept in the data so that the property writer
+     * can also look up the right type.
+     */
+    protected function propertyList(Field $field, ?TypeMapper $map, array $data): array
+    {
+        $class = $map
+            ? $map->findClass($data[$map->keyField()])
+            : $field->phpType;
+
+        return $this->getAnalyzer()->analyze($class, ClassDef::class)->properties;
+    }
+
+    protected function getAnalyzer(): ClassAnalyzer
+    {
+        return $this->analyzer;
+    }
 }
