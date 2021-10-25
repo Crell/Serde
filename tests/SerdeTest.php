@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\PropertyHandler\NativeSerializePropertyReader;
 use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
@@ -23,6 +24,7 @@ use Crell\Serde\Records\MappedCollected\ThingA;
 use Crell\Serde\Records\MappedCollected\ThingB;
 use Crell\Serde\Records\MappedCollected\ThingC;
 use Crell\Serde\Records\MappedCollected\ThingList;
+use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
 use Crell\Serde\Records\OptionalPoint;
@@ -619,7 +621,6 @@ abstract class SerdeTest extends TestCase
 
     }
 
-
     /**
      * @test
      */
@@ -653,4 +654,28 @@ abstract class SerdeTest extends TestCase
     {
 
     }
+
+    /**
+     * @test
+     */
+    public function native_object_serialization(): void
+    {
+        $s = new Serde(formatters: $this->formatters, handlers: [new NativeSerializePropertyReader()]);
+
+        $data = new NativeSerUn(1, 'beep', new \DateTimeImmutable('1918-11-11 11:11:11', new \DateTimeZone('America/Chicago')));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->native_object_serialization_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: NativeSerUn::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function native_object_serialization_validate(mixed $serialized): void
+    {
+
+    }
+
 }

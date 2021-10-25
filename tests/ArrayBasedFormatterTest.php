@@ -168,4 +168,13 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals(10, $toTest['limit']);
         self::assertEquals('Widget', $toTest['products'][0]['name']);
     }
+
+    public function native_object_serialization_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals(1, $toTest['a2']);
+        self::assertEquals('beep', $toTest['b2']);
+        self::assertEquals('1918-11-11T11:11:11.000-06:00', $toTest['c2']);
+    }
 }
