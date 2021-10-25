@@ -91,7 +91,7 @@ class Serde
 
     public function deserialize(mixed $serialized, string $from, string $to): object
     {
-        $formatter = $this->formatters[$from] ?? throw UnsupportedFormat::create($from, Direction::Serialize);
+        $formatter = $this->deformatters[$from] ?? throw UnsupportedFormat::create($from, Direction::Deserialize);
 
         $decoded = $formatter->deserializeInitialize($serialized);
 
