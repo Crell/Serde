@@ -7,11 +7,8 @@ namespace Crell\Serde;
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
-use Crell\Serde\Formatter\ArrayFormatter;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
-use Crell\Serde\Formatter\JsonFormatter;
-use Crell\Serde\Formatter\YamlFormatter;
 use Crell\Serde\PropertyHandler\DateTimePropertyReader;
 use Crell\Serde\PropertyHandler\DateTimeZonePropertyReader;
 use Crell\Serde\PropertyHandler\DictionaryPropertyReader;
@@ -22,20 +19,20 @@ use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
 use Crell\Serde\PropertyHandler\ScalarPropertyReader;
 use Crell\Serde\PropertyHandler\SequencePropertyReader;
-use Symfony\Component\Yaml\Yaml;
 use function Crell\fp\afilter;
 use function Crell\fp\indexBy;
 use function Crell\fp\pipe;
 
 /**
- * All-in serializer for most common cases.
+ * An "empty" Serde instance with no configuration.
  *
- * If you're not sure what to do, use this class. It comes pre-loaded
- * with all standard readers, writers, and formatters, but you can also
- * provide additional ones as needed.  In most cases you will only need
- * to provide an analyzer instance, or just accept the default.
+ * This class comes with no handlers or formatters pre-configured. You
+ * must provide all of them, in the order you desire.  Remember
+ * that you will get better performance if you provide the same analyzer
+ * instance to this class and to the handlers and formatters you inject,
+ * as then they can share a cache.
  */
-class SerdeCommon extends Serde
+class SerdeBasic extends Serde
 {
     /** @var PropertyReader[]  */
     protected readonly array $readers;
@@ -59,26 +56,6 @@ class SerdeCommon extends Serde
         array $handlers = [],
         array $formatters = [],
     ) {
-        // Slot any custom handlers in before the generic object reader.
-        $handlers = [
-            new ScalarPropertyReader(),
-            new SequencePropertyReader(),
-            new DictionaryPropertyReader(),
-            new DateTimePropertyReader(),
-            new DateTimeZonePropertyReader(),
-            new EnumPropertyReader(),
-            ...$handlers,
-            new NativeSerializePropertyReader($this->analyzer),
-            new ObjectPropertyReader($this->analyzer),
-        ];
-
-        // Add the common formatters.
-        $formatters[] = new JsonFormatter($this->analyzer);
-        $formatters[] = new ArrayFormatter($this->analyzer);
-        if (class_exists(Yaml::class)) {
-            $formatters[] = new YamlFormatter(analyzer: $this->analyzer);
-        }
-
         $this->readers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyReader);
         $this->writers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyWriter);
 

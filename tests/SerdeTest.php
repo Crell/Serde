@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-use Crell\Serde\PropertyHandler\NativeSerializePropertyReader;
 use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
