@@ -120,7 +120,8 @@ trait ArrayBasedDeformatter
         // Any other values are for a collecting field, if any,
         // but may need further processing according to the collecting field.
         $remaining = $this->getRemainingData($data, $usedNames);
-        // @todo This may change if we decide to support object collecting.
+        // Object collecting doesn't support type maps, so can be handled by
+        // the generic version in the else clause.
         if ($collectingField?->phpType === 'array' && $collectingField?->typeMap) {
             foreach ($remaining as $k => $v) {
                 $class = $collectingField->typeMap->findClass($v[$collectingField->typeMap->keyField()]);
