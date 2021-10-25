@@ -8,6 +8,7 @@ use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
+use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Sequence;
@@ -47,8 +48,6 @@ class XmlFormatter implements Formatter /*, Deformatter */
     }
 
     /**
-     *
-     *
      * @param \DOMNode $runningValue
      * @param Field $field
      * @param int $next
@@ -58,28 +57,28 @@ class XmlFormatter implements Formatter /*, Deformatter */
     {
         $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
         $runningValue->appendChild($node);
-        return $node;
+        return $runningValue;
     }
 
     public function serializeFloat(mixed $runningValue, Field $field, float $next): mixed
     {
         $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
         $runningValue->appendChild($node);
-        return $node;
+        return $runningValue;
     }
 
     public function serializeString(mixed $runningValue, Field $field, string $next): mixed
     {
         $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
         $runningValue->appendChild($node);
-        return $node;
+        return $runningValue;
     }
 
     public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed
     {
         $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
         $runningValue->appendChild($node);
-        return $node;
+        return $runningValue;
     }
 
     public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, callable $recursor): mixed
@@ -98,14 +97,22 @@ class XmlFormatter implements Formatter /*, Deformatter */
     {
         $doc = $runningValue->ownerDocument ?? $runningValue;
         $node = $doc->createElement($field->serializedName);
-        foreach ($next->items as $item) {
-            $dat = $recursor($item->value, $node, $item->field);
-            $node->appendChild($dat);
-        }
+
+        // PHPStorm will complain about the argument names. PHPStorm is wrong.
+        // Its stubs are woefully out of date.
+        $node = array_reduce(
+            array: $next->items,
+            callback: static fn(\DomNode $node, CollectionItem $item) => $recursor($item->value, $node, $item->field),
+            initial: $node,
+        );
+
+        /*
         foreach ($field->extraProperties as $k => $v) {
-            $dat = $runningValue->createElement($k, $v);
+            $dat = $doc->createElement($k, $v);
             $node->appendChild($dat);
         }
+        */
+
         $runningValue->appendChild($node);
         return $runningValue;
     }
