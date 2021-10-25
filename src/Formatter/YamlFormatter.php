@@ -30,11 +30,11 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
      *   A bit field of PARSE_* constants to customize the YAML parser behavior
      */
     public function __construct(
+        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
         protected readonly int $inline = 2,
         protected readonly int $indent = 4,
         protected readonly int $dumpFlags = 0,
         protected readonly int $parseFlags = 0,
-        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
     ) {}
 
     public function format(): string
