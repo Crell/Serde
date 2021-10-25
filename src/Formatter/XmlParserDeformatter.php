@@ -9,7 +9,6 @@ use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
-use Crell\Serde\Serde;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeMapper;
 
@@ -76,6 +75,10 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
      */
     public function deserializeObject(mixed $decoded, Field $field, callable $recursor, ?TypeMapper $typeMap): array|SerdeError
     {
+        if (empty($decoded[0]['tag'])) {
+            return SerdeError::Missing;
+        }
+
         if ($decoded[0]['tag'] !== $field->serializedName) {
             return SerdeError::Missing;
         }
@@ -136,7 +139,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
             if ($entry['type'] === 'close') {
                 break;
             }
-            $data[$entry['tag']] = $entry;
+            $data[$key] = $entry;
         }
         return $data;
     }
@@ -197,6 +200,10 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         });
 
         return $tags;
+
+        // This would make things easier, but because we can't guarantee
+        // names are unique across the entire tree it is not viable.
+        //return indexBy(static fn (array $entry) => $entry['tag'])($tags);
     }
 
     /**
