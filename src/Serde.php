@@ -13,6 +13,7 @@ use Crell\Serde\PropertyHandler\DateTimePropertyReader;
 use Crell\Serde\PropertyHandler\DateTimeZonePropertyReader;
 use Crell\Serde\PropertyHandler\DictionaryPropertyReader;
 use Crell\Serde\PropertyHandler\EnumPropertyReader;
+use Crell\Serde\PropertyHandler\NativeSerializePropertyReader;
 use Crell\Serde\PropertyHandler\ObjectPropertyReader;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
@@ -52,6 +53,7 @@ class Serde
             new DateTimeZonePropertyReader(),
             new EnumPropertyReader(),
             ...$handlers,
+            new NativeSerializePropertyReader($this->analyzer),
             new ObjectPropertyReader($this->analyzer),
         ];
 

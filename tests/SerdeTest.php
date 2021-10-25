@@ -660,7 +660,7 @@ abstract class SerdeTest extends TestCase
      */
     public function native_object_serialization(): void
     {
-        $s = new Serde(formatters: $this->formatters, handlers: [new NativeSerializePropertyReader()]);
+        $s = new Serde(formatters: $this->formatters);
 
         $data = new NativeSerUn(1, 'beep', new \DateTimeImmutable('1918-11-11 11:11:11', new \DateTimeZone('America/Chicago')));
 
