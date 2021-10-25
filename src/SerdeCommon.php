@@ -62,13 +62,13 @@ class SerdeCommon
 
         $this->formatters = pipe(
             $formatters,
-            afilter(static fn($formatter): bool => $formatter instanceof Formatter),
+            afilter(static fn ($formatter): bool => $formatter instanceof Formatter),
             indexBy(static fn (Formatter $formatter): string => $formatter->format()),
         );
 
         $this->deformatters = pipe(
             $formatters,
-            afilter(static fn($formatter): bool => $formatter instanceof Deformatter),
+            afilter(static fn ($formatter): bool => $formatter instanceof Deformatter),
             indexBy(static fn (Deformatter $formatter): string => $formatter->format()),
         );
     }
