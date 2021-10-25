@@ -11,7 +11,7 @@ use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Size;
-use Crell\Serde\Serde;
+use Crell\Serde\SerdeCommon;
 use PhpBench\Benchmark\Metadata\Annotations\AfterMethods;
 use PhpBench\Benchmark\Metadata\Annotations\BeforeMethods;
 use PhpBench\Benchmark\Metadata\Annotations\Iterations;
@@ -29,12 +29,12 @@ use PhpBench\Benchmark\Metadata\Annotations\Warmup;
  */
 class SerdeBench
 {
-    protected readonly Serde $serde;
+    protected readonly SerdeCommon $serde;
 
     public function setUp(): void
     {
         $analyzer = new MemoryCacheAnalyzer(new Analyzer());
-        $this->serde = new Serde(
+        $this->serde = new SerdeCommon(
             analyzer: $analyzer,
             formatters: [new JsonFormatter(analyzer: $analyzer)]
         );

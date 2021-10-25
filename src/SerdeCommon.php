@@ -23,7 +23,7 @@ use function Crell\fp\afilter;
 use function Crell\fp\indexBy;
 use function Crell\fp\pipe;
 
-class Serde
+class SerdeCommon
 {
     /** @var PropertyReader[]  */
     protected readonly array $readers;

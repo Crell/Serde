@@ -10,7 +10,7 @@ use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Size;
-use Crell\Serde\Serde;
+use Crell\Serde\SerdeCommon;
 
 require 'vendor/autoload.php';
 
@@ -23,7 +23,7 @@ function run(): void
     $analyzer->analyze(Size::class, ClassDef::class);
     $analyzer->analyze(BackedSize::class, ClassDef::class);
 
-    $serde = new Serde(
+    $serde = new SerdeCommon(
         analyzer: $analyzer,
         formatters: [new JsonFormatter($analyzer)]
     );

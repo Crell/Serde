@@ -65,7 +65,7 @@ abstract class SerdeTest extends TestCase
      */
     public function point(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $p1 = new Point(1, 2, 3);
 
@@ -88,7 +88,7 @@ abstract class SerdeTest extends TestCase
      */
     public function visibility(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $p1 = new Visibility(1, 2, 3, new Visibility(4, 5, 6));
 
@@ -111,7 +111,7 @@ abstract class SerdeTest extends TestCase
      */
     public function optional_point(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $p1 = new OptionalPoint(1, 2);
 
@@ -134,7 +134,7 @@ abstract class SerdeTest extends TestCase
      */
     public function allFields(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new AllFieldTypes(
             anint: 5,
@@ -181,7 +181,7 @@ abstract class SerdeTest extends TestCase
      */
     public function name_mangling(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new MangleNames(
             customName: 'Larry',
@@ -215,7 +215,7 @@ abstract class SerdeTest extends TestCase
             }
         }
 
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new Flattening(
             first: 'Larry',
@@ -250,7 +250,7 @@ abstract class SerdeTest extends TestCase
             ]),
         );
 
-        $s = new Serde(handlers: [$customHandler], formatters: $this->formatters);
+        $s = new SerdeCommon(handlers: [$customHandler], formatters: $this->formatters);
 
         $data = new TaskContainer(
             task: new BigTask('huge'),
@@ -302,7 +302,7 @@ abstract class SerdeTest extends TestCase
             },
         );
 
-        $s = new Serde(handlers: [$customHandler], formatters: $this->formatters);
+        $s = new SerdeCommon(handlers: [$customHandler], formatters: $this->formatters);
 
         $data = new TaskContainer(
             task: new BigTask('huge'),
@@ -327,7 +327,7 @@ abstract class SerdeTest extends TestCase
      */
     public function typemap_on_parent_class(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new Box(new Circle(new TwoDPoint(1, 2), 3));
 
@@ -355,7 +355,7 @@ abstract class SerdeTest extends TestCase
             typeMap: new ClassNameTypeMap(key: 'class'),
         );
 
-        $s = new Serde(handlers: [$customHandler], formatters: $this->formatters);
+        $s = new SerdeCommon(handlers: [$customHandler], formatters: $this->formatters);
 
         $data = new Box(new Circle(new TwoDPoint(1, 2), 3));
 
@@ -380,7 +380,7 @@ abstract class SerdeTest extends TestCase
     {
         $this->expectException(CircularReferenceDetected::class);
 
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $a = new CircularReference('A');
         $b = new CircularReference('B');
@@ -398,7 +398,7 @@ abstract class SerdeTest extends TestCase
      */
     public function nested_objects(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new NestedObject('First',
             new NestedObject('Second',
@@ -430,7 +430,7 @@ abstract class SerdeTest extends TestCase
             }
         }
 
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new NestedFlattenObject('First', ['a' => 'A', 'b' => 'B'],
             new NestedFlattenObject('Second', ['a' => 'A', 'b' => 'B'],
@@ -456,7 +456,7 @@ abstract class SerdeTest extends TestCase
      */
     public function empty_values(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new EmptyData('beep');
 
@@ -478,7 +478,7 @@ abstract class SerdeTest extends TestCase
      */
     public function exclude_values(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new Exclusions('one', 'two');
 
@@ -533,7 +533,7 @@ abstract class SerdeTest extends TestCase
             },
         );
 
-        $s = new Serde(handlers: [$customHandler], formatters: $this->formatters);
+        $s = new SerdeCommon(handlers: [$customHandler], formatters: $this->formatters);
 
         $data = new Node('A node', 3, false, false);
         $data->fields[] = new FieldItemList('en', [
@@ -572,7 +572,7 @@ abstract class SerdeTest extends TestCase
      */
     public function mapped_collected_dictionary(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new ThingList(name: 'list', things: [
             'A' => new ThingA('a', 'b'),
@@ -599,7 +599,7 @@ abstract class SerdeTest extends TestCase
      */
     public function mapped_collected_sequence(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new ThingList(name: 'list', things: [
             new ThingA('a', 'b'),
@@ -626,7 +626,7 @@ abstract class SerdeTest extends TestCase
      */
     public function pagination_flatten_object(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new Results(
             pagination: new Pagination(
@@ -660,7 +660,7 @@ abstract class SerdeTest extends TestCase
      */
     public function native_object_serialization(): void
     {
-        $s = new Serde(formatters: $this->formatters);
+        $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new NativeSerUn(1, 'beep', new \DateTimeImmutable('1918-11-11 11:11:11', new \DateTimeZone('America/Chicago')));
 
