@@ -15,7 +15,7 @@ class NoTypeMapDefinedForKey extends \InvalidArgumentException
         $new->key = $key;
         $new->fieldName = $fieldName;
 
-        $new->message = sprintf('No matching class found for key %s when deserializing to %s.', $key, $fieldName);
+        $new->message = sprintf('No matching class found for key "%s" when deserializing to "%s".', $key, $fieldName);
 
         return $new;
     }
