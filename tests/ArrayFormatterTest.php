@@ -13,6 +13,7 @@ class ArrayFormatterTest extends ArrayBasedFormatterTest
         parent::setUp();
         $this->formatters = [new ArrayFormatter()];
         $this->format = 'array';
+        $this->emptyData = [];
     }
 
     protected function arrayify(mixed $serialized): array

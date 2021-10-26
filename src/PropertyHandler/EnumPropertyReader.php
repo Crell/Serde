@@ -7,6 +7,7 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
+use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 
 class EnumPropertyReader implements PropertyReader, PropertyWriter
@@ -29,10 +30,20 @@ class EnumPropertyReader implements PropertyReader, PropertyWriter
     public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
         // It's kind of amusing that both of these work, but they work.
+        $val = match ($field->typeCategory) {
+            TypeCategory::UnitEnum => $formatter->deserializeString($source, $field),
+            TypeCategory::IntEnum => $formatter->deserializeInt($source, $field),
+            TypeCategory::StringEnum => $formatter->deserializeString($source, $field),
+        };
+
+        if ($val === SerdeError::Missing) {
+            return $val;
+        }
+
+        // It's kind of amusing that both of these work, but they work.
         return match ($field->typeCategory) {
-            TypeCategory::UnitEnum => (new \ReflectionEnum($field->phpType))->getCase($formatter->deserializeString($source, $field))->getValue(),
-            TypeCategory::IntEnum => $field->phpType::from($formatter->deserializeInt($source, $field)),
-            TypeCategory::StringEnum => $field->phpType::from($formatter->deserializeString($source, $field)),
+            TypeCategory::UnitEnum => (new \ReflectionEnum($field->phpType))->getCase($val)->getValue(),
+            TypeCategory::IntEnum, TypeCategory::StringEnum => $field->phpType::from($val),
         };
     }
 
@@ -40,6 +51,5 @@ class EnumPropertyReader implements PropertyReader, PropertyWriter
     {
         return $field->typeCategory->isEnum();
     }
-
 
 }

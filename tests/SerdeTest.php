@@ -61,6 +61,8 @@ abstract class SerdeTest extends TestCase
 
     protected string $format;
 
+    protected mixed $emptyData;
+
     /**
      * @test
      */
@@ -175,6 +177,20 @@ abstract class SerdeTest extends TestCase
     protected function all_fields_validate(mixed $serialized): void
     {
 
+    }
+
+    /**
+     * @test
+     */
+    public function empty_input(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $this->emptyData;
+
+        $result = $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
+
+        self::assertEquals(new AllFieldTypes(), $result);
     }
 
     /**
