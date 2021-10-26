@@ -43,7 +43,7 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals(0, $toTest['z']);
     }
 
-    protected function allFields_validate(mixed $serialized): void
+    protected function all_fields_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
         //        var_dump($serialized);

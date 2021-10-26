@@ -133,7 +133,7 @@ abstract class SerdeTest extends TestCase
     /**
      * @test
      */
-    public function allFields(): void
+    public function all_fields(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
@@ -165,14 +165,14 @@ abstract class SerdeTest extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->allFields_validate($serialized);
+        $this->all_fields_validate($serialized);
 
         $result = $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
 
         self::assertEquals($data, $result);
     }
 
-    protected function allFields_validate(mixed $serialized): void
+    protected function all_fields_validate(mixed $serialized): void
     {
 
     }
