@@ -14,6 +14,7 @@ use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\Formatter\SupportsCollecting;
+use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMapper;
@@ -189,10 +190,11 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
     protected function getTargetClass(Field $field, array $dict): string
     {
-        if ($map = $this->typeMap($field)) {
-            return $map->findClass($dict[$map->keyField()]);
-        }
-        return $field->phpType;
+        $map = $this->typeMap($field);
+        return $map
+            ? ($map->findClass($dict[$map->keyField()])
+                ?? throw NoTypeMapDefinedForKey::create($map->keyField(), $field->phpName))
+            : $field->phpType;
     }
 
     public function canWrite(Field $field, string $format): bool

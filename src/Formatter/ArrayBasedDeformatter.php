@@ -7,6 +7,7 @@ namespace Crell\Serde\Formatter;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
+use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeMapper;
 
@@ -148,7 +149,8 @@ trait ArrayBasedDeformatter
     protected function propertyList(Field $field, ?TypeMapper $map, array $data): array
     {
         $class = $map
-            ? $map->findClass($data[$map->keyField()])
+            ? ($map->findClass($data[$map->keyField()])
+                ?? throw NoTypeMapDefinedForKey::create($map->keyField(), $field->phpName ?? $field->phpType))
             : $field->phpType;
 
         return $this->getAnalyzer()->analyze($class, ClassDef::class)->properties;

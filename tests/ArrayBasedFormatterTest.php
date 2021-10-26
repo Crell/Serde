@@ -94,6 +94,14 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('circle', $toTest['aShape']['shape']);
     }
 
+    protected function root_type_map_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals('b', $toTest['type']);
+        self::assertEquals('Bob', $toTest['name']);
+    }
+
     public function nested_objects_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);

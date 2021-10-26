@@ -8,6 +8,8 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\RootMap\Type;
+use Crell\Serde\Records\RootMap\TypeB;
 use Crell\Serde\Records\CircularReference;
 use Crell\Serde\Records\Drupal\EmailItem;
 use Crell\Serde\Records\Drupal\FieldItemList;
@@ -388,8 +390,49 @@ abstract class SerdeTest extends TestCase
         $b->ref = $c;
         $c->ref = $a;
 
-        // This should throw an error when the loop is detected.
+        // This should throw an exception when the loop is detected.
         $serialized = $s->serialize($a, $this->format);
+    }
+
+    /**
+     * @test
+     */
+    public function root_type_map(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new TypeB('Bob');
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->root_type_map_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Type::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    protected function root_type_map_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function bad_type_map(): void
+    {
+        $this->expectException(NoTypeMapDefinedForKey::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $array = [
+            'type' => 'c',
+            'name' => 'Carl',
+        ];
+
+        // This should throw an exception because there is no mapping for type 'c'.
+        $s->deserialize($array, from: 'array', to: Type::class);
     }
 
     /**
