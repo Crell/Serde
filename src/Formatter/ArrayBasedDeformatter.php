@@ -150,7 +150,7 @@ trait ArrayBasedDeformatter
     {
         $class = $map
             ? ($map->findClass($data[$map->keyField()])
-                ?? throw NoTypeMapDefinedForKey::create($map->keyField(), $field->phpName ?? $field->phpType))
+                ?? throw NoTypeMapDefinedForKey::create($data[$map->keyField()], $field->phpName ?? $field->phpType))
             : $field->phpType;
 
         return $this->getAnalyzer()->analyze($class, ClassDef::class)->properties;
