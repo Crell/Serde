@@ -24,7 +24,7 @@ use function Crell\fp\reduceWithKeys;
 
 class ObjectPropertyReader implements PropertyWriter, PropertyReader
 {
-    protected \Closure $populator;
+    protected readonly \Closure $populator;
 
     public function __construct(
         protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
@@ -130,22 +130,18 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
         $class = $this->getTargetClass($field, $dict);
 
-        [$object, $remaining] = $this->arrayToObject($dict, $class, $formatter, $this->typeMap($field));
+        [$object, $remaining] = $this->populateObject($dict, $class, $formatter, $this->typeMap($field));
         return $object;
     }
 
-    // Rename this.
-
     /**
-     *
-     *
      * @param array $dict
      * @param string $class
      * @param Deformatter $formatter
      * @param TypeMapper|null $map
      * @return [object, array]
      */
-    protected function arrayToObject(array $dict, string $class, Deformatter $formatter, ?TypeMapper $map = null): array
+    protected function populateObject(array $dict, string $class, Deformatter $formatter, ?TypeMapper $map = null): array
     {
         // Get the list of properties on the target class, taking
         // type maps into account.
@@ -185,7 +181,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
         $remaining = $formatter->getRemainingData($dict, $usedNames);
         foreach ($collectingObjects as $collectingField) {
-            [$object, $remaining] = $this->arrayToObject($remaining, $collectingField->phpType, $formatter, $collectingField->typeMap);
+            [$object, $remaining] = $this->populateObject($remaining, $collectingField->phpType, $formatter, $collectingField->typeMap);
             $props[$collectingField->phpName] = $object;
         }
 
