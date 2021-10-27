@@ -40,15 +40,12 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
      */
     public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        /** @var ClassDef $objectMetadata */
-        $objectMetadata = $this->analyzer->analyze($value, ClassDef::class);
-
         // This lets us read private values without messing with the Reflection API.
         $propReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
 
         /** @var \Crell\Serde\Dict $dict */
         $dict = pipe(
-            $objectMetadata->properties,
+            $this->analyzer->analyze($value, ClassDef::class)->properties,
             reduce(new Dict(), fn(Dict $dict, Field $f) => $this->flattenValue($dict, $f, $propReader)),
         );
 
@@ -69,85 +66,47 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             return $dict;
         }
 
-        if ($field->flatten) {
-//            $callback = match ($field->typeCategory) {
-//                TypeCategory::Array => $this->reduceArray(...),
-//                TypeCategory::Object => $this->reduceObject(...),
-//            };
-
-            if ($field->typeCategory === TypeCategory::Array) {
-                $c = function (Dict $dict, $val, $key) use ($field) {
-                    $extra = [];
-                    if ($map = $this->typeMap($field)) {
-                        $extra[$map->keyField()] = $map->findIdentifier($val::class);
-                    }
-                    $f = Field::create(serializedName: "$key", phpType: \get_debug_type($val), extraProperties: $extra);
-                    $dict->items[] = new CollectionItem(field: $f, value: $val);
-                    return $dict;
-                };
-                $dict = reduceWithKeys($dict, $c)($value);
-            } elseif ($field->typeCategory === TypeCategory::Object) {
-                $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
-                $c = function (Dict $dict, Field $prop) use ($subPropReader) {
-                    $val = $subPropReader($prop->phpName);
-                    if ($prop->flatten) {
-                        $dict = $this->flattenValue($dict, $prop, $subPropReader);
-                    } else {
-                        $dict->items[] = new CollectionItem(field: $prop, value: $val);
-                    }
-                    return $dict;
-                };
-                $dict = reduce($dict, $c)($this->analyzer->analyze($field->phpType, ClassDef::class)->properties);
-            }
-//            $dict->items = match ($field->typeCategory) {
-//                TypeCategory::Array => [...$dict->items, ...$this->flattenArray($field, $value)],
-//                TypeCategory::Object => [...$dict->items, ...$this->flattenObject($field, $value)],
-//                // @todo Better exception.
-//                default => throw new \RuntimeException('Invalid flattening field type'),
-//            };
-//            $dict->items = match ($field->typeCategory) {
-//                TypeCategory::Array => [...$dict->items, ...$this->flattenArray($field, $value)],
-//                TypeCategory::Object => [...$dict->items, ...$this->flattenObject($field, $value)],
-//                // @todo Better exception.
-//                default => throw new \RuntimeException('Invalid flattening field type'),
-//            };
-        } else {
+        if (!$field->flatten) {
             $dict->items[] = new CollectionItem(field: $field, value: $value);
+            return $dict;
         }
 
+        if ($field->typeCategory === TypeCategory::Array) {
+            // This really wants to be explicit partial application. :-(
+            $c = fn (Dict $dict, $val, $key) => $this->reduceArrayElement($dict, $val, $key, $this->typeMap($field));
+            return reduceWithKeys($dict, $c)($value);
+        }
+
+        if ($field->typeCategory === TypeCategory::Object) {
+            $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
+            // This really wants to be explicit partial application. :-(
+            $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader);
+            return reduce($dict, $c)($this->analyzer->analyze($field->phpType, ClassDef::class)->properties);
+        }
+
+        // @todo Better exception.
+        throw new \RuntimeException('Invalid flattening field type');
+    }
+
+    protected function reduceArrayElement(Dict $dict, $val, $key, ?TypeMapper $map): Dict
+    {
+        $extra = [];
+        if ($map) {
+            $extra[$map->keyField()] = $map->findIdentifier($val::class);
+        }
+        $f = Field::create(serializedName: "$key", phpType: \get_debug_type($val), extraProperties: $extra);
+        $dict->items[] = new CollectionItem(field: $f, value: $val);
         return $dict;
     }
 
-    protected function reduceObject(Dict $dict, ): Dict
+    protected function reduceObjectProperty(Dict $dict, Field $prop, callable $subPropReader): Dict
     {
-
-    }
-
-
-    protected function flattenArray(Field $field, array $arrayValue): array
-    {
-        $items = [];
-        foreach ($arrayValue as $k => $v) {
-            $extra = [];
-            if ($map = $this->typeMap($field)) {
-                $extra[$map->keyField()] = $map->findIdentifier($v::class);
-            }
-            $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v), extraProperties: $extra);
-            $items[] = new CollectionItem(field: $f, value: $v);
+        if ($prop->flatten) {
+            return $this->flattenValue($dict, $prop, $subPropReader);
         }
-        return $items;
-    }
 
-    protected function flattenObject(Field $field, object $value): array
-    {
-        $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
-
-        // PHPStorm will complain about this, because it's stub file is out of date
-        // and has the wrong argument names. It works.
-        return array_map(
-            callback: fn (Field $prop) => new CollectionItem(field: $prop, value: $subPropReader($prop)),
-            array: $this->analyzer->analyze($field->phpType, ClassDef::class)->properties,
-        );
+        $dict->items[] = new CollectionItem(field: $prop, value: $subPropReader($prop->phpName));
+        return $dict;
     }
 
     protected function typeMap(Field $field): ?TypeMapper
