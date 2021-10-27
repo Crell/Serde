@@ -13,7 +13,7 @@ class JsonFormatterTest extends ArrayBasedFormatterTest
         parent::setUp();
         $this->formatters = [new JsonFormatter()];
         $this->format = 'json';
-        $this->emptyData = '';
+        $this->emptyData = '{}';
     }
 
     protected function arrayify(mixed $serialized): array

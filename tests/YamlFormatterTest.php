@@ -14,7 +14,7 @@ class YamlFormatterTest extends ArrayBasedFormatterTest
         parent::setUp();
         $this->formatters = [new YamlFormatter()];
         $this->format = 'yaml';
-        $this->emptyData = '';
+        $this->emptyData = '{}';
     }
 
     protected function arrayify(mixed $serialized): array
