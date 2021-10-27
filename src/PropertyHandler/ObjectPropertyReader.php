@@ -181,12 +181,16 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
         $remaining = $formatter->getRemainingData($dict, $usedNames);
         foreach ($collectingObjects as $collectingField) {
+            // @todo For extra points, support type mapping on the collecting object.
+            // Theory: Would this allow for collecting into two separate dynamically typed
+            // objects from the same source array???
             [$object, $remaining] = $this->populateObject($remaining, $collectingField->phpType, $formatter, $collectingField->typeMap);
             $props[$collectingField->phpName] = $object;
         }
 
         if ($collectingArray) {
             $props[$collectingArray->phpName] = $remaining;
+            $remaining = [];
         }
 
         // If we later add support for erroring on extra unhandled fields,
