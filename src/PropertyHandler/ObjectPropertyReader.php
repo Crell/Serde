@@ -129,18 +129,40 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
         $class = $this->getTargetClass($field, $dict);
 
+        [$object, $remaining] = $this->arrayToObject($dict, $class, $formatter, $this->typeMap($field));
+        return $object;
+    }
+
+    // Rename this.
+
+    /**
+     *
+     *
+     * @param array $dict
+     * @param string $class
+     * @param Deformatter $formatter
+     * @param TypeMapper|null $map
+     * @return [object, array]
+     */
+    protected function arrayToObject(array $dict, string $class, Deformatter $formatter, ?TypeMapper $map = null): array
+    {
         // Get the list of properties on the target class, taking
         // type maps into account.
+        /** @var Field[] $properties */
         $properties = $this->analyzer->analyze($class, ClassDef::class)->properties;
 
         $props = [];
         $usedNames = [];
-        $collectingField = null;
+        $collectingArray = null;
+        /** @var Field[] $collectingObjects */
+        $collectingObjects = [];
 
         foreach ($properties as $propField) {
             $usedNames[] = $propField->serializedName;
-            if ($propField->flatten) {
-                $collectingField = $propField;
+            if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
+                $collectingArray = $propField;
+            } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
+                $collectingObjects[] = $propField;
             } else {
                 $value = $dict[$propField->serializedName] ?? SerdeError::Missing;
                 if ($value === SerdeError::Missing) {
@@ -153,19 +175,27 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             }
         }
 
-        if ($collectingField && $formatter instanceof SupportsCollecting) {
-            $remaining = $formatter->getRemainingData($dict, $usedNames);
-            $props[$collectingField->phpName] = match ($collectingField->typeCategory) {
-                TypeCategory::Array => $remaining,
-                TypeCategory::Object => $this->createObject($collectingField->phpType, $remaining),
-                // @todo Better exception.
-                default => throw new \RuntimeException('Invalid flattening field type'),
-            };
+        // We don't care about collecting, so just stop now.
+        // If we later add support for erroring on extra unhandled fields,
+        // this is where that logic would live.
+        if (! $formatter instanceof SupportsCollecting) {
+            return [$this->createObject($class, $props), []];
         }
 
-        // @todo What should happen if something is still set to Missing?
+        $remaining = $formatter->getRemainingData($dict, $usedNames);
+        foreach ($collectingObjects as $collectingField) {
+            [$object, $remaining] = $this->arrayToObject($remaining, $collectingField->phpType, $formatter, $collectingField->typeMap);
+            $props[$collectingField->phpName] = $object;
+        }
 
-        return $this->createObject($class, $props);
+        if ($collectingArray) {
+            $props[$collectingArray->phpName] = $remaining;
+        }
+
+        // If we later add support for erroring on extra unhandled fields,
+        // this is where that logic would live.
+
+        return [$this->createObject($class, $props), $remaining];
     }
 
     protected function createObject(string $class, array $props): object

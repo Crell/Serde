@@ -8,6 +8,8 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\Pagination\DetailedResults;
+use Crell\Serde\Records\Pagination\ProductType;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
 use Crell\Serde\Records\CircularReference;
@@ -709,6 +711,45 @@ abstract class SerdeTest extends TestCase
     }
 
     public function pagination_flatten_object_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function pagination_flatten_multiple_object(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new DetailedResults(
+            pagination: new Pagination(
+                total: 500,
+                offset: 40,
+                limit: 10,
+            ),
+            type: new ProductType(
+                name: 'Beep',
+                category: 'Boop'
+            ),
+            products: [
+                new Product('Widget', 4.95),
+                new Product('Gadget', 99.99),
+                new Product('Dohickey', 11.50),
+            ],
+            other: ['narf' => 'poink', 'bleep' => 'bloop']
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->pagination_flatten_multiple_object_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: DetailedResults::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function pagination_flatten_multiple_object_validate(mixed $serialized): void
     {
 
     }
