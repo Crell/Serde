@@ -10,7 +10,7 @@ class DetailedResults
 {
     public function __construct(
         #[Field(flatten: true)]
-        public Pagination $pagination,
+        public NestedPagination $pagination,
         #[Field(flatten: true)]
         public ProductType $type,
         #[Field(arrayType: Product::class)]

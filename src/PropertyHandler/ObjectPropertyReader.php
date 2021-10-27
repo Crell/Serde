@@ -20,6 +20,7 @@ use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMapper;
 use function Crell\fp\pipe;
 use function Crell\fp\reduce;
+use function Crell\fp\reduceWithKeys;
 
 class ObjectPropertyReader implements PropertyWriter, PropertyReader
 {
@@ -61,7 +62,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
     }
 
-    protected function flattenValue(Dict $dict, Field $field, callable $propReader): \Crell\Serde\Dict
+    protected function flattenValue(Dict $dict, Field $field, callable $propReader): Dict
     {
         $value = $propReader($field->phpName);
         if ($value === null) {
@@ -69,18 +70,59 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         }
 
         if ($field->flatten) {
-            $dict->items = match ($field->typeCategory) {
-                TypeCategory::Array => [...$dict->items, ...$this->flattenArray($field, $value)],
-                TypeCategory::Object => [...$dict->items, ...$this->flattenObject($field, $value)],
-                // @todo Better exception.
-                default => throw new \RuntimeException('Invalid flattening field type'),
-            };
+//            $callback = match ($field->typeCategory) {
+//                TypeCategory::Array => $this->reduceArray(...),
+//                TypeCategory::Object => $this->reduceObject(...),
+//            };
+
+            if ($field->typeCategory === TypeCategory::Array) {
+                $c = function (Dict $dict, $val, $key) use ($field) {
+                    $extra = [];
+                    if ($map = $this->typeMap($field)) {
+                        $extra[$map->keyField()] = $map->findIdentifier($val::class);
+                    }
+                    $f = Field::create(serializedName: "$key", phpType: \get_debug_type($val), extraProperties: $extra);
+                    $dict->items[] = new CollectionItem(field: $f, value: $val);
+                    return $dict;
+                };
+                $dict = reduceWithKeys($dict, $c)($value);
+            } elseif ($field->typeCategory === TypeCategory::Object) {
+                $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
+                $c = function (Dict $dict, Field $prop) use ($subPropReader) {
+                    $val = $subPropReader($prop->phpName);
+                    if ($prop->flatten) {
+                        $dict = $this->flattenValue($dict, $prop, $subPropReader);
+                    } else {
+                        $dict->items[] = new CollectionItem(field: $prop, value: $val);
+                    }
+                    return $dict;
+                };
+                $dict = reduce($dict, $c)($this->analyzer->analyze($field->phpType, ClassDef::class)->properties);
+            }
+//            $dict->items = match ($field->typeCategory) {
+//                TypeCategory::Array => [...$dict->items, ...$this->flattenArray($field, $value)],
+//                TypeCategory::Object => [...$dict->items, ...$this->flattenObject($field, $value)],
+//                // @todo Better exception.
+//                default => throw new \RuntimeException('Invalid flattening field type'),
+//            };
+//            $dict->items = match ($field->typeCategory) {
+//                TypeCategory::Array => [...$dict->items, ...$this->flattenArray($field, $value)],
+//                TypeCategory::Object => [...$dict->items, ...$this->flattenObject($field, $value)],
+//                // @todo Better exception.
+//                default => throw new \RuntimeException('Invalid flattening field type'),
+//            };
         } else {
             $dict->items[] = new CollectionItem(field: $field, value: $value);
         }
 
         return $dict;
     }
+
+    protected function reduceObject(Dict $dict, ): Dict
+    {
+
+    }
+
 
     protected function flattenArray(Field $field, array $arrayValue): array
     {
@@ -103,7 +145,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         // PHPStorm will complain about this, because it's stub file is out of date
         // and has the wrong argument names. It works.
         return array_map(
-            callback: static fn (Field $prop) => new CollectionItem(field: $prop, value: $subPropReader($prop->phpName)),
+            callback: fn (Field $prop) => new CollectionItem(field: $prop, value: $subPropReader($prop)),
             array: $this->analyzer->analyze($field->phpType, ClassDef::class)->properties,
         );
     }

@@ -6,11 +6,12 @@ namespace Crell\Serde\Records\Pagination;
 
 use Crell\Serde\Field;
 
-class Pagination
+class NestedPagination
 {
     public function __construct(
         public int $total,
-        public int $offset,
         public int $limit,
+        #[Field(flatten: true)]
+        public PaginationState $state,
     ) {}
 }

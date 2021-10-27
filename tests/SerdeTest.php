@@ -9,6 +9,8 @@ use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Pagination\DetailedResults;
+use Crell\Serde\Records\Pagination\NestedPagination;
+use Crell\Serde\Records\Pagination\PaginationState;
 use Crell\Serde\Records\Pagination\ProductType;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
@@ -723,10 +725,10 @@ abstract class SerdeTest extends TestCase
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new DetailedResults(
-            pagination: new Pagination(
+            pagination: new NestedPagination(
                 total: 500,
-                offset: 40,
                 limit: 10,
+                state: new PaginationState(40),
             ),
             type: new ProductType(
                 name: 'Beep',
