@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-interface TypeMapper
+use Crell\AttributeUtils\Inheritable;
+use Crell\AttributeUtils\TransitiveProperty;
+
+interface TypeMapper extends Inheritable, TransitiveProperty
 {
     public function keyField(): string;
 

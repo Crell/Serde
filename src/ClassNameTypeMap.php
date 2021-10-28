@@ -10,11 +10,16 @@ use Attribute;
  * A special case of a type map where the class name is its own identifier.
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
-class ClassNameTypeMap extends TypeMap
+class ClassNameTypeMap implements TypeMapper
 {
     public function __construct(
         public readonly string $key,
     ) {}
+
+    public function keyField(): string
+    {
+        return $this->key;
+    }
 
     public function findClass(string $id): ?string
     {

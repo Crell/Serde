@@ -160,7 +160,7 @@ class Field implements FromReflectionProperty, HasSubAttributes
 
     public function subAttributes(): array
     {
-        return [TypeMap::class => 'fromTypeMap'];
+        return [TypeMapper::class => 'fromTypeMap'];
     }
 
     public function fromTypeMap(?TypeMapper $map): void
