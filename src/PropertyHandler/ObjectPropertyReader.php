@@ -81,7 +81,15 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
             // This really wants to be explicit partial application. :-(
             $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader);
-            return reduce($dict, $c)($this->analyzer->analyze($field->phpType, ClassDef::class)->properties);
+            $properties = $this->analyzer->analyze($value::class, ClassDef::class)->properties;
+            $dict = reduce($dict, $c)($properties);
+            if ($map = $this->typeMap($field)) {
+                $f = Field::create(serializedName: $map->keyField(), phpType: 'string');
+                // The type map field MUST come first so that streaming deformatters
+                // can know their context.
+                $dict->items = [new CollectionItem(field: $f, value: $map->findIdentifier($value::class)), ...$dict->items];
+            }
+            return $dict;
         }
 
         // @todo Better exception.
@@ -179,15 +187,18 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             return [$this->createObject($class, $props), []];
         }
 
-        $remaining = $formatter->getRemainingData($dict, $usedNames);
+        $remaining = $dict;
         foreach ($collectingObjects as $collectingField) {
-            // @todo For extra points, support type mapping on the collecting object.
-            // Theory: Would this allow for collecting into two separate dynamically typed
-            // objects from the same source array???
-            [$object, $remaining] = $this->populateObject($remaining, $collectingField->phpType, $formatter, $collectingField->typeMap);
+            $remaining = $formatter->getRemainingData($remaining, $usedNames);
+            $targetClass = $this->getTargetClass($collectingField, $dict);
+            [$object, $remaining] = $this->populateObject($remaining, $targetClass, $formatter, $collectingField->typeMap);
             $props[$collectingField->phpName] = $object;
+            if ($map = $this->typeMap($collectingField)) {
+                $usedNames[] = $map->keyField();
+            }
         }
 
+        $remaining = $formatter->getRemainingData($remaining, $usedNames);
         if ($collectingArray) {
             $props[$collectingArray->phpName] = $remaining;
             $remaining = [];

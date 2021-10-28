@@ -203,4 +203,19 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('beep', $toTest['b2']);
         self::assertEquals('1918-11-11T11:11:11.000-06:00', $toTest['c2']);
     }
+
+    public function flatten_and_map_objects_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals('one', $toTest['first']);
+        self::assertEquals('two', $toTest['second']);
+
+        self::assertEquals('five', $toTest['fifth']);
+        self::assertEquals('six', $toTest['sixth']);
+
+        self::assertEquals('data', $toTest['more']);
+        self::assertEquals('here', $toTest['goes']);
+    }
+
 }

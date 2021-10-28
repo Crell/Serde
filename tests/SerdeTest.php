@@ -8,6 +8,9 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\MultiCollect\ThingOneA;
+use Crell\Serde\Records\MultiCollect\ThingTwoC;
+use Crell\Serde\Records\MultiCollect\Wrapper;
 use Crell\Serde\Records\Pagination\DetailedResults;
 use Crell\Serde\Records\Pagination\NestedPagination;
 use Crell\Serde\Records\Pagination\PaginationState;
@@ -775,6 +778,42 @@ abstract class SerdeTest extends TestCase
     }
 
     public function native_object_serialization_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function flatten_and_map_objects(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new Wrapper(
+            one: new ThingOneA(
+                first: 'one',
+                second: 'two',
+            ),
+            two: new ThingTwoC(
+                fifth: 'five',
+                sixth: 'six',
+            ),
+            other: [
+                'more' => 'data',
+                'goes' => 'here',
+            ]
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->flatten_and_map_objects_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Wrapper::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function flatten_and_map_objects_validate(mixed $serialized): void
     {
 
     }
