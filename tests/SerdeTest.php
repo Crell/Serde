@@ -8,6 +8,7 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\LiteralEnums;
 use Crell\Serde\Records\MultiCollect\ThingOneA;
 use Crell\Serde\Records\MultiCollect\ThingTwoC;
 use Crell\Serde\Records\MultiCollect\Wrapper;
@@ -50,6 +51,7 @@ use Crell\Serde\Records\Tasks\SmallTask;
 use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
 use Crell\Serde\Records\Visibility;
+use Crell\Serde\Renaming\LiteralName;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -817,5 +819,4 @@ abstract class SerdeTest extends TestCase
     {
 
     }
-
 }
