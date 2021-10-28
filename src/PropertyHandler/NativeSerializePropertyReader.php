@@ -7,19 +7,14 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
-use Crell\Serde\ClassDef;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
-use Crell\Serde\PropertyHandler\PropertyReader;
-use Crell\Serde\PropertyHandler\PropertyWriter;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
-use function Crell\fp\pipe;
-use function Crell\fp\reduce;
 
 class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
 {
