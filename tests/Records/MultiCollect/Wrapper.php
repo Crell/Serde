@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde\Records\MultiCollect;
 
 use Crell\Serde\Field;
-use Crell\Serde\TypeMap;
+use Crell\Serde\StaticTypeMap;
 
 // @todo Make this actually work, round-trip, and we solve the "type"/"renderType" question for TCA.
 
@@ -21,7 +21,7 @@ class Wrapper
     ) {}
 }
 
-#[TypeMap(key: 'group_one', map: [
+#[StaticTypeMap(key: 'group_one', map: [
     'thing_a' => ThingOneA::class,
     'thing_b' => ThingOneB::class,
 ])]
@@ -30,7 +30,7 @@ interface GroupOne
 
 }
 
-#[TypeMap(key: 'group_two', map: [
+#[StaticTypeMap(key: 'group_two', map: [
     'thing_c' => ThingTwoC::class,
     'thing_d' => ThingTwoD::class,
 ])]

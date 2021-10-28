@@ -9,7 +9,7 @@ use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
 use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;
-use Crell\Serde\TypeMapper;
+use Crell\Serde\TypeMap;
 
 /**
  * Utility implementations for array-based formats.
@@ -83,10 +83,10 @@ trait ArrayBasedDeformatter
      * @param mixed $decoded
      * @param Field $field
      * @param callable $recursor
-     * @param TypeMapper|null $typeMap
+     * @param TypeMap|null $typeMap
      * @return array|SerdeError
      */
-    public function deserializeObject(mixed $decoded, Field $field, callable $recursor, ?TypeMapper $typeMap): array|SerdeError
+    public function deserializeObject(mixed $decoded, Field $field, callable $recursor, ?TypeMap $typeMap): array|SerdeError
     {
         if (!isset($decoded[$field->serializedName])) {
             return SerdeError::Missing;
@@ -146,7 +146,7 @@ trait ArrayBasedDeformatter
      * The key field is kept in the data so that the property writer
      * can also look up the right type.
      */
-    protected function propertyList(Field $field, ?TypeMapper $map, array $data): array
+    protected function propertyList(Field $field, ?TypeMap $map, array $data): array
     {
         $class = $map
             ? ($map->findClass($data[$map->keyField()])

@@ -17,7 +17,7 @@ use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
-use Crell\Serde\TypeMapper;
+use Crell\Serde\TypeMap;
 use function Crell\fp\pipe;
 use function Crell\fp\reduce;
 
@@ -50,7 +50,7 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
         return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
     }
 
-    protected function typeMap(Field $field): ?TypeMapper
+    protected function typeMap(Field $field): ?TypeMap
     {
         return $field->typeMap;
     }

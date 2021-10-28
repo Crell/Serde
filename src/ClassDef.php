@@ -15,7 +15,7 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
     /**
      * The type map, if any, that applies to this class.
      */
-    public readonly ?TypeMapper $typeMap;
+    public readonly ?TypeMap $typeMap;
 
     /** @var Field[] */
     public readonly array $properties;
@@ -48,10 +48,10 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
 
     public function subAttributes(): array
     {
-        return [TypeMap::class => 'fromTypeMap'];
+        return [StaticTypeMap::class => 'fromTypeMap'];
     }
 
-    public function fromTypeMap(?TypeMapper $map): void
+    public function fromTypeMap(?TypeMap $map): void
     {
         // This may assign to null, which is OK as that will
         // evaluate to false when we need it to.

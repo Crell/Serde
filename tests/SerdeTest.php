@@ -270,7 +270,7 @@ abstract class SerdeTest extends TestCase
     {
         $customHandler = new MappedObjectPropertyReader(
             supportedTypes: [Task::class],
-            typeMap: new TypeMap(key: 'size', map: [
+            typeMap: new StaticTypeMap(key: 'size', map: [
                 'big' => BigTask::class,
                 'small' => SmallTask::class,
             ]),
@@ -303,7 +303,7 @@ abstract class SerdeTest extends TestCase
     {
         $customHandler = new MappedObjectPropertyReader(
             supportedTypes: [Task::class],
-            typeMap: new class implements TypeMapper {
+            typeMap: new class implements TypeMap {
                 public function keyField(): string
                 {
                     return 'size';
@@ -571,7 +571,7 @@ abstract class SerdeTest extends TestCase
     {
         $customHandler = new MappedObjectPropertyReader(
             supportedTypes: [Records\Drupal\Field::class],
-            typeMap: new class implements TypeMapper {
+            typeMap: new class implements TypeMap {
                 public function keyField(): string
                 {
                     return 'type';

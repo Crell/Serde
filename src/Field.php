@@ -20,7 +20,7 @@ class Field implements FromReflectionProperty, HasSubAttributes
     /**
      * The type map, if any, that applies to this field.
      */
-    public readonly ?TypeMapper $typeMap;
+    public readonly ?TypeMap $typeMap;
 
     /**
      * The native PHP type, as the reflection system defines it.
@@ -160,10 +160,10 @@ class Field implements FromReflectionProperty, HasSubAttributes
 
     public function subAttributes(): array
     {
-        return [TypeMapper::class => 'fromTypeMap'];
+        return [TypeMap::class => 'fromTypeMap'];
     }
 
-    public function fromTypeMap(?TypeMapper $map): void
+    public function fromTypeMap(?TypeMap $map): void
     {
         // This may assign to null, which is OK as that will
         // evaluate to false when we need it to.

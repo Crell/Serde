@@ -17,7 +17,7 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
-use Crell\Serde\TypeMapper;
+use Crell\Serde\TypeMap;
 use function Crell\fp\pipe;
 use function Crell\fp\reduce;
 use function Crell\fp\reduceWithKeys;
@@ -96,7 +96,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         throw new \RuntimeException('Invalid flattening field type');
     }
 
-    protected function reduceArrayElement(Dict $dict, $val, $key, ?TypeMapper $map): Dict
+    protected function reduceArrayElement(Dict $dict, $val, $key, ?TypeMap $map): Dict
     {
         $extra = [];
         if ($map) {
@@ -117,7 +117,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return $dict;
     }
 
-    protected function typeMap(Field $field): ?TypeMapper
+    protected function typeMap(Field $field): ?TypeMap
     {
         return $field->typeMap;
     }
@@ -146,10 +146,10 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
      * @param array $dict
      * @param string $class
      * @param Deformatter $formatter
-     * @param TypeMapper|null $map
+     * @param TypeMap|null $map
      * @return [object, array]
      */
-    protected function populateObject(array $dict, string $class, Deformatter $formatter, ?TypeMapper $map = null): array
+    protected function populateObject(array $dict, string $class, Deformatter $formatter, ?TypeMap $map = null): array
     {
         // Get the list of properties on the target class, taking
         // type maps into account.

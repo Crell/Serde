@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\RootMap;
 
-use Crell\Serde\TypeMap;
+use Crell\Serde\StaticTypeMap;
 
-#[TypeMap('type', [
+#[StaticTypeMap('type', [
     'a' => TypeA::class,
     'b' => TypeB::class,
 ])]
