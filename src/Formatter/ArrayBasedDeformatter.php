@@ -10,6 +10,7 @@ use Crell\Serde\Field;
 use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeMap;
+use function Crell\fp\reduceWithKeys;
 
 /**
  * Utility implementations for array-based formats.
@@ -47,15 +48,10 @@ trait ArrayBasedDeformatter
         }
 
         if (class_exists($field?->typeField?->arrayType ?? '')) {
-            $ret = [];
-            foreach ($decoded[$field->serializedName] as $k => $v) {
-                $f = Field::create(serializedName: "$k", phpType: $field->typeField->arrayType);
-                $ret[$k] = $recursor($decoded[$field->serializedName], $f);
-            }
-            return $ret;
+            return $this->upcastArray($decoded[$field->serializedName], $recursor, $field->typeField->arrayType);
         }
 
-        return $decoded[$field->serializedName];
+        return $this->upcastArray($decoded[$field->serializedName], $recursor);
     }
 
     public function deserializeDictionary(mixed $decoded, Field $field, callable $recursor): array|SerdeError
@@ -69,22 +65,24 @@ trait ArrayBasedDeformatter
         }
 
         if (class_exists($field?->typeField?->arrayType ?? '')) {
-            $ret = [];
-            foreach ($decoded[$field->serializedName] as $k => $v) {
-                $f = Field::create(serializedName: "$k", phpType: $field->typeField->arrayType);
-                $ret[$k] = $recursor($decoded[$field->serializedName], $f);
-            }
-            return $ret;
+            return $this->upcastArray($decoded[$field->serializedName], $recursor, $field->typeField->arrayType);
         }
 
-        $data = $decoded[$field->serializedName];
-        $ret = [];
-        foreach ($data as $k => $v) {
-            $f = Field::create(serializedName: $k, phpType: get_debug_type($v));
+        return $this->upcastArray($decoded[$field->serializedName], $recursor);
+    }
+
+    /**
+     * Deserializes all elements of an array, through the recursor.
+     */
+    protected function upcastArray(array $data, callable $recursor, ?string $type = null): array
+    {
+        $upcast = function(array $ret, mixed$v, int|string $k) use ($recursor, $type, $data) {
+            $f = Field::create(serializedName: "$k", phpType: $type?? get_debug_type($v));
             $ret[$k] = $recursor($data, $f);
-        }
+            return $ret;
+        };
 
-        return $ret;
+        return reduceWithKeys([], $upcast)($data);
     }
 
     /**
