@@ -204,6 +204,7 @@ class Field implements FromReflectionProperty, HasSubAttributes
         $new->serializedName = $serializedName;
         $new->phpType = $phpType;
         $new->typeMap = null;
+        $new->typeField = null;
         $new->extraProperties = $extraProperties;
         $new->finalize();
         return $new;

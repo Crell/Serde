@@ -8,6 +8,7 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\ImplodingSequence;
 use Crell\Serde\Records\InvalidFieldType;
 use Crell\Serde\Records\LiteralEnums;
 use Crell\Serde\Records\MultiCollect\ThingOneA;
@@ -834,6 +835,31 @@ abstract class SerdeTest extends TestCase
 
         // This should throw an exception when the loop is detected.
         $serialized = $s->serialize($a, $this->format);
+    }
+
+    /**
+     * @test
+     */
+    public function sequence_imploding(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ImplodingSequence(
+            values: ['a', 'b', 'c'],
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->sequence_imploding_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: ImplodingSequence::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function sequence_imploding_validate(mixed $serialized): void
+    {
+
     }
 
 }

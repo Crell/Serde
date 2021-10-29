@@ -9,11 +9,19 @@ use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\Sequence;
+use Crell\Serde\SequenceField;
 
 class SequencePropertyReader implements PropertyReader, PropertyWriter
 {
     public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
+        /** @var ?SequenceField $typeField */
+        $typeField = $field?->typeField;
+        if ($typeField?->implodeOn) {
+            $val = \implode($typeField->implodeOn, $value);
+            return $formatter->serializeString($runningValue, $field, $val);
+        }
+
         $seq = new Sequence();
         foreach ($value as $k => $v) {
             $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
@@ -30,6 +38,19 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
 
     public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
     {
+        /** @var ?SequenceField $typeField */
+        $typeField = $field?->typeField;
+        // The extra type check is necessary because it might be a DictionaryField.
+        // We cannot easily tell them apart at the moment.
+        if ($typeField instanceof SequenceField && $typeField?->implodeOn) {
+            $val = $formatter->deserializeString($source, $field);
+            $parts = explode($typeField->implodeOn, $val);
+            if ($typeField->trim) {
+                $parts = array_map(trim(...), $parts);
+            }
+            return $parts;
+        }
+
         return $formatter->deserializeSequence($source, $field, $recursor);
     }
 
