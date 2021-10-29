@@ -41,7 +41,7 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
         return $this->includeFieldsByDefault;
     }
 
-    public static function propertyAttribute(): string
+    public function propertyAttribute(): string
     {
         return Field::class;
     }
