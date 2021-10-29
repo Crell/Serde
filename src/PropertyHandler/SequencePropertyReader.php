@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\CollectionItem;
+use Crell\Serde\DictionaryField;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
@@ -56,8 +57,10 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
 
     public function canWrite(Field $field, string $format): bool
     {
-        // This is not good, as we cannot differentiate from dictionaries. :-(
-        return $field->phpType === 'array';
+        $typeField = $field?->typeField;
+        // This may still catch a dictionary that is unmarked. That is unavoidable.
+        // Fortunately it doesn't break in practice because PHP doesn't care.
+        return $field->phpType === 'array' && ($typeField === null || $typeField instanceof SequenceField);
     }
 }
 

@@ -218,11 +218,12 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('here', $toTest['goes']);
     }
 
-    public function sequence_imploding_validate(mixed $serialized): void
+    public function array_imploding_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
 
-        self::assertEquals('a, b, c', $toTest['values']);
+        self::assertEquals('a, b, c', $toTest['seq']);
+        self::assertEquals('a=A, b=B, c=C', $toTest['dict']);
     }
 
 }

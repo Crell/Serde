@@ -6,13 +6,22 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
+use Crell\Serde\DictionaryField;
 use Crell\Serde\Field;
+use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
+use Crell\Serde\SequenceField;
 
-class DictionaryPropertyReader implements PropertyReader
+class DictionaryPropertyReader implements PropertyReader, PropertyWriter
 {
     public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
     {
+        /** @var ?DictionaryField $typeField */
+        $typeField = $field?->typeField;
+        if ($typeField?->shouldImplode()) {
+            return $formatter->serializeString($runningValue, $field, $typeField->implode($value));
+        }
+
         $dict = new Dict();
         foreach ($value as $k => $v) {
             $f = Field::create(serializedName: $k, phpType: \get_debug_type($v));
@@ -26,4 +35,27 @@ class DictionaryPropertyReader implements PropertyReader
     {
         return $field->phpType === 'array' && !\array_is_list($value);
     }
+
+    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    {
+        /** @var ?DictionaryField $typeField */
+        $typeField = $field?->typeField;
+        // The extra type check is necessary because it might be a SequenceField.
+        // We cannot easily tell them apart at the moment.
+        if ($typeField instanceof DictionaryField && $typeField?->implodeOn) {
+            $val = $formatter->deserializeString($source, $field);
+            return $typeField->explode($val);
+        }
+
+        return $formatter->deserializeDictionary($source, $field, $recursor);
+    }
+
+    public function canWrite(Field $field, string $format): bool
+    {
+        $typeField = $field?->typeField;
+
+        return $field->phpType === 'array' && ($typeField === null || $typeField instanceof DictionaryField);
+    }
+
+
 }
