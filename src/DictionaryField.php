@@ -12,4 +12,9 @@ class DictionaryField implements TypeField
     public function __construct(
         public readonly ?string $arrayType = null,
     ) {}
+
+    public function acceptsType(string $type): bool
+    {
+        return $type === 'array';
+    }
 }

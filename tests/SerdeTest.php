@@ -8,6 +8,7 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\InvalidFieldType;
 use Crell\Serde\Records\LiteralEnums;
 use Crell\Serde\Records\MultiCollect\ThingOneA;
 use Crell\Serde\Records\MultiCollect\ThingTwoC;
@@ -819,4 +820,20 @@ abstract class SerdeTest extends TestCase
     {
 
     }
+
+    /**
+     * @test
+     */
+    public function invalid_type_field(): void
+    {
+        $this->expectException(FieldTypeIncompatible::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $a = new InvalidFieldType();
+
+        // This should throw an exception when the loop is detected.
+        $serialized = $s->serialize($a, $this->format);
+    }
+
 }

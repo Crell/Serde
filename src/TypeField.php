@@ -6,5 +6,5 @@ namespace Crell\Serde;
 
 interface TypeField
 {
-
+    public function acceptsType(string $type): bool;
 }

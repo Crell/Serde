@@ -180,6 +180,9 @@ class Field implements FromReflectionProperty, HasSubAttributes
 
     public function fromTypeField(?TypeField $typeField): void
     {
+        if ($typeField && !$typeField?->acceptsType($this->phpType)) {
+            throw FieldTypeIncompatible::create($typeField::class, $this->phpType);
+        }
         // This may assign to null, which is OK as that will
         // evaluate to false when we need it to.
         $this->typeField = $typeField;
