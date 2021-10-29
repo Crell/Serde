@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde\Records\Pagination;
 
 use Crell\Serde\Field;
+use Crell\Serde\SequenceField;
 
 class DetailedResults
 {
@@ -13,7 +14,7 @@ class DetailedResults
         public NestedPagination $pagination,
         #[Field(flatten: true)]
         public ProductType $type,
-        #[Field(arrayType: Product::class)]
+        #[SequenceField(arrayType: Product::class)]
         public array $products,
         #[Field(flatten: true)]
         public array $other = [],

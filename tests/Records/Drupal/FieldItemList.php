@@ -11,7 +11,7 @@ class FieldItemList
     public function __construct(
         public string $langcode = 'en',
         /** @var array<int, Field> */
-        #[Serde\Field(arrayType: Field::class)]
+        #[Serde\SequenceField(arrayType: Field::class)]
         public array $list = [],
     ) {
     }

@@ -9,6 +9,6 @@ use Crell\Serde;
 trait Fieldable
 {
     /** @var array<int, FieldItemList> */
-    #[Serde\Field(arrayType: FieldItemList::class)]
+    #[Serde\SequenceField(arrayType: FieldItemList::class)]
     public array $fields;
 }

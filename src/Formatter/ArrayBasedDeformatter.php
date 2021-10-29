@@ -46,10 +46,10 @@ trait ArrayBasedDeformatter
             return SerdeError::Missing;
         }
 
-        if ($field->arrayType && class_exists($field->arrayType)) {
+        if (class_exists($field?->typeField?->arrayType ?? '')) {
             $ret = [];
             foreach ($decoded[$field->serializedName] as $k => $v) {
-                $f = Field::create(serializedName: "$k", phpType: $field->arrayType);
+                $f = Field::create(serializedName: "$k", phpType: $field->typeField->arrayType);
                 $ret[$k] = $recursor($decoded[$field->serializedName], $f);
             }
             return $ret;

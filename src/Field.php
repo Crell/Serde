@@ -23,6 +23,13 @@ class Field implements FromReflectionProperty, HasSubAttributes
     public readonly ?TypeMap $typeMap;
 
     /**
+     * The type field, if any, that applies to this field.
+     *
+     * This property holds any type-specific information defined.
+     */
+    public readonly ?TypeField $typeField;
+
+    /**
      * The native PHP type, as the reflection system defines it.
      */
     public readonly string $phpType;
@@ -83,8 +90,6 @@ class Field implements FromReflectionProperty, HasSubAttributes
         protected readonly bool $useDefault = true,
         /** True to flatten an array on serialization and collect into it when deserializing. */
         public readonly bool $flatten = false,
-        /** For an array property, specifies the class type of each item in the array. */
-        public readonly ?string $arrayType = null,
         /** Set true to exclude this field from serialization entirely. */
         public readonly bool $exclude = false,
     ) {
@@ -160,7 +165,10 @@ class Field implements FromReflectionProperty, HasSubAttributes
 
     public function subAttributes(): array
     {
-        return [TypeMap::class => 'fromTypeMap'];
+        return [
+            TypeMap::class => 'fromTypeMap',
+            TypeField::class => 'fromTypeField',
+        ];
     }
 
     public function fromTypeMap(?TypeMap $map): void
@@ -168,6 +176,13 @@ class Field implements FromReflectionProperty, HasSubAttributes
         // This may assign to null, which is OK as that will
         // evaluate to false when we need it to.
         $this->typeMap = $map;
+    }
+
+    public function fromTypeField(?TypeField $typeField): void
+    {
+        // This may assign to null, which is OK as that will
+        // evaluate to false when we need it to.
+        $this->typeField = $typeField;
     }
 
     /**

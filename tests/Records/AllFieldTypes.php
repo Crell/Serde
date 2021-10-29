@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records;
 
+use Crell\Serde\DictionaryField;
 use Crell\Serde\Field;
+use Crell\Serde\SequenceField;
 
 /**
  * A test class that includes all meaningful types of field, for testing purposes.
@@ -22,9 +24,9 @@ class AllFieldTypes
         public array $simpleArray = [],
         public array $assocArray = [],
         public ?Point $simpleObject = null,
-        #[Field(arrayType: Point::class)]
+        #[SequenceField(arrayType: Point::class)]
         public array $objectList = [],
-        #[Field(arrayType: Point::class)]
+        #[DictionaryField(arrayType: Point::class)]
         public array $objectMap = [],
         public array $nestedArray = [],
         public Size $size = Size::Small,
