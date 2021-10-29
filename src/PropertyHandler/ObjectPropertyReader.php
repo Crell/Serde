@@ -235,7 +235,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         $map = $this->typeMap($field);
         return $map
             ? ($map->findClass($dict[$map->keyField()])
-                ?? throw NoTypeMapDefinedForKey::create($map->keyField(), $field->phpName))
+                ?? throw NoTypeMapDefinedForKey::create($dict[$map->keyField()], $field->phpName))
             : $field->phpType;
     }
 
