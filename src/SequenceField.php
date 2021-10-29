@@ -22,4 +22,23 @@ class SequenceField implements TypeField
     {
         return $type === 'array';
     }
+
+    public function shouldImplode(): bool
+    {
+        return !is_null($this->implodeOn);
+    }
+
+    public function implode(array $array): string
+    {
+        return \implode($this->implodeOn, $array);
+    }
+
+    public function explode(string $in): array
+    {
+        $parts = \explode($this->implodeOn, $in);
+        if ($this->trim) {
+            $parts = array_map(trim(...), $parts);
+        }
+        return $parts;
+    }
 }

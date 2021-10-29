@@ -18,9 +18,8 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
     {
         /** @var ?SequenceField $typeField */
         $typeField = $field?->typeField;
-        if ($typeField?->implodeOn) {
-            $val = \implode($typeField->implodeOn, $value);
-            return $formatter->serializeString($runningValue, $field, $val);
+        if ($typeField?->shouldImplode()) {
+            return $formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
         $seq = new Sequence();
@@ -45,11 +44,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof SequenceField && $typeField?->implodeOn) {
             $val = $formatter->deserializeString($source, $field);
-            $parts = explode($typeField->implodeOn, $val);
-            if ($typeField->trim) {
-                $parts = array_map(trim(...), $parts);
-            }
-            return $parts;
+            return $typeField->explode($val);
         }
 
         return $formatter->deserializeSequence($source, $field, $recursor);
