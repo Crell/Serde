@@ -173,6 +173,8 @@ abstract class SerdeTest extends TestCase
             ],
             size: Size::Large,
             backedSize: BackedSize::Large,
+            implodedSeq: [1, 2, 3],
+            implodedDict: ['a' => 'A', 'b' => 'B'],
 //            untyped: 'beep',
         );
 

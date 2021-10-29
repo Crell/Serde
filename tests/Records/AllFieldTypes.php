@@ -31,6 +31,10 @@ class AllFieldTypes
         public array $nestedArray = [],
         public Size $size = Size::Small,
         public BackedSize $backedSize = BackedSize::Small,
+        #[SequenceField(implodeOn: ',')]
+        public array $implodedSeq = [],
+        #[DictionaryField(implodeOn: ',', joinOn: '=')]
+        public array $implodedDict = [],
 //        public $untyped = null,
 //        public $resource = null,
     ) {}

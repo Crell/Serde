@@ -11,6 +11,7 @@ use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\Sequence;
 use Crell\Serde\SequenceField;
+use Crell\Serde\SerdeError;
 
 class SequencePropertyReader implements PropertyReader, PropertyWriter
 {
@@ -44,7 +45,9 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof SequenceField && $typeField?->implodeOn) {
             $val = $formatter->deserializeString($source, $field);
-            return $typeField->explode($val);
+            return $val === SerdeError::Missing
+                ? null
+                : $typeField->explode($val);
         }
 
         return $formatter->deserializeSequence($source, $field, $recursor);

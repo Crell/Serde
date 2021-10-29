@@ -11,6 +11,7 @@ use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\SequenceField;
+use Crell\Serde\SerdeError;
 
 class DictionaryPropertyReader implements PropertyReader, PropertyWriter
 {
@@ -44,7 +45,9 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof DictionaryField && $typeField?->implodeOn) {
             $val = $formatter->deserializeString($source, $field);
-            return $typeField->explode($val);
+            return $val === SerdeError::Missing
+                ? null
+                : $typeField->explode($val);
         }
 
         return $formatter->deserializeDictionary($source, $field, $recursor);
