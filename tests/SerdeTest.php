@@ -644,6 +644,12 @@ abstract class SerdeTest extends TestCase
      */
     public function mapped_collected_dictionary(): void
     {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new ThingList(name: 'list', things: [
@@ -671,6 +677,12 @@ abstract class SerdeTest extends TestCase
      */
     public function mapped_collected_sequence(): void
     {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new ThingList(name: 'list', things: [
@@ -698,6 +710,12 @@ abstract class SerdeTest extends TestCase
      */
     public function pagination_flatten_object(): void
     {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new Results(
@@ -732,6 +750,12 @@ abstract class SerdeTest extends TestCase
      */
     public function pagination_flatten_multiple_object(): void
     {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new DetailedResults(
@@ -794,6 +818,12 @@ abstract class SerdeTest extends TestCase
      */
     public function flatten_and_map_objects(): void
     {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $data = new Wrapper(
