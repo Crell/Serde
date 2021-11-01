@@ -6,6 +6,8 @@ namespace Crell\Serde\Records;
 
 use Crell\Serde\DictionaryField;
 use Crell\Serde\Field;
+use Crell\Serde\Records\MultiCollect\GroupOne;
+use Crell\Serde\Records\MultiCollect\ThingOneA;
 use Crell\Serde\SequenceField;
 
 /**
@@ -35,6 +37,8 @@ class AllFieldTypes
         public array $implodedSeq = [],
         #[DictionaryField(implodeOn: ',', joinOn: '=')]
         public array $implodedDict = [],
+        #[Field(flatten: true)]
+        public GroupOne $flattenedObject = new ThingOneA(),
 //        public $untyped = null,
 //        public $resource = null,
     ) {}

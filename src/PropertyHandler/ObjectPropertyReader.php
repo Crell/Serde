@@ -190,11 +190,16 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         $remaining = $dict;
         foreach ($collectingObjects as $collectingField) {
             $remaining = $formatter->getRemainingData($remaining, $usedNames);
-            $targetClass = $this->getTargetClass($collectingField, $dict);
-            [$object, $remaining] = $this->populateObject($remaining, $targetClass, $formatter, $collectingField->typeMap);
-            $props[$collectingField->phpName] = $object;
-            if ($map = $this->typeMap($collectingField)) {
-                $usedNames[] = $map->keyField();
+            // It's possible there will be a class map but no mapping field in
+            // the data. In that case, either set a default or just ignore the field.
+            if ($targetClass = $this->getTargetClass($collectingField, $dict)) {
+                [$object, $remaining] = $this->populateObject($remaining, $targetClass, $formatter, $collectingField->typeMap);
+                $props[$collectingField->phpName] = $object;
+                if ($map = $this->typeMap($collectingField)) {
+                    $usedNames[] = $map->keyField();
+                }
+            } elseif ($collectingField->shouldUseDefault) {
+                $props[$collectingField->phpName] = $collectingField->defaultValue;
             }
         }
 
@@ -230,13 +235,21 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return $new;
     }
 
-    protected function getTargetClass(Field $field, array $dict): string
+    protected function getTargetClass(Field $field, array $dict): ?string
     {
-        $map = $this->typeMap($field);
-        return $map
-            ? ($map->findClass($dict[$map->keyField()])
-                ?? throw NoTypeMapDefinedForKey::create($dict[$map->keyField()], $field->phpName))
-            : $field->phpType;
+        if (!$map = $this->typeMap($field)) {
+            return $field->phpType;
+        }
+
+        if (! $key = ($dict[$map->keyField()] ?? null)) {
+            return null;
+        }
+
+        if (!$class = $map->findClass($key)) {
+            throw NoTypeMapDefinedForKey::create($key, $field->phpName);
+        }
+
+        return $class;
     }
 
     public function canWrite(Field $field, string $format): bool
