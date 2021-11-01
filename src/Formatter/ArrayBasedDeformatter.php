@@ -9,6 +9,7 @@ use Crell\Serde\ClassDef;
 use Crell\Serde\Field;
 use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;
+use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
 use function Crell\fp\reduceWithKeys;
 
@@ -102,42 +103,61 @@ trait ArrayBasedDeformatter
             return SerdeError::FormatError;
         }
 
+        // Now that we have an array of the raw data, some values need to be
+        // recursively upcast to objects themselves, based on the information
+        // in the object metadata for the target object.
+
         $data = $decoded[$field->serializedName];
 
-        $collectingField = null;
         $usedNames = [];
+        $collectingArray = null;
+        /** @var Field[] $collectingObjects */
+        $collectingObjects = [];
 
         $ret = [];
 
-        $properties = $this->propertyList($field, $typeMap, $data);
-
-        // First pull out the properties we know about.
-        /** @var Field $prop */
-        foreach ($properties as $prop) {
-            $usedNames[] = $prop->serializedName;
-            if ($prop->flatten) {
-                $collectingField = $prop;
-                continue;
+        /** @var Field $propField */
+        foreach ($this->propertyList($field, $typeMap, $data) as $propField) {
+            $usedNames[] = $propField->serializedName;
+            if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
+                $collectingArray = $propField;
+            } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
+                $collectingObjects[] = $propField;
+            } else {
+                $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
+                    ? $recursor($data, $propField)
+                    : $data[$propField->serializedName] ?? SerdeError::Missing;
             }
-            $ret[$prop->serializedName] = ($prop->typeCategory->isEnum() || $prop->typeCategory->isCompound())
-                ? $recursor($data, $prop)
-                : $data[$prop->serializedName] ?? SerdeError::Missing;
         }
 
         // Any other values are for a collecting field, if any,
-        // but may need further processing according to the collecting field.
+        // but may need to be upcast themselves.
+
+        // First upcast any values that will become properties of a collecting object.
         $remaining = $this->getRemainingData($data, $usedNames);
-        // Object collecting doesn't support type maps, so can be handled by
-        // the generic version in the else clause.
-        if ($collectingField?->phpType === 'array' && $collectingField?->typeMap) {
+        foreach ($collectingObjects as $collectingField) {
+            $remaining = $this->getRemainingData($remaining, $usedNames);
+            $nestedProps = $this->propertyList($collectingField, $collectingField?->typeMap, $remaining);
+            foreach ($nestedProps as $propField) {
+                $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
+                    ? $recursor($data, $propField)
+                    : $remaining[$propField->serializedName] ?? SerdeError::Missing;
+                $usedNames[] = $propField->serializedName;
+            }
+        }
+
+        // Then IF the remaining data is going to be collected to an array,
+        // and that array has a type map, upcast all elements of that array to
+        // the appropriate type.
+        $remaining = $this->getRemainingData($remaining, $usedNames);
+        if ($collectingArray?->typeMap) {
             foreach ($remaining as $k => $v) {
-                $class = $collectingField->typeMap->findClass($v[$collectingField->typeMap->keyField()]);
+                $class = $collectingArray->typeMap->findClass($v[$collectingArray->typeMap->keyField()]);
                 $ret[$k] = $recursor($remaining, Field::create(serializedName: "$k", phpType: $class));
             }
         } else {
-            foreach ($remaining as $k => $v) {
-                $ret[$k] = $v;
-            }
+            // Otherwise, just tack on whatever is left to the processed data.
+            $ret = [...$ret, ...$remaining];
         }
 
         return $ret;
@@ -154,12 +174,28 @@ trait ArrayBasedDeformatter
      */
     protected function propertyList(Field $field, ?TypeMap $map, array $data): array
     {
-        $class = $map
-            ? ($map->findClass($data[$map->keyField()])
-                ?? throw NoTypeMapDefinedForKey::create($data[$map->keyField()], $field->phpName ?? $field->phpType))
-            : $field->phpType;
+        $class = $this->getTargetClass($field, $map, $data);
 
-        return $this->getAnalyzer()->analyze($class, ClassDef::class)->properties;
+        return $class ?
+            $this->getAnalyzer()->analyze($class, ClassDef::class)->properties
+            : [];
+    }
+
+    protected function getTargetClass(Field $field, ?TypeMap $map, array $dict): ?string
+    {
+        if (!$map) {
+            return $field->phpType;
+        }
+
+        if (! $key = ($dict[$map->keyField()] ?? null)) {
+            return null;
+        }
+
+        if (!$class = $map->findClass($key)) {
+            return null;
+        }
+
+        return $class;
     }
 
     public function getRemainingData(mixed $source, array $used): array

@@ -8,6 +8,9 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\FlatMapNested\HostObject;
+use Crell\Serde\Records\FlatMapNested\Item;
+use Crell\Serde\Records\FlatMapNested\NestedA;
 use Crell\Serde\Records\ImplodingArrays;
 use Crell\Serde\Records\InvalidFieldType;
 use Crell\Serde\Records\LiteralEnums;
@@ -892,6 +895,48 @@ abstract class SerdeTest extends TestCase
     }
 
     public function array_imploding_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function flat_map_nested(): void
+    {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new HostObject(
+            nested: new NestedA(
+                name: 'Bob',
+                item: new Item(1, 2),
+                items: [
+                    new Item(3, 4),
+                    new Item(5, 6),
+                ],
+            ),
+            list: [
+                new Item(7, 8),
+                new Item(9, 10),
+            ]
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->flat_map_nested_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: HostObject::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function flat_map_nested_validate(mixed $serialized): void
     {
 
     }

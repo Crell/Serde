@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Records\FlatMapNested\NestedA;
 use Crell\Serde\Records\MappedCollected\ThingA;
 use Crell\Serde\Records\MappedCollected\ThingB;
 use Crell\Serde\Records\MappedCollected\ThingC;
@@ -224,6 +225,28 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
 
         self::assertEquals('a, b, c', $toTest['seq']);
         self::assertEquals('a=A, b=B, c=C', $toTest['dict']);
+    }
+
+
+    public function flat_map_nested_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        // These come from the flattened $nested property.
+        self::assertEquals(NestedA::class, $toTest['type']);
+        self::assertEquals('Bob', $toTest['name']);
+        self::assertEquals(1, $toTest['item']['a']);
+        self::assertEquals(2, $toTest['item']['b']);
+
+        // These come from the $items sequence field in the NestedA class, in
+        // the $nested property of the main object.
+        self::assertEquals(3, $toTest['items'][0]['a']);
+        self::assertEquals(4, $toTest['items'][0]['b']);
+
+        // These come from the $list property in the main object.
+        self::assertEquals(7, $toTest['list'][0]['a']);
+        self::assertEquals(8, $toTest['list'][0]['b']);
+
     }
 
 }
