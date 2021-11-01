@@ -246,7 +246,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         }
 
         if (!$class = $map->findClass($key)) {
-            throw NoTypeMapDefinedForKey::create($key, $field->phpName);
+            throw NoTypeMapDefinedForKey::create($key, $field->phpName ?? $field->phpType);
         }
 
         return $class;
