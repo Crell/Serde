@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Attribute;
+use Crell\AttributeUtils\Excludable;
 use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
 use Crell\Serde\Renaming\LiteralName;
@@ -13,7 +14,7 @@ use function Crell\fp\indexBy;
 use function Crell\fp\pipe;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class Field implements FromReflectionProperty, HasSubAttributes
+class Field implements FromReflectionProperty, HasSubAttributes, Excludable
 {
     use Evolvable;
 
@@ -237,5 +238,10 @@ class Field implements FromReflectionProperty, HasSubAttributes
     {
         return $this->rename?->convert($this->phpName)
             ?? $this->phpName;
+    }
+
+    public function exclude(): bool
+    {
+        return $this->exclude;
     }
 }
