@@ -227,7 +227,6 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('a=A, b=B, c=C', $toTest['dict']);
     }
 
-
     public function flat_map_nested_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
@@ -246,7 +245,16 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         // These come from the $list property in the main object.
         self::assertEquals(7, $toTest['list'][0]['a']);
         self::assertEquals(8, $toTest['list'][0]['b']);
-
     }
 
+
+    public function post_deserialize_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        // fullName should not be in the serialized data.
+        self::assertCount(2, $toTest);
+        self::assertEquals('Larry', $toTest['first']);
+        self::assertEquals('Garfield', $toTest['last']);
+    }
 }

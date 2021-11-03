@@ -7,10 +7,11 @@ namespace Crell\Serde;
 use Attribute;
 use Crell\AttributeUtils\FromReflectionClass;
 use Crell\AttributeUtils\HasSubAttributes;
+use Crell\AttributeUtils\ParseMethods;
 use Crell\AttributeUtils\ParseProperties;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
+class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes, ParseMethods
 {
     /**
      * The type map, if any, that applies to this class.
@@ -21,6 +22,9 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
     public readonly array $properties;
 
     public readonly string $phpType;
+
+    /** @var string[] */
+    public readonly array $postLoadCallacks;
 
     public function __construct(
         public readonly bool $includeFieldsByDefault = true,
@@ -56,5 +60,25 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
         // This may assign to null, which is OK as that will
         // evaluate to false when we need it to.
         $this->typeMap = $map;
+    }
+
+    /**
+     * @param MethodDef[] $methods
+     */
+    public function setMethods(array $methods): void
+    {
+        $this->postLoadCallacks = array_keys(
+            array_filter($methods, static fn (MethodDef $def) => $def->postLoadCallback)
+        );
+    }
+
+    public function includeMethodsByDefault(): bool
+    {
+        return true;
+    }
+
+    public function methodAttribute(): string
+    {
+        return MethodDef::class;
     }
 }

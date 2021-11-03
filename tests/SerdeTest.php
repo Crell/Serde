@@ -8,12 +8,12 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\MappedObjectPropertyReader;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\Callbacks\CallbackHost;
 use Crell\Serde\Records\FlatMapNested\HostObject;
 use Crell\Serde\Records\FlatMapNested\Item;
 use Crell\Serde\Records\FlatMapNested\NestedA;
 use Crell\Serde\Records\ImplodingArrays;
 use Crell\Serde\Records\InvalidFieldType;
-use Crell\Serde\Records\LiteralEnums;
 use Crell\Serde\Records\MultiCollect\ThingOneA;
 use Crell\Serde\Records\MultiCollect\ThingTwoC;
 use Crell\Serde\Records\MultiCollect\Wrapper;
@@ -56,7 +56,6 @@ use Crell\Serde\Records\Tasks\SmallTask;
 use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
 use Crell\Serde\Records\Visibility;
-use Crell\Serde\Renaming\LiteralName;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -941,4 +940,29 @@ abstract class SerdeTest extends TestCase
 
     }
 
+    /**
+     * @test
+     */
+    public function post_deserialize_callback(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new CallbackHost(first: 'Larry', last: 'Garfield');
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->post_deserialize_validate($serialized);
+
+        /** @var CallbackHost $result */
+        $result = $s->deserialize($serialized, from: $this->format, to: CallbackHost::class);
+
+        self::assertEquals($data, $result);
+
+        self::assertEquals('Larry Garfield', $result->fullName);
+    }
+
+    public function post_deserialize_validate(mixed $serialized): void
+    {
+
+    }
 }

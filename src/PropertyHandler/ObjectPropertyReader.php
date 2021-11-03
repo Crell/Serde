@@ -25,6 +25,7 @@ use function Crell\fp\reduceWithKeys;
 class ObjectPropertyReader implements PropertyWriter, PropertyReader
 {
     protected readonly \Closure $populator;
+    protected readonly \Closure $methodCaller;
 
     public function __construct(
         protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
@@ -151,10 +152,12 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
      */
     protected function populateObject(array $dict, string $class, Deformatter $formatter, ?TypeMap $map = null): array
     {
+        /** @var ClassDef $classDef */
+        $classDef = $this->analyzer->analyze($class, ClassDef::class);
+
         // Get the list of properties on the target class, taking
         // type maps into account.
-        /** @var Field[] $properties */
-        $properties = $this->analyzer->analyze($class, ClassDef::class)->properties;
+        $properties = $classDef->properties;
 
         $props = [];
         $usedNames = [];
@@ -212,10 +215,10 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         // If we later add support for erroring on extra unhandled fields,
         // this is where that logic would live.
 
-        return [$this->createObject($class, $props), $remaining];
+        return [$this->createObject($class, $props, $classDef->postLoadCallacks), $remaining];
     }
 
-    protected function createObject(string $class, array $props): object
+    protected function createObject(string $class, array $props, array $callbacks): object
     {
         // Make an empty instance of the target class.
         $rClass = new \ReflectionClass($class);
@@ -229,9 +232,19 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             }
         };
 
+        // Cache the method invoker  same way.
+        $this->methodCaller ??= fn(string $fn) => $this->$fn();
+
         // Bind the populator to the object to bypass visibility rules,
         // then invoke it on the object to populate it.
         $this->populator->bindTo($new, $new)($props);
+
+        // Invoke any post-load callbacks, even if they're private.
+        $invoker = $this->methodCaller->bindTo($new, $new);
+        foreach ($callbacks as $fn) {
+            $invoker($fn);
+        }
+
         return $new;
     }
 
