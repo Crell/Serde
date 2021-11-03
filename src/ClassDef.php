@@ -48,7 +48,7 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
 
     public function subAttributes(): array
     {
-        return [StaticTypeMap::class => 'fromTypeMap'];
+        return [TypeMap::class => 'fromTypeMap'];
     }
 
     public function fromTypeMap(?TypeMap $map): void
