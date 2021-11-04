@@ -8,6 +8,43 @@ use PHPUnit\Framework\TestCase;
 
 class DictionaryFieldTest extends TestCase
 {
+    /**
+     * @test
+     * @dataProvider implosionExamples
+     */
+    public function implosion(string $implodeOn, string $joinOn, array $in, string $expected): void
+    {
+        $d = new DictionaryField(
+            implodeOn: $implodeOn,
+            joinOn: $joinOn,
+        );
+
+        $result = $d->implode($in);
+
+        self::assertEquals($expected, $result);
+    }
+
+    public function implosionExamples(): iterable
+    {
+        yield [
+            'implodeOn' => ',',
+            'joinOn' => '=',
+            'in' => ['narf' => 'poink'],
+            'expected' => 'narf=poink',
+        ];
+        yield [
+            'implodeOn' => ',',
+            'joinOn' => '=',
+            'in' => ['narf' => 'poink', 'beep' => 'boop'],
+            'expected' => 'narf=poink,beep=boop',
+        ];
+        yield [
+            'implodeOn' => ',',
+            'joinOn' => '=',
+            'in' => ['narf', 'poink'],
+            'expected' => '0=narf,1=poink',
+        ];
+    }
 
     /**
      * @test
@@ -49,7 +86,7 @@ class DictionaryFieldTest extends TestCase
             'implodeOn' => ',',
             'joinOn' => '=',
             'in' => 'beep = boop, narf',
-            'expected' => ['beep' => 'boop', 'narf' => '',],
+            'expected' => ['beep' => 'boop', 'narf' => ''],
         ];
         yield 'Trailing imploders are ignored' => [
             'implodeOn' => ',',
@@ -62,6 +99,12 @@ class DictionaryFieldTest extends TestCase
             'joinOn' => '=',
             'in' => 'beep=boop, narf=poink=blurg,',
             'expected' => ['beep' => 'boop', 'narf' => 'poink'],
+        ];
+        yield 'Empty input gives empty array' => [
+            'implodeOn' => ',',
+            'joinOn' => '=',
+            'in' => '',
+            'expected' => [],
         ];
     }
 }
