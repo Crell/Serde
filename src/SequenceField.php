@@ -39,6 +39,6 @@ class SequenceField implements TypeField
         if ($this->trim) {
             $parts = array_map(trim(...), $parts);
         }
-        return $parts;
+        return array_filter($parts);
     }
 }
