@@ -12,7 +12,7 @@ class NoReaderFound extends \RuntimeException
 
     public static function create(string $type, string $format): static
     {
-        $new = new static();
+        $new = new self();
         $new->type = $type;
         $new->format = $format;
 

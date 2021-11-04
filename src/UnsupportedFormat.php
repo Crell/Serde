@@ -10,7 +10,7 @@ class UnsupportedFormat extends \InvalidArgumentException
 
     public static function create(string $format, Direction $dir): static
     {
-        $new = new static();
+        $new = new self();
         $new->format = $format;
 
         $new->message = match ($dir) {

@@ -11,7 +11,7 @@ class FieldTypeIncompatible extends \InvalidArgumentException
 
     public static function create(string $typeField, $propertyType): static
     {
-        $new = new static();
+        $new = new self();
         $new->typeField = $typeField;
         $new->propertyType = $propertyType;
 

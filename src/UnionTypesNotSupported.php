@@ -11,7 +11,7 @@ class UnionTypesNotSupported extends \TypeError
 
     public static function create(\ReflectionProperty $property): static
     {
-        $new = new static();
+        $new = new self();
         $new->property = $property;
         return $new;
     }

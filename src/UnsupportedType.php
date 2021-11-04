@@ -10,7 +10,7 @@ class UnsupportedType extends \RuntimeException
 
     public static function create(string $type): static
     {
-        $new = new static();
+        $new = new self();
         $new->type = $type;
 
         $new->message = sprintf('No type %s found. Cannot deserialize to a type that does not exist.', $type);

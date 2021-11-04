@@ -11,7 +11,7 @@ class NoTypeMapDefinedForKey extends \InvalidArgumentException
 
     public static function create(string $key, string $fieldName): static
     {
-        $new = new static();
+        $new = new self();
         $new->key = $key;
         $new->fieldName = $fieldName;
 

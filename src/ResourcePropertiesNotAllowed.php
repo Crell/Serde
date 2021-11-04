@@ -10,7 +10,7 @@ class ResourcePropertiesNotAllowed extends \InvalidArgumentException
 
     public static function create(string $name): static
     {
-        $new = new static();
+        $new = new self();
         $new->name = $name;
 
         $new->message = sprintf('Resource properties cannot be serialized.  Please exclude %s.', $name);
