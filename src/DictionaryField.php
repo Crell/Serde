@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Attribute;
-use function Crell\fp\amap;
+use function Crell\fp\afilter;
 use function Crell\fp\amapWithKeys;
-use function Crell\fp\keyedMap;
-use function Crell\fp\pipe;
-use function Crell\fp\implode;
 use function Crell\fp\explode;
+use function Crell\fp\implode;
+use function Crell\fp\pipe;
 use function Crell\fp\reduce;
-use function Crell\fp\append;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class DictionaryField implements TypeField
@@ -43,20 +41,30 @@ class DictionaryField implements TypeField
 
     public function explode(string $in): array
     {
-        $add = function (array $array, $item): array {
-            [$k, $v] = explode($this->joinOn)($item);
-            $array[$k] = $v;
-            return $array;
-        };
-
-        $ret = pipe($in,
+        return pipe($in,
             explode($this->implodeOn),
-            reduce([], $add),
+            reduce([], $this->explodeReduce(...)),
         );
+    }
 
-        return $this->trim
-            ? array_map(trim(...), $ret)
-            : $ret;
+    protected function explodeReduce(array $array, string $item): array
+    {
+        if (!$item) {
+            return $array;
+        }
+        if (!str_contains($item, $this->joinOn)) {
+            $k = $this->trim ? trim($item) : $item;
+            $array[$k] = '';
+            return $array;
+        }
+
+        [$k, $v] = \explode($this->joinOn, $item);
+        if ($this->trim) {
+            $k = trim($k);
+            $v = trim($v);
+        }
+        $array[$k] = $v;
+        return $array;
     }
 
     public function acceptsType(string $type): bool
