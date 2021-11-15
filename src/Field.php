@@ -203,6 +203,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
     {
         $new = new static();
         $new->serializedName = $serializedName;
+        $new->phpName ??= $serializedName;
         $new->phpType = $phpType;
         $new->typeMap = null;
         $new->typeField = null;
