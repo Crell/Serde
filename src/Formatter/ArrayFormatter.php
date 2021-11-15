@@ -7,6 +7,7 @@ namespace Crell\Serde\Formatter;
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
+use Crell\Serde\ClassDef;
 
 class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 {
@@ -22,12 +23,12 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
         return 'array';
     }
 
-    public function serializeInitialize(): array
+    public function serializeInitialize(ClassDef $classDef): array
     {
         return ['root' => []];
     }
 
-    public function serializeFinalize(mixed $runningValue): mixed
+    public function serializeFinalize(mixed $runningValue, ClassDef $classDef): mixed
     {
         return $runningValue['root'];
     }

@@ -7,6 +7,7 @@ namespace Crell\Serde\Formatter;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Sequence;
+use Crell\Serde\ClassDef;
 
 interface Formatter
 {
@@ -14,9 +15,9 @@ interface Formatter
 
     public function initialField(string $type): Field;
 
-    public function serializeInitialize(): mixed;
+    public function serializeInitialize(ClassDef $classDef): mixed;
 
-    public function serializeFinalize(mixed $runningValue): mixed;
+    public function serializeFinalize(mixed $runningValue, ClassDef $classDef): mixed;
 
     public function serializeInt(mixed $runningValue, Field $field, int $next): mixed;
 

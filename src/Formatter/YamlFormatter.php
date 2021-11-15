@@ -7,6 +7,7 @@ namespace Crell\Serde\Formatter;
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
+use Crell\Serde\ClassDef;
 use Symfony\Component\Yaml\Yaml;
 
 class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
@@ -42,12 +43,12 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
         return 'yaml';
     }
 
-    public function serializeInitialize(): array
+    public function serializeInitialize(ClassDef $classDef): array
     {
         return ['root' => []];
     }
 
-    public function serializeFinalize(mixed $runningValue): string
+    public function serializeFinalize(mixed $runningValue, ClassDef $classDef): string
     {
         return Yaml::dump($runningValue['root'], inline: $this->inline, indent: $this->indent, flags: $this->dumpFlags);
     }

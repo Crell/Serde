@@ -7,6 +7,7 @@ namespace Crell\Serde\Formatter;
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
+use Crell\Serde\ClassDef;
 
 class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
 {
@@ -22,12 +23,12 @@ class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
         return 'json';
     }
 
-    public function serializeInitialize(): array
+    public function serializeInitialize(ClassDef $classDef): array
     {
         return ['root' => []];
     }
 
-    public function serializeFinalize(mixed $runningValue): string
+    public function serializeFinalize(mixed $runningValue, ClassDef $classDef): string
     {
         return json_encode($runningValue['root'], JSON_THROW_ON_ERROR);
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\PropertyHandler\PropertyReader;
@@ -37,11 +38,16 @@ abstract class Serde
     /** @var Deformatter[] */
     protected readonly array $deformatters;
 
+    protected readonly ClassAnalyzer $analyzer;
+
     public function serialize(object $object, string $format): mixed
     {
         $formatter = $this->formatters[$format] ?? throw UnsupportedFormat::create($format, Direction::Serialize);
 
-        $init = $formatter->serializeInitialize();
+        /** @var ClassDef $classDef */
+        $classDef = $this->analyzer->analyze($object, ClassDef::class);
+
+        $init = $formatter->serializeInitialize($classDef);
 
         $inner = new Serializer(
             analyzer: $this->analyzer,
@@ -52,7 +58,7 @@ abstract class Serde
 
         $serializedValue = $inner->serialize($object, $init, $formatter->initialField($object::class));
 
-        return $formatter->serializeFinalize($serializedValue);
+        return $formatter->serializeFinalize($serializedValue, $classDef);
     }
 
     public function deserialize(mixed $serialized, string $from, string $to): object
