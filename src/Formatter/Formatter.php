@@ -30,4 +30,6 @@ interface Formatter
     public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, callable $recursor): mixed;
 
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, callable $recursor): mixed;
+
+    public function serializeObject(mixed $runningValue, Field $field, Dict $next, callable $recursor): mixed;
 }

@@ -83,4 +83,9 @@ trait ArrayBasedFormatter
         }
         return $runningValue;
     }
+
+    public function serializeObject(mixed $runningValue, Field $field, Dict $next, callable $recursor): array
+    {
+        return $this->serializeDictionary($runningValue, $field, $next, $recursor);
+    }
 }
