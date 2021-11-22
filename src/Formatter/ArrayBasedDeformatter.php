@@ -77,8 +77,8 @@ trait ArrayBasedDeformatter
      */
     protected function upcastArray(array $data, callable $recursor, ?string $type = null): array
     {
-        $upcast = function(array $ret, mixed$v, int|string $k) use ($recursor, $type, $data) {
-            $f = Field::create(serializedName: "$k", phpType: $type?? get_debug_type($v));
+        $upcast = function(array $ret, mixed $v, int|string $k) use ($recursor, $type, $data) {
+            $f = Field::create(serializedName: "$k", phpType: $type ?? get_debug_type($v));
             $ret[$k] = $recursor($data, $f);
             return $ret;
         };
