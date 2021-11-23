@@ -120,7 +120,17 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
     protected function typeMap(Field $field): ?TypeMap
     {
-        return $field->typeMap;
+        if ($field->typeMap) {
+            return $field->typeMap;
+        }
+
+        if (class_exists($field->phpType) || interface_exists($field->phpType)) {
+            /** @var ClassDef $classDef */
+            $classDef = $this->analyzer->analyze($field->phpType, ClassDef::class);
+            return $classDef?->typeMap;
+        }
+
+        return null;
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool

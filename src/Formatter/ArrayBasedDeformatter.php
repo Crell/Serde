@@ -48,8 +48,9 @@ trait ArrayBasedDeformatter
             return SerdeError::Missing;
         }
 
-        if (class_exists($field?->typeField?->arrayType ?? '')) {
-            return $this->upcastArray($decoded[$field->serializedName], $recursor, $field->typeField->arrayType);
+        $class = $field?->typeField?->arrayType ?? '';
+        if (class_exists($class) || interface_exists($class)) {
+            return $this->upcastArray($decoded[$field->serializedName], $recursor, $class);
         }
 
         return $this->upcastArray($decoded[$field->serializedName], $recursor);
@@ -65,8 +66,9 @@ trait ArrayBasedDeformatter
             return SerdeError::FormatError;
         }
 
-        if (class_exists($field?->typeField?->arrayType ?? '')) {
-            return $this->upcastArray($decoded[$field->serializedName], $recursor, $field->typeField->arrayType);
+        $class = $field?->typeField?->arrayType ?? '';
+        if (class_exists($class) || interface_exists($class)) {
+            return $this->upcastArray($decoded[$field->serializedName], $recursor, $class);
         }
 
         return $this->upcastArray($decoded[$field->serializedName], $recursor);
@@ -77,8 +79,12 @@ trait ArrayBasedDeformatter
      */
     protected function upcastArray(array $data, callable $recursor, ?string $type = null): array
     {
-        $upcast = function(array $ret, mixed $v, int|string $k) use ($recursor, $type, $data) {
-            $f = Field::create(serializedName: "$k", phpType: $type ?? get_debug_type($v));
+        /** @var ClassDef $classDef */
+        $classDef = $type ? $this->getAnalyzer()->analyze($type, ClassDef::class) : null;
+
+        $upcast = function(array $ret, mixed $v, int|string $k) use ($recursor, $type, $data, $classDef) {
+            $arrayType = $classDef?->typeMap?->findClass($v[$classDef->typeMap->keyField()]) ?? $type ?? get_debug_type($v);
+            $f = Field::create(serializedName: "$k", phpType: $arrayType);
             $ret[$k] = $recursor($data, $f);
             return $ret;
         };

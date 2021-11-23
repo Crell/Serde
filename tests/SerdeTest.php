@@ -48,7 +48,9 @@ use Crell\Serde\Records\Pagination\Results;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Shapes\Box;
 use Crell\Serde\Records\Shapes\Circle;
+use Crell\Serde\Records\Shapes\Rectangle;
 use Crell\Serde\Records\Shapes\Shape;
+use Crell\Serde\Records\Shapes\ShapeList;
 use Crell\Serde\Records\Shapes\TwoDPoint;
 use Crell\Serde\Records\Size;
 use Crell\Serde\Records\Tasks\BigTask;
@@ -962,6 +964,38 @@ abstract class SerdeTest extends TestCase
     }
 
     public function post_deserialize_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function mapped_arrays(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ShapeList(
+            shapeSeq: [
+                new Circle(new TwoDPoint(3, 4), 5),
+                new Rectangle(new TwoDPoint(1, 2), new TwoDPoint(3, 4)),
+            ],
+            shapeDict: [
+                'one' => new Rectangle(new TwoDPoint(5, 6), new TwoDPoint(7, 8)),
+                'two' => new Circle(new TwoDPoint(9, 8), 7),
+            ],
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->mapped_arrays_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: ShapeList::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function mapped_arrays_validate(mixed $serialized): void
     {
 
     }

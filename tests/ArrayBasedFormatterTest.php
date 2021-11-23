@@ -247,7 +247,6 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals(8, $toTest['list'][0]['b']);
     }
 
-
     public function post_deserialize_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
@@ -256,5 +255,18 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertCount(2, $toTest);
         self::assertEquals('Larry', $toTest['first']);
         self::assertEquals('Garfield', $toTest['last']);
+    }
+
+    public function mapped_arrays_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertCount(2, $toTest['shapeSeq']);
+        self::assertCount(2, $toTest['shapeDict']);
+
+        self::assertEquals('circle', $toTest['shapeSeq'][0]['shape']);
+        self::assertEquals('rect', $toTest['shapeSeq'][1]['shape']);
+        self::assertEquals('rect', $toTest['shapeDict']['one']['shape']);
+        self::assertEquals('circle', $toTest['shapeDict']['two']['shape']);
     }
 }
