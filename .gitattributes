@@ -9,3 +9,8 @@
 /.scrutinizer.yml   export-ignore
 /tests              export-ignore
 /docs               export-ignore
+/docker             export-ignore
+/benchmarks         export-ignore
+/docker-compose.yml export-ignore
+/phpbench.json      export-ignore
+/profile.php        export-ignore
