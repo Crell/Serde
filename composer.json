@@ -19,10 +19,6 @@
     "repositories": [
         {
             "type": "git",
-            "url": "https://github.com/Crell/fp.git"
-        },
-        {
-            "type": "git",
             "url": "https://github.com/Crell/AttributeUtils.git"
         }
     ],
