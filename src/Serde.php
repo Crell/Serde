@@ -44,7 +44,6 @@ abstract class Serde
     {
         $formatter = $this->formatters[$format] ?? throw UnsupportedFormat::create($format, Direction::Serialize);
 
-        /** @var ClassDef $classDef */
         $classDef = $this->analyzer->analyze($object, ClassDef::class);
 
         $init = $formatter->serializeInitialize($classDef);

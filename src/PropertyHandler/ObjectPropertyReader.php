@@ -125,9 +125,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         }
 
         if (class_exists($field->phpType) || interface_exists($field->phpType)) {
-            /** @var ClassDef $classDef */
-            $classDef = $this->analyzer->analyze($field->phpType, ClassDef::class);
-            return $classDef?->typeMap;
+            return $this->analyzer->analyze($field->phpType, ClassDef::class)?->typeMap;
         }
 
         return null;
@@ -162,7 +160,6 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
      */
     protected function populateObject(array $dict, string $class, Deformatter $formatter, ?TypeMap $map = null): array
     {
-        /** @var ClassDef $classDef */
         $classDef = $this->analyzer->analyze($class, ClassDef::class);
 
         // Get the list of properties on the target class, taking
