@@ -147,7 +147,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
         $class = $this->getTargetClass($field, $dict);
 
-        [$object, $remaining] = $this->populateObject($dict, $class, $formatter, $this->typeMap($field));
+        [$object, $remaining] = $this->populateObject($dict, $class, $formatter);
         return $object;
     }
 
@@ -158,7 +158,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
      * @param TypeMap|null $map
      * @return [object, array]
      */
-    protected function populateObject(array $dict, string $class, Deformatter $formatter, ?TypeMap $map = null): array
+    protected function populateObject(array $dict, string $class, Deformatter $formatter): array
     {
         $classDef = $this->analyzer->analyze($class, ClassDef::class);
 
@@ -203,7 +203,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             // It's possible there will be a class map but no mapping field in
             // the data. In that case, either set a default or just ignore the field.
             if ($targetClass = $this->getTargetClass($collectingField, $dict)) {
-                [$object, $remaining] = $this->populateObject($remaining, $targetClass, $formatter, $collectingField->typeMap);
+                [$object, $remaining] = $this->populateObject($remaining, $targetClass, $formatter);
                 $props[$collectingField->phpName] = $object;
                 if ($map = $this->typeMap($collectingField)) {
                     $usedNames[] = $map->keyField();
