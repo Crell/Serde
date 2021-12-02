@@ -269,4 +269,13 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('rect', $toTest['shapeDict']['one']['shape']);
         self::assertEquals('circle', $toTest['shapeDict']['two']['shape']);
     }
+
+    public function root_typemap_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals('rect', $toTest['shape']);
+        self::assertEquals(1, $toTest['topLeft']['x']);
+        self::assertEquals(4, $toTest['bottomRight']['y']);
+    }
 }

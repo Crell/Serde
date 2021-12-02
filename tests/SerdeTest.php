@@ -999,4 +999,27 @@ abstract class SerdeTest extends TestCase
     {
 
     }
+
+    /**
+     * @test
+     */
+    public function root_typemap(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new Rectangle(new TwoDPoint(1, 2), new TwoDPoint(3, 4));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->root_typemap_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Shape::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function root_typemap_validate(mixed $serialized): void
+    {
+
+    }
 }
