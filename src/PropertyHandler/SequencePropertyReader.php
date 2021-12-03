@@ -12,15 +12,16 @@ use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\Sequence;
 use Crell\Serde\SequenceField;
 use Crell\Serde\SerdeError;
+use Crell\Serde\Serializer;
 
 class SequencePropertyReader implements PropertyReader, PropertyWriter
 {
-    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         /** @var ?SequenceField $typeField */
         $typeField = $field?->typeField;
         if ($typeField?->shouldImplode()) {
-            return $formatter->serializeString($runningValue, $field, $typeField->implode($value));
+            return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
         $seq = new Sequence();
@@ -29,7 +30,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
             $seq->items[] = new CollectionItem(field: $f, value: $v);
         }
 
-        return $formatter->serializeSequence($runningValue, $field, $seq, $recursor);
+        return $serializer->formatter->serializeSequence($runningValue, $field, $seq, $serializer->serialize(...));
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool

@@ -7,17 +7,18 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
+use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
 class ScalarPropertyReader implements PropertyReader, PropertyWriter
 {
-    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         return match ($field->phpType) {
-            'int' => $formatter->serializeInt($runningValue, $field, $value),
-            'float' => $formatter->serializeFloat($runningValue, $field, $value),
-            'bool' => $formatter->serializeBool($runningValue, $field, $value),
-            'string' => $formatter->serializeString($runningValue, $field, $value),
+            'int' => $serializer->formatter->serializeInt($runningValue, $field, $value),
+            'float' => $serializer->formatter->serializeFloat($runningValue, $field, $value),
+            'bool' => $serializer->formatter->serializeBool($runningValue, $field, $value),
+            'string' => $serializer->formatter->serializeString($runningValue, $field, $value),
         };
     }
 

@@ -13,6 +13,7 @@ use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\SerdeError;
+use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
 
@@ -22,7 +23,7 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
         protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
     ) {}
 
-    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $propValues = $value->__serialize();
 
@@ -42,7 +43,7 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
             $dict->items = [new CollectionItem(field: $f, value: $map->findIdentifier($value::class)), ...$dict->items];
         }
 
-        return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
+        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer->serialize(...));
     }
 
     protected function typeMap(Field $field): ?TypeMap

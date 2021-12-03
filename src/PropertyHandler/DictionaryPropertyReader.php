@@ -12,15 +12,16 @@ use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\SequenceField;
 use Crell\Serde\SerdeError;
+use Crell\Serde\Serializer;
 
 class DictionaryPropertyReader implements PropertyReader, PropertyWriter
 {
-    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         /** @var ?DictionaryField $typeField */
         $typeField = $field?->typeField;
         if ($typeField?->shouldImplode()) {
-            return $formatter->serializeString($runningValue, $field, $typeField->implode($value));
+            return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
         $dict = new Dict();
@@ -29,7 +30,7 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
             $dict->items[] = new CollectionItem(field: $f, value: $v);
         }
 
-        return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
+        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer->serialize(...));
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool

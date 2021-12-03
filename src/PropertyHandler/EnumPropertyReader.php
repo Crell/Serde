@@ -8,17 +8,18 @@ use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\SerdeError;
+use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
 class EnumPropertyReader implements PropertyReader, PropertyWriter
 {
-    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $scalar = $value->value ?? $value->name;
 
         return match (true) {
-            is_int($scalar) => $formatter->serializeInt($runningValue, $field, $scalar),
-            is_string($scalar) => $formatter->serializeString($runningValue, $field, $scalar),
+            is_int($scalar) => $serializer->serializeInt($runningValue, $field, $scalar),
+            is_string($scalar) => $serializer->formatter->serializeString($runningValue, $field, $scalar),
         };
     }
 

@@ -18,23 +18,12 @@ class Serializer
      */
     protected array $seenObjects = [];
 
-    /**
-     * Reference to the serialize() method.
-     *
-     * This recursor gets passed through to the formatter, and may
-     * get called recursively.  Storing a single reference rather than
-     * making a new one each time is a minor performance optimization.
-     */
-    protected readonly \Closure $recursor;
-
     public function __construct(
         protected readonly ClassAnalyzer $analyzer,
         /** @var PropertyReader[]  */
         protected readonly array $readers,
-        protected readonly Formatter $formatter,
-    ) {
-        $this->recursor = $this->serialize(...);
-    }
+        public readonly Formatter $formatter,
+    ) {}
 
     public function serialize(mixed $value, mixed $runningValue, Field $field): mixed
     {
@@ -48,7 +37,7 @@ class Serializer
         }
 
         $reader = $this->findReader($field, $value);
-        $result = $reader->readValue($this->formatter, $this->recursor, $field, $value, $runningValue);
+        $result = $reader->readValue($this, $field, $value, $runningValue);
 
         if (is_object($value)) {
             array_pop($this->seenObjects);

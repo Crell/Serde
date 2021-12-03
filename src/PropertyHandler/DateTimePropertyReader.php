@@ -8,21 +8,21 @@ use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\SerdeError;
+use Crell\Serde\Serializer;
 
 class DateTimePropertyReader implements PropertyReader, PropertyWriter
 {
     /**
-     * @param Formatter $formatter
-     * @param callable $recursor
+     * @param Serializer $serializer
      * @param Field $field
      * @param \DateTimeInterface $value
      * @param mixed $runningValue
      * @return mixed
      */
-    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $string = $value->format(\DateTimeInterface::RFC3339_EXTENDED);
-        return $formatter->serializeString($runningValue, $field, $string);
+        return $serializer->formatter->serializeString($runningValue, $field, $string);
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool

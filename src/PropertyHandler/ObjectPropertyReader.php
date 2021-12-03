@@ -16,6 +16,7 @@ use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;
+use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
 use function Crell\fp\pipe;
@@ -32,14 +33,13 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
     ) {}
 
     /**
-     * @param Formatter $formatter
-     * @param callable $recursor
+     * @param Serializer $serializer
      * @param Field $field
      * @param object $value
      * @param mixed $runningValue
      * @return mixed
      */
-    public function readValue(Formatter $formatter, callable $recursor, Field $field, mixed $value, mixed $runningValue): mixed
+    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         // This lets us read private values without messing with the Reflection API.
         $propReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
@@ -57,7 +57,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             $dict->items = [new CollectionItem(field: $f, value: $map->findIdentifier($value::class)), ...$dict->items];
         }
 
-        return $formatter->serializeDictionary($runningValue, $field, $dict, $recursor);
+        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer->serialize(...));
     }
 
     protected function flattenValue(Dict $dict, Field $field, callable $propReader): Dict
