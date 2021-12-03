@@ -19,7 +19,7 @@ class Serializer
     protected array $seenObjects = [];
 
     public function __construct(
-        protected readonly ClassAnalyzer $analyzer,
+        public readonly ClassAnalyzer $analyzer,
         /** @var PropertyReader[]  */
         protected readonly array $readers,
         public readonly Formatter $formatter,

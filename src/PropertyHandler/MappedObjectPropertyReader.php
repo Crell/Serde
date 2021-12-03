@@ -7,7 +7,9 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
+use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
+use Crell\Serde\Serializer;
 use Crell\Serde\TypeMap;
 use function Crell\fp\firstValue;
 
@@ -21,7 +23,7 @@ class MappedObjectPropertyReader extends ObjectPropertyReader
         protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
     ) {}
 
-    protected function typeMap(Field $field): ?TypeMap
+    protected function typeMap(Serializer|Deserializer $serializer, Field $field): ?TypeMap
     {
         return $this->typeMap;
     }

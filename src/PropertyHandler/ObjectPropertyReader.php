@@ -29,10 +29,6 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
     protected readonly \Closure $populator;
     protected readonly \Closure $methodCaller;
 
-    public function __construct(
-        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
-    ) {}
-
     /**
      * @param Serializer $serializer
      * @param Field $field
@@ -47,11 +43,11 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
         /** @var \Crell\Serde\Dict $dict */
         $dict = pipe(
-            $this->analyzer->analyze($value, ClassDef::class)->properties,
-            reduce(new Dict(), fn(Dict $dict, Field $f) => $this->flattenValue($dict, $f, $propReader)),
+            $serializer->analyzer->analyze($value, ClassDef::class)->properties,
+            reduce(new Dict(), fn(Dict $dict, Field $f) => $this->flattenValue($dict, $f, $propReader, $serializer)),
         );
 
-        if ($map = $this->typeMap($field)) {
+        if ($map = $this->typeMap($serializer, $field)) {
             $f = Field::create(serializedName: $map->keyField(), phpType: 'string');
             // The type map field MUST come first so that streaming deformatters
             // can know their context.
@@ -61,7 +57,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
     }
 
-    protected function flattenValue(Dict $dict, Field $field, callable $propReader): Dict
+    protected function flattenValue(Dict $dict, Field $field, callable $propReader, Serializer $serializer): Dict
     {
         $value = $propReader($field->phpName);
         if ($value === null) {
@@ -75,17 +71,17 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
         if ($field->typeCategory === TypeCategory::Array) {
             // This really wants to be explicit partial application. :-(
-            $c = fn (Dict $dict, $val, $key) => $this->reduceArrayElement($dict, $val, $key, $this->typeMap($field));
+            $c = fn (Dict $dict, $val, $key) => $this->reduceArrayElement($dict, $val, $key, $this->typeMap($serializer, $field));
             return reduceWithKeys($dict, $c)($value);
         }
 
         if ($field->typeCategory === TypeCategory::Object) {
             $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
             // This really wants to be explicit partial application. :-(
-            $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader);
-            $properties = $this->analyzer->analyze($value::class, ClassDef::class)->properties;
+            $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader, $serializer);
+            $properties = $serializer->analyzer->analyze($value::class, ClassDef::class)->properties;
             $dict = reduce($dict, $c)($properties);
-            if ($map = $this->typeMap($field)) {
+            if ($map = $this->typeMap($serializer, $field)) {
                 $f = Field::create(serializedName: $map->keyField(), phpType: 'string');
                 // The type map field MUST come first so that streaming deformatters
                 // can know their context.
@@ -109,24 +105,24 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return $dict;
     }
 
-    protected function reduceObjectProperty(Dict $dict, Field $prop, callable $subPropReader): Dict
+    protected function reduceObjectProperty(Dict $dict, Field $prop, callable $subPropReader, Serializer $serializer): Dict
     {
         if ($prop->flatten) {
-            return $this->flattenValue($dict, $prop, $subPropReader);
+            return $this->flattenValue($dict, $prop, $subPropReader, $serializer);
         }
 
         $dict->items[] = new CollectionItem(field: $prop, value: $subPropReader($prop->phpName));
         return $dict;
     }
 
-    protected function typeMap(Field $field): ?TypeMap
+    protected function typeMap(Serializer|Deserializer $serializer, Field $field): ?TypeMap
     {
         if ($field->typeMap) {
             return $field->typeMap;
         }
 
         if (class_exists($field->phpType) || interface_exists($field->phpType)) {
-            return $this->analyzer->analyze($field->phpType, ClassDef::class)?->typeMap;
+            return $serializer->analyzer->analyze($field->phpType, ClassDef::class)?->typeMap;
         }
 
         return null;
@@ -141,13 +137,13 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
     {
         // Get the raw data as an array from the source.
         $dict = $deserializer->deformatter->deserializeObject($source, $field, $deserializer,
-            $this->typeMap($field));
+            $this->typeMap($deserializer, $field));
 
         if ($dict === SerdeError::Missing) {
             return null;
         }
 
-        $class = $this->getTargetClass($field, $dict);
+        $class = $this->getTargetClass($field, $dict, $deserializer);
 
         [$object, $remaining] = $this->populateObject($dict, $class, $deserializer);
         return $object;
@@ -163,7 +159,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
     protected function populateObject(array $dict, string $class, Deserializer $deserializer): array
     {
         /** @var ClassDef $classDef */
-        $classDef = $this->analyzer->analyze($class, ClassDef::class);
+        $classDef = $deserializer->analyzer->analyze($class, ClassDef::class);
 
         // Get the list of properties on the target class, taking
         // type maps into account.
@@ -205,10 +201,10 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             $remaining = $deserializer->deformatter->getRemainingData($remaining, $usedNames);
             // It's possible there will be a class map but no mapping field in
             // the data. In that case, either set a default or just ignore the field.
-            if ($targetClass = $this->getTargetClass($collectingField, $dict)) {
+            if ($targetClass = $this->getTargetClass($collectingField, $dict, $deserializer)) {
                 [$object, $remaining] = $this->populateObject($remaining, $targetClass, $deserializer);
                 $props[$collectingField->phpName] = $object;
-                if ($map = $this->typeMap($collectingField)) {
+                if ($map = $this->typeMap($deserializer, $collectingField)) {
                     $usedNames[] = $map->keyField();
                 }
             } elseif ($collectingField->shouldUseDefault) {
@@ -258,9 +254,9 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return $new;
     }
 
-    protected function getTargetClass(Field $field, array $dict): ?string
+    protected function getTargetClass(Field $field, array $dict, Deserializer $deserializer): ?string
     {
-        if (!$map = $this->typeMap($field)) {
+        if (!$map = $this->typeMap($deserializer, $field)) {
             return $field->phpType;
         }
 

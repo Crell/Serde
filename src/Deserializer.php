@@ -14,7 +14,7 @@ use Crell\Serde\PropertyHandler\PropertyWriter;
 class Deserializer
 {
     public function __construct(
-        protected readonly ClassAnalyzer $analyzer,
+        public readonly ClassAnalyzer $analyzer,
         /** @var PropertyWriter[] */
         protected readonly array $writers,
         public readonly Deformatter $deformatter,
