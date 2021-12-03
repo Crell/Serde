@@ -8,6 +8,7 @@ use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\CollectionItem;
+use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
@@ -56,11 +57,11 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
         return $field->typeCategory === TypeCategory::Object && method_exists($value, '__serialize');
     }
 
-    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         // The data may not have any relation at all to the original object's
         // properties.  So deserialize as a basic dictionary instead.
-        $dict = $formatter->deserializeDictionary($source, $field, $recursor);
+        $dict = $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer->deserialize(...));
 
         if ($dict === SerdeError::Missing) {
             return null;

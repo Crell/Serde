@@ -9,6 +9,7 @@ use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\CollectionItem;
+use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
@@ -136,10 +137,10 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         return $field->typeCategory === TypeCategory::Object;
     }
 
-    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         // Get the raw data as an array from the source.
-        $dict = $formatter->deserializeObject($source, $field, $recursor, $this->typeMap($field));
+        $dict = $deserializer->deformatter->deserializeObject($source, $field, $deserializer->deserialize(...), $this->typeMap($field));
 
         if ($dict === SerdeError::Missing) {
             return null;
@@ -147,19 +148,20 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
 
         $class = $this->getTargetClass($field, $dict);
 
-        [$object, $remaining] = $this->populateObject($dict, $class, $formatter);
+        [$object, $remaining] = $this->populateObject($dict, $class, $deserializer);
         return $object;
     }
 
     /**
      * @param array $dict
      * @param string $class
-     * @param Deformatter $formatter
+     * @param Deserializer $deserializer
      * @param TypeMap|null $map
      * @return [object, array]
      */
-    protected function populateObject(array $dict, string $class, Deformatter $formatter): array
+    protected function populateObject(array $dict, string $class, Deserializer $deserializer): array
     {
+        /** @var ClassDef $classDef */
         $classDef = $this->analyzer->analyze($class, ClassDef::class);
 
         // Get the list of properties on the target class, taking
@@ -193,17 +195,17 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         // We don't care about collecting, so just stop now.
         // If we later add support for erroring on extra unhandled fields,
         // this is where that logic would live.
-        if (! $formatter instanceof SupportsCollecting) {
-            return [$this->createObject($class, $props), []];
+        if (! $deserializer->deformatter instanceof SupportsCollecting) {
+            return [$this->createObject($class, $props, $classDef->postLoadCallacks), []];
         }
 
         $remaining = $dict;
         foreach ($collectingObjects as $collectingField) {
-            $remaining = $formatter->getRemainingData($remaining, $usedNames);
+            $remaining = $deserializer->deformatter->getRemainingData($remaining, $usedNames);
             // It's possible there will be a class map but no mapping field in
             // the data. In that case, either set a default or just ignore the field.
             if ($targetClass = $this->getTargetClass($collectingField, $dict)) {
-                [$object, $remaining] = $this->populateObject($remaining, $targetClass, $formatter);
+                [$object, $remaining] = $this->populateObject($remaining, $targetClass, $deserializer);
                 $props[$collectingField->phpName] = $object;
                 if ($map = $this->typeMap($collectingField)) {
                     $usedNames[] = $map->keyField();
@@ -213,7 +215,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             }
         }
 
-        $remaining = $formatter->getRemainingData($remaining, $usedNames);
+        $remaining = $deserializer->deformatter->getRemainingData($remaining, $usedNames);
         if ($collectingArray) {
             $props[$collectingArray->phpName] = $remaining;
             $remaining = [];

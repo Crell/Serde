@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
+use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
@@ -30,9 +31,9 @@ class DateTimeZonePropertyReader implements PropertyReader, PropertyWriter
         return $field->phpType === \DateTimeZone::class;
     }
 
-    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
-        $string = $formatter->deserializeString($source, $field);
+        $string = $deserializer->deformatter->deserializeString($source, $field);
 
         if ($string === SerdeError::Missing) {
             return null;

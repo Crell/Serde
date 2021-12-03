@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\CollectionItem;
+use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
 use Crell\Serde\DictionaryField;
 use Crell\Serde\Field;
@@ -38,20 +39,20 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
         return $field->phpType === 'array' && !\array_is_list($value);
     }
 
-    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         /** @var ?DictionaryField $typeField */
         $typeField = $field?->typeField;
         // The extra type check is necessary because it might be a SequenceField.
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof DictionaryField && $typeField?->implodeOn) {
-            $val = $formatter->deserializeString($source, $field);
+            $val = $deserializer->deformatter->deserializeString($source, $field);
             return $val === SerdeError::Missing
                 ? null
                 : $typeField->explode($val);
         }
 
-        return $formatter->deserializeDictionary($source, $field, $recursor);
+        return $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer->deserialize(...));
     }
 
     public function canWrite(Field $field, string $format): bool

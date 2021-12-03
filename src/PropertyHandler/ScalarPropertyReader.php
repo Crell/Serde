@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
+use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
@@ -22,13 +23,13 @@ class ScalarPropertyReader implements PropertyReader, PropertyWriter
         };
     }
 
-    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         return match ($field->phpType) {
-            'int' => $formatter->deserializeInt($source, $field),
-            'float' => $formatter->deserializeFloat($source, $field),
-            'bool' => $formatter->deserializeBool($source, $field),
-            'string' => $formatter->deserializeString($source, $field),
+            'int' => $deserializer->deformatter->deserializeInt($source, $field),
+            'float' => $deserializer->deformatter->deserializeFloat($source, $field),
+            'bool' => $deserializer->deformatter->deserializeBool($source, $field),
+            'string' => $deserializer->deformatter->deserializeString($source, $field),
         };
     }
 

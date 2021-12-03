@@ -68,7 +68,7 @@ abstract class Serde
         $inner = new Deserializer(
             analyzer: $this->analyzer,
             writers: $this->writers,
-            formatter: $formatter,
+            deformatter: $formatter,
         );
 
         $new = $inner->deserialize($decoded, $formatter->initialField($to));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
+use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
@@ -18,7 +19,7 @@ class EnumPropertyReader implements PropertyReader, PropertyWriter
         $scalar = $value->value ?? $value->name;
 
         return match (true) {
-            is_int($scalar) => $serializer->serializeInt($runningValue, $field, $scalar),
+            is_int($scalar) => $serializer->formatter->serializeInt($runningValue, $field, $scalar),
             is_string($scalar) => $serializer->formatter->serializeString($runningValue, $field, $scalar),
         };
     }
@@ -28,13 +29,13 @@ class EnumPropertyReader implements PropertyReader, PropertyWriter
         return $field->typeCategory->isEnum();
     }
 
-    public function writeValue(Deformatter $formatter, callable $recursor, Field $field, mixed $source): mixed
+    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         // It's kind of amusing that both of these work, but they work.
         $val = match ($field->typeCategory) {
-            TypeCategory::UnitEnum => $formatter->deserializeString($source, $field),
-            TypeCategory::IntEnum => $formatter->deserializeInt($source, $field),
-            TypeCategory::StringEnum => $formatter->deserializeString($source, $field),
+            TypeCategory::UnitEnum => $deserializer->deformatter->deserializeString($source, $field),
+            TypeCategory::IntEnum => $deserializer->deformatter->deserializeInt($source, $field),
+            TypeCategory::StringEnum => $deserializer->deformatter->deserializeString($source, $field),
         };
 
         if ($val === SerdeError::Missing) {
