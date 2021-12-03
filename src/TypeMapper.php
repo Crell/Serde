@@ -23,41 +23,19 @@ class TypeMapper
             throw new \RuntimeException('Can only get class for a class Field.');
         }
 
-        $map = pipe($this->typeMaps,
-            first(static fn (TypeMap $map, string $class) => is_a($field->phpType, $class, true)),
-        );
-
-        if ($map) {
-            return $map;
-        }
-
-        if ($field->typeMap) {
-            return $field->typeMap;
-        }
-
-        // Transitivity ought to make this block unnecessary, but seemingly doesn't.
-        // @todo Figure out why and fix it.
-        if (class_exists($field->phpType) || interface_exists($field->phpType)) {
-            $classDef = $this->analyzer->analyze($field->phpType, ClassDef::class);
-            if ($classDef?->typeMap) {
-                return $classDef->typeMap;
-            }
-        }
-
-        return null;
+        return $this->getOverrideMapFor($field->phpType)
+            ?? $field->typeMap
+            ?? $this->typeMapForClass($field->phpType);
     }
 
     public function typeMapForClass(string $class): ?TypeMap
     {
-        $map = pipe($this->typeMaps,
-            first(static fn (TypeMap $map, string $overrideClass) => is_a($class, $overrideClass, true)),
-        );
-
-        if ($map) {
-            return $map;
+        if (!class_exists($class) && !interface_exists($class)) {
+            return null;
         }
 
-        return $this->analyzer->analyze($class, ClassDef::class)?->typeMap;
+        return $this->getOverrideMapFor($class)
+            ?? $this->analyzer->analyze($class, ClassDef::class)?->typeMap;
     }
 
     public function getTargetClass(Field $field, array $dict): ?string
@@ -98,5 +76,12 @@ class TypeMapper
         return $class ?
             $this->analyzer->analyze($class, ClassDef::class)->properties
             : [];
+    }
+
+    protected function getOverrideMapFor(string $class): ?TypeMap
+    {
+        return pipe($this->typeMaps,
+            first(static fn (TypeMap $map, string $overrideClass) => is_a($class, $overrideClass, true)),
+        );
     }
 }
