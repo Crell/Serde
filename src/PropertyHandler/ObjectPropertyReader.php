@@ -118,14 +118,13 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
     public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         // Get the raw data as an array from the source.
-        $dict = $deserializer->deformatter->deserializeObject($source, $field, $deserializer,
-            $deserializer->typeMapper->typeMapForField($field));
+        $dict = $deserializer->deformatter->deserializeObject($source, $field, $deserializer);
 
         if ($dict === SerdeError::Missing) {
             return null;
         }
 
-        $class = $this->getTargetClass($field, $dict, $deserializer);
+        $class = $deserializer->typeMapper->getTargetClass($field, $dict);
 
         [$object, $remaining] = $this->populateObject($dict, $class, $deserializer);
         return $object;
@@ -135,7 +134,6 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
      * @param array $dict
      * @param string $class
      * @param Deserializer $deserializer
-     * @param TypeMap|null $map
      * @return [object, array]
      */
     protected function populateObject(array $dict, string $class, Deserializer $deserializer): array
@@ -183,7 +181,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             $remaining = $deserializer->deformatter->getRemainingData($remaining, $usedNames);
             // It's possible there will be a class map but no mapping field in
             // the data. In that case, either set a default or just ignore the field.
-            if ($targetClass = $this->getTargetClass($collectingField, $dict, $deserializer)) {
+            if ($targetClass = $deserializer->typeMapper->getTargetClass($collectingField, $dict)) {
                 [$object, $remaining] = $this->populateObject($remaining, $targetClass, $deserializer);
                 $props[$collectingField->phpName] = $object;
                 if ($map = $deserializer->typeMapper->typeMapForField($collectingField)) {
@@ -234,23 +232,6 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         }
 
         return $new;
-    }
-
-    protected function getTargetClass(Field $field, array $dict, Deserializer $deserializer): ?string
-    {
-        if (!$map = $deserializer->typeMapper->typeMapForField($field)) {
-            return $field->phpType;
-        }
-
-        if (! $key = ($dict[$map->keyField()] ?? null)) {
-            return null;
-        }
-
-        if (!$class = $map->findClass($key)) {
-            throw NoTypeMapDefinedForKey::create($key, $field->phpName ?? $field->phpType);
-        }
-
-        return $class;
     }
 
     public function canWrite(Field $field, string $format): bool

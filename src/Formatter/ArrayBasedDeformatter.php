@@ -93,10 +93,9 @@ trait ArrayBasedDeformatter
      * @param mixed $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @param TypeMap|null $typeMap
      * @return array|SerdeError
      */
-    public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer, ?TypeMap $typeMap): array|SerdeError
+    public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
         if (!isset($decoded[$field->serializedName])) {
             return SerdeError::Missing;
@@ -120,7 +119,7 @@ trait ArrayBasedDeformatter
         $ret = [];
 
         /** @var Field $propField */
-        foreach ($this->propertyList($field, $typeMap, $data, $deserializer) as $propField) {
+        foreach ($this->propertyList($field, $data, $deserializer) as $propField) {
             $usedNames[] = $propField->serializedName;
             if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
                 $collectingArray = $propField;
@@ -140,7 +139,7 @@ trait ArrayBasedDeformatter
         $remaining = $this->getRemainingData($data, $usedNames);
         foreach ($collectingObjects as $collectingField) {
             $remaining = $this->getRemainingData($remaining, $usedNames);
-            $nestedProps = $this->propertyList($collectingField, $collectingField?->typeMap, $remaining, $deserializer
+            $nestedProps = $this->propertyList($collectingField, $remaining, $deserializer
             );
             foreach ($nestedProps as $propField) {
                 $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
@@ -176,30 +175,13 @@ trait ArrayBasedDeformatter
      * The key field is kept in the data so that the property writer
      * can also look up the right type.
      */
-    protected function propertyList(Field $field, ?TypeMap $map, array $data, Deserializer $deserializer): array
+    protected function propertyList(Field $field, array $data, Deserializer $deserializer): array
     {
-        $class = $this->getTargetClass($field, $map, $data);
+        $class = $deserializer->typeMapper->getTargetClass($field, $data);
 
         return $class ?
             $deserializer->analyzer->analyze($class, ClassDef::class)->properties
             : [];
-    }
-
-    protected function getTargetClass(Field $field, ?TypeMap $map, array $dict): ?string
-    {
-        if (!$map) {
-            return $field->phpType;
-        }
-
-        if (! $key = ($dict[$map->keyField()] ?? null)) {
-            return null;
-        }
-
-        if (!$class = $map->findClass($key)) {
-            return null;
-        }
-
-        return $class;
     }
 
     public function getRemainingData(mixed $source, array $used): array

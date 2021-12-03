@@ -60,13 +60,26 @@ class TypeMapper
         return $this->analyzer->analyze($class, ClassDef::class)?->typeMap;
     }
 
-    public function getClassFor(Field $field): string
+    public function getTargetClass(Field $field, array $dict): ?string
     {
         if ($field->typeCategory !== TypeCategory::Object) {
             // @todo Better exception.
             throw new \RuntimeException('Can only get class for a class Field.');
         }
 
+        if (!$map = $this->typeMapForField($field)) {
+            return $field->phpType;
+        }
+
+        if (! $key = ($dict[$map->keyField()] ?? null)) {
+            return null;
+        }
+
+        if (!$class = $map->findClass($key)) {
+            throw NoTypeMapDefinedForKey::create($key, $field->phpName ?? $field->phpType);
+        }
+
+        return $class;
 
     }
 }
