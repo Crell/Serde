@@ -17,6 +17,7 @@ class Deserializer
         /** @var PropertyWriter[] */
         protected readonly array $writers,
         public readonly Deformatter $deformatter,
+        public readonly TypeMapper $typeMapper,
     ) {}
 
     public function deserialize(mixed $decoded, Field $field): mixed

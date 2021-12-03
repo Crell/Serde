@@ -20,7 +20,7 @@ use Crell\Serde\PropertyHandler\PropertyWriter;
  *
  * For most typical cases, you can use SerdeCommon and be happy.
  *
- * Note: You MUST repeat the for readonly properties in the subclass,
+ * Note: You MUST repeat the five readonly properties in the subclass,
  * exactly as defined here, or they will not be settable from the
  * subclass constructor.  This is a PHP limitation.
  */
@@ -38,6 +38,8 @@ abstract class Serde
     /** @var Deformatter[] */
     protected readonly array $deformatters;
 
+    protected readonly TypeMapper $typeMapper;
+
     protected readonly ClassAnalyzer $analyzer;
 
     public function serialize(object $object, string $format): mixed
@@ -52,6 +54,7 @@ abstract class Serde
             analyzer: $this->analyzer,
             readers: $this->readers,
             formatter: $formatter,
+            typeMapper: $this->typeMapper,
         );
 
         $serializedValue = $inner->serialize($object, $init, $formatter->initialField($inner, $object::class));
@@ -69,6 +72,7 @@ abstract class Serde
             analyzer: $this->analyzer,
             writers: $this->writers,
             deformatter: $formatter,
+            typeMapper: $this->typeMapper,
         );
 
         $new = $inner->deserialize($decoded, $formatter->initialField($inner, $to));

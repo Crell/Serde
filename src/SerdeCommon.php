@@ -49,6 +49,8 @@ class SerdeCommon extends Serde
     /** @var Deformatter[] */
     protected readonly array $deformatters;
 
+    protected readonly TypeMapper $typeMapper;
+
     /**
      * @param ClassAnalyzer $analyzer
      * @param array<int, PropertyReader|PropertyWriter> $handlers
@@ -58,7 +60,11 @@ class SerdeCommon extends Serde
         protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
         array $handlers = [],
         array $formatters = [],
+        /** @var TypeMap[] */
+        array $typeMaps = [],
     ) {
+        $this->typeMapper = new TypeMapper($typeMaps, $this->analyzer);
+
         // Slot any custom handlers in before the generic object reader.
         $handlers = [
             new ScalarPropertyReader(),

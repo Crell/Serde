@@ -38,6 +38,8 @@ class SerdeBasic extends Serde
     /** @var Deformatter[] */
     protected readonly array $deformatters;
 
+    protected readonly TypeMapper $typeMapper;
+
     /**
      * @param ClassAnalyzer $analyzer
      * @param array<int, PropertyReader|PropertyWriter> $handlers
@@ -47,7 +49,11 @@ class SerdeBasic extends Serde
         protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
         array $handlers = [],
         array $formatters = [],
+        /** @var TypeMap[] */
+        array $typeMaps = [],
     ) {
+        $this->typeMapper = new TypeMapper($typeMaps, $this->analyzer);
+
         $this->readers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyReader);
         $this->writers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyWriter);
 
