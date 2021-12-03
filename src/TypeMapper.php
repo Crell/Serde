@@ -11,7 +11,7 @@ use function Crell\fp\pipe;
 class TypeMapper
 {
     public function __construct(
-        /** TypeMap[] */
+        /** @var array<class-string, TypeMap> */
         protected readonly array $typeMaps,
         protected readonly ClassAnalyzer $analyzer,
     ) {}

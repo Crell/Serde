@@ -49,7 +49,7 @@ class SerdeBasic extends Serde
         protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
         array $handlers = [],
         array $formatters = [],
-        /** @var TypeMap[] */
+        /** @var array<class-string, TypeMap> */
         array $typeMaps = [],
     ) {
         $this->typeMapper = new TypeMapper($typeMaps, $this->analyzer);
