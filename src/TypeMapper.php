@@ -16,7 +16,7 @@ class TypeMapper
         protected readonly ClassAnalyzer $analyzer,
     ) {}
 
-    public function typeMap(Field $field): ?TypeMap
+    public function typeMapForField(Field $field): ?TypeMap
     {
         if (!in_array($field->typeCategory, [TypeCategory::Object, TypeCategory::Array], true)) {
             // @todo Better exception.
@@ -45,6 +45,19 @@ class TypeMapper
         }
 
         return null;
+    }
+
+    public function typeMapForClass(string $class): ?TypeMap
+    {
+        $map = pipe($this->typeMaps,
+            first(static fn (TypeMap $map, string $overrideClass) => is_a($class, $overrideClass, true)),
+        );
+
+        if ($map) {
+            return $map;
+        }
+
+        return $this->analyzer->analyze($class, ClassDef::class)?->typeMap;
     }
 
     public function getClassFor(Field $field): string

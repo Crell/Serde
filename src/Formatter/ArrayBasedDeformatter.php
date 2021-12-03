@@ -78,11 +78,9 @@ trait ArrayBasedDeformatter
      */
     protected function upcastArray(array $data, Deserializer $deserializer, ?string $type = null): array
     {
-        /** @var ClassDef $classDef */
-        $classDef = $type ? $deserializer->analyzer->analyze($type, ClassDef::class) : null;
-
-        $upcast = function(array $ret, mixed $v, int|string $k) use ($deserializer, $type, $data, $classDef) {
-            $arrayType = $classDef?->typeMap?->findClass($v[$classDef->typeMap->keyField()]) ?? $type ?? get_debug_type($v);
+        $upcast = function(array $ret, mixed $v, int|string $k) use ($deserializer, $type, $data) {
+            $map = $type ? $deserializer->typeMapper->typeMapForClass($type) : null;
+            $arrayType = $map?->findClass($v[$map?->keyField()]) ?? $type ?? get_debug_type($v);
             $f = Field::create(serializedName: "$k", phpType: $arrayType);
             $ret[$k] = $deserializer->deserialize($data, $f);
             return $ret;
@@ -156,9 +154,9 @@ trait ArrayBasedDeformatter
         // and that array has a type map, upcast all elements of that array to
         // the appropriate type.
         $remaining = $this->getRemainingData($remaining, $usedNames);
-        if ($collectingArray?->typeMap) {
+        if ($collectingArray && $map = $deserializer->typeMapper->typeMapForField($collectingArray)) {
             foreach ($remaining as $k => $v) {
-                $class = $collectingArray->typeMap->findClass($v[$collectingArray->typeMap->keyField()]);
+                $class = $map->findClass($v[$map->keyField()]);
                 $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: "$k", phpType: $class));
             }
         } else {
