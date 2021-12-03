@@ -6,6 +6,7 @@ namespace Crell\Serde\Formatter;
 
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\ClassDef;
+use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
 use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;
@@ -42,7 +43,7 @@ trait ArrayBasedDeformatter
         return $decoded[$field->serializedName] ?? SerdeError::Missing;
     }
 
-    public function deserializeSequence(mixed $decoded, Field $field, callable $recursor): array|SerdeError
+    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
         if (!isset($decoded[$field->serializedName])) {
             return SerdeError::Missing;
@@ -50,13 +51,13 @@ trait ArrayBasedDeformatter
 
         $class = $field?->typeField?->arrayType ?? '';
         if (class_exists($class) || interface_exists($class)) {
-            return $this->upcastArray($decoded[$field->serializedName], $recursor, $class);
+            return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class);
         }
 
-        return $this->upcastArray($decoded[$field->serializedName], $recursor);
+        return $this->upcastArray($decoded[$field->serializedName], $deserializer);
     }
 
-    public function deserializeDictionary(mixed $decoded, Field $field, callable $recursor): array|SerdeError
+    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
         if (!isset($decoded[$field->serializedName])) {
             return SerdeError::Missing;
@@ -68,24 +69,24 @@ trait ArrayBasedDeformatter
 
         $class = $field?->typeField?->arrayType ?? '';
         if (class_exists($class) || interface_exists($class)) {
-            return $this->upcastArray($decoded[$field->serializedName], $recursor, $class);
+            return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class);
         }
 
-        return $this->upcastArray($decoded[$field->serializedName], $recursor);
+        return $this->upcastArray($decoded[$field->serializedName], $deserializer);
     }
 
     /**
      * Deserializes all elements of an array, through the recursor.
      */
-    protected function upcastArray(array $data, callable $recursor, ?string $type = null): array
+    protected function upcastArray(array $data, Deserializer $deserializer, ?string $type = null): array
     {
         /** @var ClassDef $classDef */
         $classDef = $type ? $this->getAnalyzer()->analyze($type, ClassDef::class) : null;
 
-        $upcast = function(array $ret, mixed $v, int|string $k) use ($recursor, $type, $data, $classDef) {
+        $upcast = function(array $ret, mixed $v, int|string $k) use ($deserializer, $type, $data, $classDef) {
             $arrayType = $classDef?->typeMap?->findClass($v[$classDef->typeMap->keyField()]) ?? $type ?? get_debug_type($v);
             $f = Field::create(serializedName: "$k", phpType: $arrayType);
-            $ret[$k] = $recursor($data, $f);
+            $ret[$k] = $deserializer->deserialize($data, $f);
             return $ret;
         };
 
@@ -95,11 +96,11 @@ trait ArrayBasedDeformatter
     /**
      * @param mixed $decoded
      * @param Field $field
-     * @param callable $recursor
+     * @param Deserializer $deserializer
      * @param TypeMap|null $typeMap
      * @return array|SerdeError
      */
-    public function deserializeObject(mixed $decoded, Field $field, callable $recursor, ?TypeMap $typeMap): array|SerdeError
+    public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer, ?TypeMap $typeMap): array|SerdeError
     {
         if (!isset($decoded[$field->serializedName])) {
             return SerdeError::Missing;
@@ -131,7 +132,7 @@ trait ArrayBasedDeformatter
                 $collectingObjects[] = $propField;
             } else {
                 $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
-                    ? $recursor($data, $propField)
+                    ? $deserializer->deserialize($data, $propField)
                     : $data[$propField->serializedName] ?? SerdeError::Missing;
             }
         }
@@ -146,7 +147,7 @@ trait ArrayBasedDeformatter
             $nestedProps = $this->propertyList($collectingField, $collectingField?->typeMap, $remaining);
             foreach ($nestedProps as $propField) {
                 $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
-                    ? $recursor($data, $propField)
+                    ? $deserializer->deserialize($data, $propField)
                     : $remaining[$propField->serializedName] ?? SerdeError::Missing;
                 $usedNames[] = $propField->serializedName;
             }
@@ -159,7 +160,7 @@ trait ArrayBasedDeformatter
         if ($collectingArray?->typeMap) {
             foreach ($remaining as $k => $v) {
                 $class = $collectingArray->typeMap->findClass($v[$collectingArray->typeMap->keyField()]);
-                $ret[$k] = $recursor($remaining, Field::create(serializedName: "$k", phpType: $class));
+                $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: "$k", phpType: $class));
             }
         } else {
             // Otherwise, just tack on whatever is left to the processed data.

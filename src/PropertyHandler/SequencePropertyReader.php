@@ -52,7 +52,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
                 : $typeField->explode($val);
         }
 
-        return $deserializer->deformatter->deserializeSequence($source, $field, $deserializer->deserialize(...));
+        return $deserializer->deformatter->deserializeSequence($source, $field, $deserializer);
     }
 
     public function canWrite(Field $field, string $format): bool

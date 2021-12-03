@@ -52,7 +52,7 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
                 : $typeField->explode($val);
         }
 
-        return $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer->deserialize(...));
+        return $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer);
     }
 
     public function canWrite(Field $field, string $format): bool

@@ -61,7 +61,7 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
     {
         // The data may not have any relation at all to the original object's
         // properties.  So deserialize as a basic dictionary instead.
-        $dict = $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer->deserialize(...));
+        $dict = $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer);
 
         if ($dict === SerdeError::Missing) {
             return null;
