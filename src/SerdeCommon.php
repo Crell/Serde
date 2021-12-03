@@ -74,8 +74,8 @@ class SerdeCommon extends Serde
             new DateTimeZonePropertyReader(),
             ...$handlers,
             new EnumPropertyReader(),
-            new NativeSerializePropertyReader($this->analyzer),
-            new ObjectPropertyReader($this->analyzer),
+            new NativeSerializePropertyReader(),
+            new ObjectPropertyReader(),
         ];
 
         // Add the common formatters.
