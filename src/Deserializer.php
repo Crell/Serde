@@ -24,8 +24,6 @@ class Deserializer
 
     public function __construct(
         protected readonly ClassAnalyzer $analyzer,
-        /** @var PropertyReader[]  */
-        protected readonly array $readers,
         /** @var PropertyWriter[] */
         protected readonly array $writers,
         protected readonly Deformatter $formatter,

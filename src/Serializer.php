@@ -31,8 +31,6 @@ class Serializer
         protected readonly ClassAnalyzer $analyzer,
         /** @var PropertyReader[]  */
         protected readonly array $readers,
-        /** @var PropertyWriter[] */
-        protected readonly array $writers,
         protected readonly Formatter $formatter,
     ) {
         $this->recursor = $this->serialize(...);
