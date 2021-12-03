@@ -36,7 +36,7 @@ class SerdeBench
         $analyzer = new MemoryCacheAnalyzer(new Analyzer());
         $this->serde = new SerdeCommon(
             analyzer: $analyzer,
-            formatters: [new JsonFormatter(analyzer: $analyzer)]
+            formatters: [new JsonFormatter()]
         );
     }
 
