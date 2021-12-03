@@ -73,10 +73,10 @@ class SerdeCommon extends Serde
         ];
 
         // Add the common formatters.
-        $formatters[] = new JsonFormatter($this->analyzer);
-        $formatters[] = new ArrayFormatter($this->analyzer);
+        $formatters[] = new JsonFormatter();
+        $formatters[] = new ArrayFormatter();
         if (class_exists(Yaml::class)) {
-            $formatters[] = new YamlFormatter(analyzer: $this->analyzer);
+            $formatters[] = new YamlFormatter();
         }
 
         $this->readers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyReader);

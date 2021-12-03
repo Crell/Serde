@@ -13,7 +13,7 @@ interface Deformatter
 {
     public function format(): string;
 
-    public function initialField(string $targetType): Field;
+    public function initialField(Deserializer $deserializer, string $targetType): Field;
 
     public function deserializeInitialize(mixed $serialized): mixed;
 

@@ -14,7 +14,7 @@ interface Formatter
 {
     public function format(): string;
 
-    public function initialField(string $type): Field;
+    public function initialField(Serializer $serializer, string $type): Field;
 
     public function serializeInitialize(ClassDef $classDef): mixed;
 

@@ -31,7 +31,6 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
      *   A bit field of PARSE_* constants to customize the YAML parser behavior
      */
     public function __construct(
-        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
         protected readonly int $inline = 2,
         protected readonly int $indent = 4,
         protected readonly int $dumpFlags = 0,
@@ -61,10 +60,5 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
     public function deserializeFinalize(mixed $decoded): void
     {
 
-    }
-
-    protected function getAnalyzer(): ClassAnalyzer
-    {
-        return $this->analyzer;
     }
 }

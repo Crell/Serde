@@ -54,7 +54,7 @@ abstract class Serde
             formatter: $formatter,
         );
 
-        $serializedValue = $inner->serialize($object, $init, $formatter->initialField($object::class));
+        $serializedValue = $inner->serialize($object, $init, $formatter->initialField($inner, $object::class));
 
         return $formatter->serializeFinalize($serializedValue, $classDef);
     }
@@ -71,7 +71,7 @@ abstract class Serde
             deformatter: $formatter,
         );
 
-        $new = $inner->deserialize($decoded, $formatter->initialField($to));
+        $new = $inner->deserialize($decoded, $formatter->initialField($inner, $to));
 
         $formatter->deserializeFinalize($decoded);
 

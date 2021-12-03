@@ -81,7 +81,7 @@ trait ArrayBasedDeformatter
     protected function upcastArray(array $data, Deserializer $deserializer, ?string $type = null): array
     {
         /** @var ClassDef $classDef */
-        $classDef = $type ? $this->getAnalyzer()->analyze($type, ClassDef::class) : null;
+        $classDef = $type ? $deserializer->analyzer->analyze($type, ClassDef::class) : null;
 
         $upcast = function(array $ret, mixed $v, int|string $k) use ($deserializer, $type, $data, $classDef) {
             $arrayType = $classDef?->typeMap?->findClass($v[$classDef->typeMap->keyField()]) ?? $type ?? get_debug_type($v);
@@ -124,7 +124,7 @@ trait ArrayBasedDeformatter
         $ret = [];
 
         /** @var Field $propField */
-        foreach ($this->propertyList($field, $typeMap, $data) as $propField) {
+        foreach ($this->propertyList($field, $typeMap, $data, $deserializer) as $propField) {
             $usedNames[] = $propField->serializedName;
             if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
                 $collectingArray = $propField;
@@ -144,7 +144,8 @@ trait ArrayBasedDeformatter
         $remaining = $this->getRemainingData($data, $usedNames);
         foreach ($collectingObjects as $collectingField) {
             $remaining = $this->getRemainingData($remaining, $usedNames);
-            $nestedProps = $this->propertyList($collectingField, $collectingField?->typeMap, $remaining);
+            $nestedProps = $this->propertyList($collectingField, $collectingField?->typeMap, $remaining, $deserializer
+            );
             foreach ($nestedProps as $propField) {
                 $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
                     ? $deserializer->deserialize($data, $propField)
@@ -179,12 +180,12 @@ trait ArrayBasedDeformatter
      * The key field is kept in the data so that the property writer
      * can also look up the right type.
      */
-    protected function propertyList(Field $field, ?TypeMap $map, array $data): array
+    protected function propertyList(Field $field, ?TypeMap $map, array $data, Deserializer $deserializer): array
     {
         $class = $this->getTargetClass($field, $map, $data);
 
         return $class ?
-            $this->getAnalyzer()->analyze($class, ClassDef::class)->properties
+            $deserializer->analyzer->analyze($class, ClassDef::class)->properties
             : [];
     }
 
@@ -209,13 +210,4 @@ trait ArrayBasedDeformatter
     {
         return array_diff_key($source, array_flip($used));
     }
-
-    /**
-     * Returns a class analyzer.
-     *
-     * Classes using this trait must provide a class analyzer via this method.
-     *
-     * @return ClassAnalyzer
-     */
-    abstract protected function getAnalyzer(): ClassAnalyzer;
 }

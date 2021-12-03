@@ -14,10 +14,6 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
     use ArrayBasedFormatter;
     use ArrayBasedDeformatter;
 
-    public function __construct(
-        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
-    ) {}
-
     public function format(): string
     {
         return 'array';
@@ -46,10 +42,5 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
     public function deserializeFinalize(mixed $decoded): void
     {
 
-    }
-
-    protected function getAnalyzer(): ClassAnalyzer
-    {
-        return $this->analyzer;
     }
 }
