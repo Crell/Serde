@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
-use Crell\AttributeUtils\Analyzer;
-use Crell\AttributeUtils\ClassAnalyzer;
-use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
-use Crell\Serde\Formatter\Deformatter;
-use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;

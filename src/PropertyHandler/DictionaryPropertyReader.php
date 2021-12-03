@@ -9,9 +9,6 @@ use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
 use Crell\Serde\DictionaryField;
 use Crell\Serde\Field;
-use Crell\Serde\Formatter\Deformatter;
-use Crell\Serde\Formatter\Formatter;
-use Crell\Serde\SequenceField;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 

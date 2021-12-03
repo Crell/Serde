@@ -11,8 +11,6 @@ use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
-use Crell\Serde\Formatter\Deformatter;
-use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;

@@ -6,8 +6,6 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
-use Crell\Serde\Formatter\Deformatter;
-use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
-use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
-use Crell\Serde\NoTypeMapDefinedForKey;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;

@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
-use Crell\AttributeUtils\Analyzer;
-use Crell\AttributeUtils\ClassAnalyzer;
-use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
 
 class JsonFormatter implements Formatter, Deformatter, SupportsCollecting

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Attribute;
-use function Crell\fp\afilter;
 use function Crell\fp\amapWithKeys;
 use function Crell\fp\explode;
 use function Crell\fp\implode;

@@ -6,7 +6,6 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
-use Crell\Serde\Formatter\Deformatter;
 
 class EnumOnArrayPropertyReader extends EnumPropertyReader
 {

@@ -6,10 +6,7 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
-use Crell\Serde\DictionaryField;
 use Crell\Serde\Field;
-use Crell\Serde\Formatter\Deformatter;
-use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\Sequence;
 use Crell\Serde\SequenceField;
 use Crell\Serde\SerdeError;

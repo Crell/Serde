@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
+use Crell\Serde\ClassDef;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Sequence;
-use Crell\Serde\ClassDef;
 use Crell\Serde\Serializer;
 
 interface Formatter

@@ -7,7 +7,6 @@ namespace Crell\Serde;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\PropertyHandler\PropertyReader;
-use Crell\Serde\PropertyHandler\PropertyWriter;
 
 // This exists mainly just to create a closure over the formatter.
 // But that does simplify a number of functions.
