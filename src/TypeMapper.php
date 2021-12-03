@@ -80,6 +80,23 @@ class TypeMapper
         }
 
         return $class;
+    }
 
+    /**
+     * Gets the property list for a given object.
+     *
+     * We need to know the object properties to deserialize to.
+     * However, that list may be modified by the type map, as
+     * the type map is in the incoming data.
+     * The key field is kept in the data so that the property writer
+     * can also look up the right type.
+     */
+    public function propertyList(Field $field, array $data): array
+    {
+        $class = $this->getTargetClass($field, $data);
+
+        return $class ?
+            $this->analyzer->analyze($class, ClassDef::class)->properties
+            : [];
     }
 }

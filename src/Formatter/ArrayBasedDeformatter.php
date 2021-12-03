@@ -119,7 +119,7 @@ trait ArrayBasedDeformatter
         $ret = [];
 
         /** @var Field $propField */
-        foreach ($this->propertyList($field, $data, $deserializer) as $propField) {
+        foreach ($deserializer->typeMapper->propertyList($field, $data) as $propField) {
             $usedNames[] = $propField->serializedName;
             if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
                 $collectingArray = $propField;
@@ -139,8 +139,7 @@ trait ArrayBasedDeformatter
         $remaining = $this->getRemainingData($data, $usedNames);
         foreach ($collectingObjects as $collectingField) {
             $remaining = $this->getRemainingData($remaining, $usedNames);
-            $nestedProps = $this->propertyList($collectingField, $remaining, $deserializer
-            );
+            $nestedProps = $deserializer->typeMapper->propertyList($collectingField, $remaining);
             foreach ($nestedProps as $propField) {
                 $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
                     ? $deserializer->deserialize($data, $propField)
@@ -166,23 +165,6 @@ trait ArrayBasedDeformatter
         return $ret;
     }
 
-    /**
-     * Gets the property list for a given object.
-     *
-     * We need to know the object properties to deserialize to.
-     * However, that list may be modified by the type map, as
-     * the type map is in the incoming data.
-     * The key field is kept in the data so that the property writer
-     * can also look up the right type.
-     */
-    protected function propertyList(Field $field, array $data, Deserializer $deserializer): array
-    {
-        $class = $deserializer->typeMapper->getTargetClass($field, $data);
-
-        return $class ?
-            $deserializer->analyzer->analyze($class, ClassDef::class)->properties
-            : [];
-    }
 
     public function getRemainingData(mixed $source, array $used): array
     {
