@@ -44,7 +44,7 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
             $dict->items = [new CollectionItem(field: $f, value: $map->findIdentifier($value::class)), ...$dict->items];
         }
 
-        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer->serialize(...));
+        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
     }
 
     protected function typeMap(Field $field): ?TypeMap

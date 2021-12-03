@@ -8,6 +8,7 @@ use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Sequence;
 use Crell\Serde\ClassDef;
+use Crell\Serde\Serializer;
 
 interface Formatter
 {
@@ -27,9 +28,9 @@ interface Formatter
 
     public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed;
 
-    public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, callable $recursor): mixed;
+    public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): mixed;
 
-    public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, callable $recursor): mixed;
+    public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): mixed;
 
-    public function serializeObject(mixed $runningValue, Field $field, Dict $next, callable $recursor): mixed;
+    public function serializeObject(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): mixed;
 }

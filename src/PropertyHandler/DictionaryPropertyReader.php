@@ -31,7 +31,7 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
             $dict->items[] = new CollectionItem(field: $f, value: $v);
         }
 
-        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer->serialize(...));
+        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool

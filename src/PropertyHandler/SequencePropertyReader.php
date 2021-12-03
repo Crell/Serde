@@ -31,7 +31,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
             $seq->items[] = new CollectionItem(field: $f, value: $v);
         }
 
-        return $serializer->formatter->serializeSequence($runningValue, $field, $seq, $serializer->serialize(...));
+        return $serializer->formatter->serializeSequence($runningValue, $field, $seq, $serializer);
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool

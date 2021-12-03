@@ -58,7 +58,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
             $dict->items = [new CollectionItem(field: $f, value: $map->findIdentifier($value::class)), ...$dict->items];
         }
 
-        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer->serialize(...));
+        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
     }
 
     protected function flattenValue(Dict $dict, Field $field, callable $propReader): Dict
