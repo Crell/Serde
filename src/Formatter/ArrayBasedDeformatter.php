@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
-use Crell\Serde\ClassDef;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
-use Crell\Serde\TypeMap;
 use function Crell\fp\reduceWithKeys;
 
 /**

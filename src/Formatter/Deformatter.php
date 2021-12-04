@@ -7,7 +7,6 @@ namespace Crell\Serde\Formatter;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
 use Crell\Serde\SerdeError;
-use Crell\Serde\TypeMap;
 
 interface Deformatter
 {
