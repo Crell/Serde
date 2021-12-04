@@ -138,12 +138,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
      */
     protected function populateObject(array $dict, string $class, Deserializer $deserializer): array
     {
-        /** @var ClassDef $classDef */
         $classDef = $deserializer->analyzer->analyze($class, ClassDef::class);
-
-        // Get the list of properties on the target class, taking
-        // type maps into account.
-        $properties = $classDef->properties;
 
         $props = [];
         $usedNames = [];
@@ -151,7 +146,7 @@ class ObjectPropertyReader implements PropertyWriter, PropertyReader
         /** @var Field[] $collectingObjects */
         $collectingObjects = [];
 
-        foreach ($properties as $propField) {
+        foreach ($classDef->properties as $propField) {
             $usedNames[] = $propField->serializedName;
             if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
                 $collectingArray = $propField;
