@@ -18,6 +18,7 @@ use Crell\Serde\PropertyHandler\DictionaryPropertyReader;
 use Crell\Serde\PropertyHandler\EnumPropertyReader;
 use Crell\Serde\PropertyHandler\NativeSerializePropertyReader;
 use Crell\Serde\PropertyHandler\ObjectPropertyReader;
+use Crell\Serde\PropertyHandler\ObjectPropertyWriter;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
 use Crell\Serde\PropertyHandler\ScalarPropertyReader;
@@ -76,6 +77,7 @@ class SerdeCommon extends Serde
             new EnumPropertyReader(),
             new NativeSerializePropertyReader(),
             new ObjectPropertyReader(),
+            new ObjectPropertyWriter(),
         ];
 
         // Add the common formatters.
