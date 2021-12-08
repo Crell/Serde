@@ -23,16 +23,7 @@ trait ArrayBasedFormatter
 {
     public function initialField(Serializer|Deserializer $serializer, string $type): Field
     {
-        // @todo This feels very ugly and hard coded to me. I'm not sure of a better fix.
-        // But we need to get a type map onto the root field in order to support
-        // deserializing into a mapped root object.
-        /** @var ClassDef $classDef */
-        $classDef = $serializer->analyzer->analyze($type, ClassDef::class);
-        $field = Field::create('root', $type);
-        if ($classDef?->typeMap) {
-            $field = $field->with(typeMap: $classDef->typeMap);
-        }
-        return $field;
+        return Field::create('root', $type);
     }
 
     public function serializeInt(mixed $runningValue, Field $field, int $next): array
