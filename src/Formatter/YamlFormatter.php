@@ -49,7 +49,7 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
         return Yaml::dump($runningValue['root'], inline: $this->inline, indent: $this->indent, flags: $this->dumpFlags);
     }
 
-    public function deserializeInitialize(mixed $serialized): mixed
+    public function deserializeInitialize(mixed $serialized): array
     {
         return ['root' => Yaml::parse($serialized, $this->parseFlags)];
     }
