@@ -8,6 +8,7 @@ use Attribute;
 use Crell\AttributeUtils\Excludable;
 use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
+use Crell\fp\Evolvable;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
 use function Crell\fp\indexBy;

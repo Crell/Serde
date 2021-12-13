@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records;
 
-use Crell\Serde\Evolvable;
+use Crell\fp\Evolvable;
 
 /**
  * A more complex test showing dependent and complex values.
