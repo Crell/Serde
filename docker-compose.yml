@@ -1,15 +1,16 @@
 # To use:
 # Run "docker-compose build" to rebuild the app container.
-# Run "docker-compose run --rm php80" to run the test script with xdebug.
-# Run "docker-compose run --rm php81" to run the test script on 8.1.
+# Run "docker-compose run -u $(id -u ${USER}):$(id -g ${USER}) --rm php81 composer install" to install dependencies.
+# Run "docker-compose run  -u $(id -u ${USER}):$(id -g ${USER})--rm php81 vendor/bin/phpunit" to run the test script on 8.1.
 # Run "docker-compose down -v" to fully wipe everything and start over.
-# Run "docker-compose run --rm php80 bash" to log into the container to run tests selectively.
+# Run "docker-compose run -u $(id -u ${USER}):$(id -g ${USER}) --rm php80 bash" to log into the container to run tests selectively.
 
 version: "3"
 services:
     php81:
         build: ./docker/php/81
         volumes:
+#            - ~/.composer:/.composer #uncomment this line to allow usage of local composer cache
             - .:/usr/src/myapp
             - ./docker/php/81/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
             - ./docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
