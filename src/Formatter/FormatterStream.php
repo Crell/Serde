@@ -6,7 +6,7 @@ namespace Crell\Serde\Formatter;
 
 class FormatterStream
 {
-    public bool $root = true;
+    private bool $namedContext = false;
 
     public function __construct(
         public mixed $stream,
@@ -17,6 +17,25 @@ class FormatterStream
         return new static(...$args);
     }
 
+    public function namedContext(): static
+    {
+        $new = clone($this);
+        $new->namedContext = true;
+        return $new;
+    }
+
+    public function unnamedContext(): static
+    {
+        $new = clone($this);
+        $new->namedContext = false;
+        return $new;
+    }
+
+    public function isNamedContext(): bool
+    {
+        return $this->namedContext;
+    }
+
     /**
      * Wrapper for writing to the stream.
      *
@@ -25,7 +44,7 @@ class FormatterStream
      * @return int|false
      *   The value returned from fwrite();
      */
-    public function write(mixed $data): int|false
+    public function write(string $data): int|false
     {
         return fwrite($this->stream, $data);
     }
