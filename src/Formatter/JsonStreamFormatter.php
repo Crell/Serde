@@ -23,41 +23,55 @@ class JsonStreamFormatter implements Formatter
         return Field::create('root', $type);
     }
 
-    public function serializeInitialize(ClassDef $classDef): mixed
+    public function serializeInitialize(ClassDef $classDef): FormatterStream
     {
         return FormatterStream::new(fopen('php://temp/', 'wb'));
     }
 
-    public function serializeFinalize(mixed $runningValue, ClassDef $classDef): mixed
+    /**
+     * @param FormatterStream $runningValue
+     */
+    public function serializeFinalize(mixed $runningValue, ClassDef $classDef): FormatterStream
     {
         return $runningValue;
     }
 
-    public function serializeInt(mixed $runningValue, Field $field, int $next): mixed
+    /**
+     * @param FormatterStream $runningValue
+     */
+    public function serializeInt(mixed $runningValue, Field $field, int $next): FormatterStream
     {
-        fwrite($runningValue->stream, sprintf('"%s":%d', $field->serializedName, $next));
-        return $runningValue;
+        return $runningValue->printf('"%s":%d', $field->serializedName, $next);
     }
 
-    public function serializeFloat(mixed $runningValue, Field $field, float $next): mixed
+    /**
+     * @param FormatterStream $runningValue
+     */
+    public function serializeFloat(mixed $runningValue, Field $field, float $next): FormatterStream
     {
-        fwrite($runningValue->stream, sprintf('"%s":%f', $field->serializedName, $next));
-        return $runningValue;
+        return $runningValue->printf('"%s":%f', $field->serializedName, $next);
     }
 
-    public function serializeString(mixed $runningValue, Field $field, string $next): mixed
+    /**
+     * @param FormatterStream $runningValue
+     */
+    public function serializeString(mixed $runningValue, Field $field, string $next): FormatterStream
     {
-        fwrite($runningValue->stream, sprintf('"%s":"%s"', $field->serializedName, $next));
-        return $runningValue;
+        return $runningValue->printf('"%s":"%s"', $field->serializedName, $next);
     }
 
-    public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed
+    /**
+     * @param FormatterStream $runningValue
+     */
+    public function serializeBool(mixed $runningValue, Field $field, bool $next): FormatterStream
     {
-        fwrite($runningValue->stream, sprintf('"%s":%s', $field->serializedName, $next ? 'true' : 'false'));
-        return $runningValue;
+        return $runningValue->printf('"%s":%s', $field->serializedName, $next ? 'true' : 'false');
     }
 
-    public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): mixed
+    /**
+     * @param FormatterStream $runningValue
+     */
+    public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): FormatterStream
     {
         // TODO: Implement serializeSequence() method.
     }
@@ -68,7 +82,7 @@ class JsonStreamFormatter implements Formatter
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): FormatterStream
     {
         if (!$runningValue->root) {
-            fwrite($runningValue->stream, "\"$field->serializedName\":");
+            $runningValue->write("\"$field->serializedName\":");
         }
 
         fwrite($runningValue->stream, '{');
@@ -80,7 +94,7 @@ class JsonStreamFormatter implements Formatter
         /** @var CollectionItem $item */
         foreach ($next->items as $item) {
             if (!$isFirst) {
-                fwrite($runningValue->stream, ',');
+                $runningValue->write(',');
             }
             $isFirst = false;
             $serializer->serialize($item->value, $runningValue, $item->field);
@@ -90,15 +104,15 @@ class JsonStreamFormatter implements Formatter
             if (!$isFirst) {
                 fwrite($runningValue, ',');
             }
-            fwrite($runningValue, sprintf('"%s":"%s"\n', $k, $v));
+            $runningValue->printf('"%s":"%s"\n', $k, $v);
         }
 
-        fwrite($runningValue->stream, '}');
+        $runningValue->write('}');
 
         return $runningValue;
     }
 
-    public function serializeObject(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): mixed
+    public function serializeObject(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): FormatterStream
     {
         return $this->serializeDictionary($runningValue, $field, $next, $serializer);
     }
