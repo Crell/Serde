@@ -1030,7 +1030,6 @@ abstract class SerdeTest extends TestCase
 
     }
 
-
     /**
      * @test
      */

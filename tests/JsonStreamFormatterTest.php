@@ -6,8 +6,13 @@ namespace Crell\Serde;
 
 use Crell\Serde\Formatter\FormatterStream;
 use Crell\Serde\Formatter\JsonStreamFormatter;
+use Crell\Serde\Records\AllFieldTypes;
+use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
+use Crell\Serde\Records\MultiCollect\ThingOneA;
+use Crell\Serde\Records\MultiCollect\ThingTwoC;
+use Crell\Serde\Records\MultiCollect\Wrapper;
 use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Pagination\DetailedResults;
@@ -16,6 +21,7 @@ use Crell\Serde\Records\Pagination\PaginationState;
 use Crell\Serde\Records\Pagination\Product;
 use Crell\Serde\Records\Pagination\ProductType;
 use Crell\Serde\Records\Point;
+use Crell\Serde\Records\Size;
 use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\TestCase;
 
@@ -105,5 +111,48 @@ class JsonStreamFormatterTest extends TestCase
             ),
         ];
 
+        yield Wrapper::class => [
+            'data' => new Wrapper(
+                one: new ThingOneA(
+                    first: 'one',
+                    second: 'two',
+                ),
+                two: new ThingTwoC(
+                    fifth: 'five',
+                    sixth: 'six',
+                ),
+                other: [
+                    'more' => 'data',
+                    'goes' => 'here',
+                ]
+            )
+        ];
+
+        yield AllFieldTypes::class => [
+            'data' => new AllFieldTypes(
+                anint: 5,
+                string: 'hello',
+                afloat: 3.14,
+                bool: true,
+                dateTimeImmutable: new \DateTimeImmutable('2021-05-01 08:30:45', new \DateTimeZone('America/Chicago')),
+                dateTime: new \DateTime('2021-05-01 08:30:45', new \DateTimeZone('America/Chicago')),
+                dateTimeZone: new \DateTimeZone('America/Chicago'),
+                simpleArray: ['a', 'b', 'c', 1, 2, 3],
+                assocArray: ['a' => 'A', 'b' => 'B', 'c' => 'C'],
+                simpleObject: new Point(4, 5, 6),
+                objectList: [new Point(1, 2, 3), new Point(4, 5, 6)],
+                objectMap: ['a' => new Point(1, 2, 3), 'b' => new Point(4, 5, 6)],
+                nestedArray: [
+                    'a' => [1, 2, 3],
+                    'b' => ['a' => 1, 'b' => 2, 'c' => 3],
+                    'c' => 'normal',
+                ],
+                size: Size::Large,
+                backedSize: BackedSize::Large,
+                implodedSeq: [1, 2, 3],
+                implodedDict: ['a' => 'A', 'b' => 'B'],
+                flattenedObject: new ThingOneA(first: 'a', second: 'b'),
+            )
+        ];
     }
 }
