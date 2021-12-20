@@ -54,12 +54,11 @@ class FormatterStream
      *
      * @param string $format
      * @param ...$args
-     * @return static
-     *   The called object.
+     * @return int|false
+     *   The return value from fwrite().
      */
-    public function printf(string $format, ...$args): static
+    public function printf(string $format, ...$args): int|false
     {
-        $this->write(sprintf($format, ...$args));
-        return $this;
+        return $this->write(sprintf($format, ...$args));
     }
 }
