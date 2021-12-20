@@ -94,6 +94,8 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
         public readonly bool $flatten = false,
         /** Set true to exclude this field from serialization entirely. */
         public readonly bool $exclude = false,
+        /** On deserialization, also check for values in fields with these names. */
+        public readonly array $alias = [],
     ) {
         if ($default) {
             $this->defaultValue = $default;

@@ -14,6 +14,17 @@ class JsonFormatterTest extends ArrayBasedFormatterTest
         $this->formatters = [new JsonFormatter()];
         $this->format = 'json';
         $this->emptyData = '{}';
+
+        $this->aliasedData = json_encode([
+            'un' => 1,
+            'dos' => 'dos',
+            'dot' => [
+                'x' => 1,
+                'y' => 2,
+                'z' => 3,
+            ]
+        ], JSON_THROW_ON_ERROR);
+
     }
 
     protected function arrayify(mixed $serialized): array

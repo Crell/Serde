@@ -8,6 +8,9 @@ use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
+use function Crell\fp\first;
+use function Crell\fp\firstValue;
+use function Crell\fp\pipe;
 use function Crell\fp\reduceWithKeys;
 
 /**
@@ -95,19 +98,26 @@ trait ArrayBasedDeformatter
      */
     public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
-        if (!isset($decoded[$field->serializedName])) {
+        $candidateNames = [$field->serializedName, ...$field->alias];
+
+        $key = pipe($candidateNames,
+            first(static fn (string $name): bool => isset($decoded[$name]))
+        );
+
+        if (!isset($decoded[$key])) {
             return SerdeError::Missing;
         }
+
         // @todo Still unsure if this should be an exception instead.
-        if (!is_array($decoded[$field->serializedName])) {
+        if (!is_array($decoded[$key])) {
             return SerdeError::FormatError;
         }
+
+        $data = $decoded[$key];
 
         // Now that we have an array of the raw data, some values need to be
         // recursively upcast to objects themselves, based on the information
         // in the object metadata for the target object.
-
-        $data = $decoded[$field->serializedName];
 
         $usedNames = [];
         $collectingArray = null;
@@ -126,7 +136,7 @@ trait ArrayBasedDeformatter
             } else {
                 $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
                     ? $deserializer->deserialize($data, $propField)
-                    : $data[$propField->serializedName] ?? SerdeError::Missing;
+                    : $this->getFieldData($propField, $data) ?? SerdeError::Missing;
             }
         }
 
@@ -163,6 +173,10 @@ trait ArrayBasedDeformatter
         return $ret;
     }
 
+    public function getFieldData(Field $field, array $data): mixed
+    {
+        return firstValue(fn(string $name): mixed => $data[$name] ?? null)([$field->serializedName, ...$field->alias]);
+    }
 
     public function getRemainingData(mixed $source, array $used): array
     {

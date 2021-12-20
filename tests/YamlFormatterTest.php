@@ -15,6 +15,17 @@ class YamlFormatterTest extends ArrayBasedFormatterTest
         $this->formatters = [new YamlFormatter()];
         $this->format = 'yaml';
         $this->emptyData = '{}';
+
+        $this->aliasedData = Yaml::dump([
+            'un' => 1,
+            'dos' => 'dos',
+            'dot' => [
+                'x' => 1,
+                'y' => 2,
+                'z' => 3,
+            ]
+        ]);
+
     }
 
     protected function arrayify(mixed $serialized): array

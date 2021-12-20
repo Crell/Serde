@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Formatter\SupportsCollecting;
+use Crell\Serde\Records\AliasedFields;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Callbacks\CallbackHost;
@@ -75,7 +76,17 @@ abstract class SerdeTest extends TestCase
 
     protected string $format;
 
+    /**
+     * Whatever the "empty string" equivalent is for a given format.
+     */
     protected mixed $emptyData;
+
+    /**
+     * A serialized blob with aliased fields.
+     *
+     * @see field_aliases_read_on_deserialize()
+     */
+    protected mixed $aliasedData;
 
     /**
      * @test
@@ -1017,5 +1028,26 @@ abstract class SerdeTest extends TestCase
     public function root_typemap_validate(mixed $serialized): void
     {
 
+    }
+
+
+    /**
+     * @test
+     */
+    function field_aliases(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $this->aliasedData;
+
+        $result = $s->deserialize($serialized, from: $this->format, to: AliasedFields::class);
+
+        $expected = new AliasedFields(
+            one: 1,
+            two: 'dos',
+            point: new Point(1, 2, 3),
+        );
+
+        self::assertEquals($expected, $result);
     }
 }

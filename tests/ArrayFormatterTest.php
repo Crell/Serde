@@ -18,6 +18,16 @@ class ArrayFormatterTest extends ArrayBasedFormatterTest
         $this->formatters = [new ArrayFormatter()];
         $this->format = 'array';
         $this->emptyData = [];
+
+        $this->aliasedData = [
+            'un' => 1,
+            'dos' => 'dos',
+            'dot' => [
+                'x' => 1,
+                'y' => 2,
+                'z' => 3,
+            ]
+        ];
     }
 
     protected function arrayify(mixed $serialized): array
