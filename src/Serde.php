@@ -42,13 +42,13 @@ abstract class Serde
 
     protected readonly ClassAnalyzer $analyzer;
 
-    public function serialize(object $object, string $format): mixed
+    public function serialize(object $object, string $format, mixed $init = null): mixed
     {
         $formatter = $this->formatters[$format] ?? throw UnsupportedFormat::create($format, Direction::Serialize);
 
         $classDef = $this->analyzer->analyze($object, ClassDef::class);
 
-        $init = $formatter->serializeInitialize($classDef);
+        $init ??= $formatter->serializeInitialize($classDef);
 
         $inner = new Serializer(
             analyzer: $this->analyzer,
