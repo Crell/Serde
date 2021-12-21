@@ -8,6 +8,7 @@ use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
+use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeMapper;
@@ -23,7 +24,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         return 'xml';
     }
 
-    public function initialField(string $targetType): Field
+    public function initialField(Deserializer $deserializer, string $targetType): Field
     {
         $shortName = substr(strrchr($targetType, '\\'), 1);
         return Field::create(serializedName: $shortName, phpType: $targetType);
@@ -54,12 +55,12 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         // TODO: Implement deserializeString() method.
     }
 
-    public function deserializeSequence(mixed $decoded, Field $field, callable $recursor): array|SerdeError
+    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
         // TODO: Implement deserializeSequence() method.
     }
 
-    public function deserializeDictionary(mixed $decoded, Field $field, callable $recursor): array|SerdeError
+    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
         // TODO: Implement deserializeDictionary() method.
     }
@@ -69,11 +70,11 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
      *
      * @param array $decoded
      * @param Field $field
-     * @param callable $recursor
+     * @param Deserializer $deserializer
      * @param TypeMapper|null $typeMap
      * @return array|SerdeError
      */
-    public function deserializeObject(mixed $decoded, Field $field, callable $recursor, ?TypeMapper $typeMap): array|SerdeError
+    public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
         if (empty($decoded[0]['tag'])) {
             return SerdeError::Missing;
@@ -90,7 +91,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
 
         $data = $this->extractSubEntries($decoded);
 
-        $properties = $this->propertyList($field, $typeMap, $data);
+        $properties = $deserializer->typeMapper->propertyList($field, $data);
 
         $collectingField = null;
         $usedNames = [];
@@ -106,7 +107,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
                 continue;
             }
             $ret[$prop->serializedName] = ($prop->typeCategory->isEnum() || $prop->typeCategory->isCompound())
-                ? $recursor($data, $prop)
+                ? $deserializer->deserialize($data, $prop)
                 : $this->castScalarType($prop->phpType, $data[$prop->serializedName]['value'] ?? SerdeError::Missing);
         }
 
@@ -118,7 +119,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         if ($collectingField?->phpType === 'array' && $collectingField?->typeMap) {
             foreach ($remaining as $name => $entry) {
                 $class = $collectingField->typeMap->findClass($entry[$collectingField->typeMap->keyField()]);
-                $ret[$name] = $recursor($remaining, Field::create(serializedName: "$name", phpType: $class));
+                $ret[$name] = $deserializer->deserialize($remaining, Field::create(serializedName: "$name", phpType: $class));
             }
         } else {
             foreach ($remaining as $k => $v) {

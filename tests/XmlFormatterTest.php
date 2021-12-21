@@ -14,5 +14,17 @@ class XmlFormatterTest extends SerdeTest
         parent::setUp();
         $this->formatters = [new XmlFormatter(), new XmlParserDeformatter()];
         $this->format = 'xml';
+
+        $this->aliasedData = <<<END
+        <AliasedFields>
+            <un>1</un>
+            <dos>dos</dos>
+            <dot>
+                <x>1</x>
+                <y>2</y>
+                <z>3</z>
+            </dot>
+        </AliasedFields>
+END;
     }
 }
