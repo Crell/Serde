@@ -10,13 +10,19 @@ use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\ClassDef;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
+use Crell\Serde\GenericXmlParser;
 use Crell\Serde\SerdeError;
+use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMapper;
+use Crell\Serde\XmlElement;
+use Crell\Serde\XmlFormat;
+use function Crell\fp\firstValue;
+use function Crell\fp\pipe;
 
 class XmlParserDeformatter implements Deformatter, SupportsCollecting
 {
     public function __construct(
-        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
+        private GenericXmlParser $parser = new GenericXmlParser(),
     ) {}
 
     public function format(): string
@@ -30,14 +36,26 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         return Field::create(serializedName: $shortName, phpType: $targetType);
     }
 
-    public function deserializeInitialize(mixed $serialized): mixed
+    public function deserializeInitialize(mixed $serialized): XmlElement
     {
-        return $this->parseTags($serialized);
+        return $this->parser->parseXml($serialized);
     }
 
+    /**
+     * @param XmlElement $decoded
+     * @param Field $field
+     * @return int|SerdeError
+     */
     public function deserializeInt(mixed $decoded, Field $field): int|SerdeError
     {
-        // TODO: Implement deserializeInt() method.
+        $value = $this->getValueFromElement($decoded, $field);
+
+        // @todo Still not sure what to do with this.
+        if (!is_numeric($value)) {
+            return SerdeError::FormatError;
+        }
+
+        return (int)$value;
     }
 
     public function deserializeFloat(mixed $decoded, Field $field): float|SerdeError
@@ -68,49 +86,61 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
     /**
      *
      *
-     * @param array $decoded
+     * @param XmlElement $decoded
      * @param Field $field
      * @param Deserializer $deserializer
      * @param TypeMapper|null $typeMap
      * @return array|SerdeError
      */
     public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
-    {
-        if (empty($decoded[0]['tag'])) {
+   {
+        if ($decoded->name !== $field->serializedName) {
             return SerdeError::Missing;
         }
 
-        if ($decoded[0]['tag'] !== $field->serializedName) {
-            return SerdeError::Missing;
-        }
+        //$data = $this->extractSubEntries($decoded);
 
-        // @todo Should be an exception, maybe?
-        if ($decoded[0]['type'] !== 'open') {
-            return SerdeError::FormatError;
-        }
-
-        $data = $this->extractSubEntries($decoded);
-
+        $data = $this->groupedChildren($decoded);
+        // @todo This is going to break on typemapped fields, but deal with that later.
         $properties = $deserializer->typeMapper->propertyList($field, $data);
 
-        $collectingField = null;
         $usedNames = [];
+        $collectingArray = null;
+        /** @var Field[] $collectingObjects */
+        $collectingObjects = [];
 
         $ret = [];
 
         // First pull out the properties we know about.
-        /** @var Field $prop */
-        foreach ($properties as $prop) {
-            $usedNames[] = $prop->serializedName;
-            if ($prop->flatten) {
-                $collectingField = $prop;
-                continue;
+        /** @var Field $propField */
+        foreach ($properties as $propField) {
+            $usedNames[] = $propField->serializedName;
+            if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
+                $collectingArray = $propField;
+            } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
+                $collectingObjects[] = $propField;
+            } else {
+                if ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound()) {
+                    $deserializer->deserialize($data, $propField);
+                } else {
+                    // @todo This needs to be enhanced to deal with attribute-based values.
+                    $valueElement = $this->getFieldData($propField, $data)[0];
+
+                    $ret[$propField->serializedName] = $deserializer->deserialize($valueElement, $propField);
+
+                    //$ret[$propField->serializedName] = $this->castScalarType($propField->phpType, $value);
+                }
+
+
+                /*
+                $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
+                    ? $deserializer->deserialize($data, $propField)
+                    : $this->getFieldData($propField, $data) ?? SerdeError::Missing;
+                */
             }
-            $ret[$prop->serializedName] = ($prop->typeCategory->isEnum() || $prop->typeCategory->isCompound())
-                ? $deserializer->deserialize($data, $prop)
-                : $this->castScalarType($prop->phpType, $data[$prop->serializedName]['value'] ?? SerdeError::Missing);
         }
 
+        /*
         // Any other values are for a collecting field, if any,
         // but may need further processing according to the collecting field.
         $remaining = $this->getRemainingData($data, $usedNames);
@@ -126,8 +156,32 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
                 $ret[$k] = $v;
             }
         }
-
+*/
         return $ret;
+    }
+
+    /**
+     *
+     *
+     * @param Field $field
+     * @param array $data
+     * @return XmlElement[]
+     */
+    public function getFieldData(Field $field, array $data): mixed
+    {
+        return firstValue(fn(string $name): mixed => $data[$name] ?? null)([$field->serializedName, ...$field->alias]);
+    }
+
+    protected function groupedChildren(XmlElement $element): array
+    {
+        $fn = static function (array $collection, XmlElement $child) {
+            $name = $child->name;
+            $collection[$name] ??= [];
+            $collection[$name][] = $child;
+            return $collection;
+        };
+
+        return array_reduce($element->children, $fn, []);
     }
 
     protected function extractSubEntries(array $decoded): array
@@ -143,6 +197,15 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
             $data[$key] = $entry;
         }
         return $data;
+    }
+
+    protected function getValueFromElement(XmlElement $element, Field $field): mixed
+    {
+        $atName = ($field->formats[XmlFormat::class] ?? null)?->attributeName;
+
+        return $atName
+            ? ($element->attributes[$atName] ?? SerdeError::Missing)
+            : $element->content;
     }
 
     protected function castScalarType(string $type, mixed $value): int|string|bool|float|SerdeError
@@ -166,67 +229,4 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         return array_diff_key($source, array_flip($used));
     }
 
-    /**
-     * Parses an XML string into a nested array of tag definitions.
-     *
-     * @see https://www.php.net/manual/en/function.xml-parse-into-struct.php
-     *
-     * @param string $xml
-     *   A well-formed XML string to parse.
-     * @return array
-     *   A nested array of tag definitions.  The format is the same as created by
-     *   xml_parse_into_struct(), but with defaults added and a few derived properties.
-     */
-    protected function parseTags(string $xml): array
-    {
-        $tags = [];
-        $parser = xml_parser_create();
-        xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
-        xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
-        xml_parse_into_struct($parser, $xml, $tags);
-        xml_parser_free($parser);
-
-        // Ensure all properties are always defined so that we don't have to constantly check for missing values later.
-        array_walk($tags, static function (&$tag) {
-            [$tagNs, $tagName] = match (\str_contains($tag['tag'], ':')) {
-                true => explode(':', $tag['tag']),
-                false => [$tag['tag'], ''],
-            };
-            $tag += [
-                'attributes' => [],
-                'value' => '',
-                'name' => $tagName,
-                'namespace' => $tagNs,
-            ];
-        });
-
-        return $tags;
-
-        // This would make things easier, but because we can't guarantee
-        // names are unique across the entire tree it is not viable.
-        //return indexBy(static fn (array $entry) => $entry['tag'])($tags);
-    }
-
-    /**
-     * Gets the property list for a given object.
-     *
-     * We need to know the object properties to deserialize to.
-     * However, that list may be modified by the type map, as
-     * the type map is in the incoming data.
-     * The key field is kept in the data so that the property writer
-     * can also look up the right type.
-     */
-    protected function propertyList(Field $field, ?TypeMapper $map, array $data): array
-    {
-        $class = $map
-            ? $map->findClass($data[$map->keyField()])
-            : $field->phpType;
-
-        return $this->getAnalyzer()->analyze($class, ClassDef::class)->properties;
-    }
-
-    protected function getAnalyzer(): ClassAnalyzer
-    {
-        return $this->analyzer;
-    }
 }
