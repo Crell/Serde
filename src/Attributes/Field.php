@@ -71,6 +71,13 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
     public readonly bool $shouldUseDefault;
 
     /**
+     * An array of format-specific directives for this Field, indexed by class name.
+     *
+     * @var FormatField[]
+     */
+    public readonly array $formats;
+
+    /**
      * The renaming mechanism used for this field.
      *
      * This property is unset after the analysis phase to minimize
@@ -195,7 +202,13 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
         return [
             TypeMap::class => 'fromTypeMap',
             TypeField::class => 'fromTypeField',
+            FormatField::class => 'fromFormatFields',
         ];
+    }
+
+    public function fromFormatFields(array $formatFields): void
+    {
+        $this->formats = indexBy(get_class(...))($formatFields);
     }
 
     public function fromTypeMap(?TypeMap $map): void
