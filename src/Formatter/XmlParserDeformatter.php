@@ -98,8 +98,6 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
             return SerdeError::Missing;
         }
 
-        //$data = $this->extractSubEntries($decoded);
-
         $data = $this->groupedChildren($decoded);
         // @todo This is going to break on typemapped fields, but deal with that later.
         $properties = $deserializer->typeMapper->propertyList($field, $data);
@@ -123,20 +121,14 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
                 if ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound()) {
                     $deserializer->deserialize($data, $propField);
                 } else {
-                    // @todo This needs to be enhanced to deal with attribute-based values.
+                    // @todo This needs to be enhanced to deal with attribute-based values, I think?
+                    // per-type deserialize methods also deal with that, but since the same element
+                    // may need to get passed multiple times to account for multiple attributes
+                    // on one element, I think it's necessary here, too.
                     $valueElement = $this->getFieldData($propField, $data)[0];
 
                     $ret[$propField->serializedName] = $deserializer->deserialize($valueElement, $propField);
-
-                    //$ret[$propField->serializedName] = $this->castScalarType($propField->phpType, $value);
                 }
-
-
-                /*
-                $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
-                    ? $deserializer->deserialize($data, $propField)
-                    : $this->getFieldData($propField, $data) ?? SerdeError::Missing;
-                */
             }
         }
 
@@ -161,8 +153,6 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
     }
 
     /**
-     *
-     *
      * @param Field $field
      * @param array $data
      * @return XmlElement[]
@@ -184,21 +174,6 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         return array_reduce($element->children, $fn, []);
     }
 
-    protected function extractSubEntries(array $decoded): array
-    {
-        $data = [];
-        foreach ($decoded as $key => $entry) {
-            if ($key === 0) {
-                continue;
-            }
-            if ($entry['type'] === 'close') {
-                break;
-            }
-            $data[$key] = $entry;
-        }
-        return $data;
-    }
-
     protected function getValueFromElement(XmlElement $element, Field $field): mixed
     {
         $atName = ($field->formats[XmlFormat::class] ?? null)?->attributeName;
@@ -208,20 +183,8 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
             : $element->content;
     }
 
-    protected function castScalarType(string $type, mixed $value): int|string|bool|float|SerdeError
-    {
-        return match ($type) {
-            'int' => (int)$value,
-            'float' => (float)$value,
-            'bool' => (bool)$value,
-            'string' => (string)$value,
-            SerdeError::Missing => SerdeError::Missing,
-        };
-    }
-
     public function deserializeFinalize(mixed $decoded): void
     {
-        // TODO: Implement deserializeFinalize() method.
     }
 
     public function getRemainingData(mixed $source, array $used): mixed
