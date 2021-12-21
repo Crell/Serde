@@ -34,7 +34,7 @@ class XmlFormatter implements Formatter /*, Deformatter */
         return Field::create(serializedName: $shortName, phpType: $type);
     }
 
-    public function serializeInitialize(ClassDef $classDef): mixed
+    public function serializeInitialize(ClassDef $classDef): \DOMDocument
     {
         return new \DOMDocument();
     }
