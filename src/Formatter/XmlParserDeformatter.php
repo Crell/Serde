@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
-use Crell\AttributeUtils\Analyzer;
-use Crell\AttributeUtils\ClassAnalyzer;
-use Crell\AttributeUtils\MemoryCacheAnalyzer;
-use Crell\Serde\ClassDef;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Field;
 use Crell\Serde\GenericXmlParser;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
-use Crell\Serde\TypeMapper;
 use Crell\Serde\XmlElement;
 use Crell\Serde\XmlFormat;
 use function Crell\fp\firstValue;
-use function Crell\fp\pipe;
+use function Crell\fp\reduceWithKeys;
 
 class XmlParserDeformatter implements Deformatter, SupportsCollecting
 {
@@ -36,6 +31,9 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         return Field::create(serializedName: $shortName, phpType: $targetType);
     }
 
+    /**
+     * @param string $serialized
+     */
     public function deserializeInitialize(mixed $serialized): XmlElement
     {
         return $this->parser->parseXml($serialized);
@@ -43,8 +41,6 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
 
     /**
      * @param XmlElement $decoded
-     * @param Field $field
-     * @return int|SerdeError
      */
     public function deserializeInt(mixed $decoded, Field $field): int|SerdeError
     {
@@ -58,25 +54,79 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         return (int)$value;
     }
 
+    /**
+     * @param XmlElement $decoded
+     */
     public function deserializeFloat(mixed $decoded, Field $field): float|SerdeError
     {
-        // TODO: Implement deserializeFloat() method.
+        $value = $this->getValueFromElement($decoded, $field);
+
+        // @todo Still not sure what to do with this.
+        if (!is_numeric($value)) {
+            return SerdeError::FormatError;
+        }
+
+        return (float)$value;
     }
 
+    /**
+     * @param XmlElement $decoded
+     */
     public function deserializeBool(mixed $decoded, Field $field): bool|SerdeError
     {
-        // TODO: Implement deserializeBool() method.
+        $value = $this->getValueFromElement($decoded, $field);
+
+        // @todo Still not sure what to do with this.
+        if (!is_numeric($value)) {
+            return SerdeError::FormatError;
+        }
+
+        return (bool)$value;
     }
 
+    /**
+     * @param XmlElement $decoded
+     */
     public function deserializeString(mixed $decoded, Field $field): string|SerdeError
     {
-        // TODO: Implement deserializeString() method.
+        return $this->getValueFromElement($decoded, $field);
     }
 
+    /**
+     * @param array $decoded
+     */
     public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
-        // TODO: Implement deserializeSequence() method.
+        if (empty($decoded)) {
+            return SerdeError::Missing;
+        }
+
+        $class = $field?->typeField?->arrayType ?? '';
+        if (class_exists($class) || interface_exists($class)) {
+            return $this->upcastArray($decoded, $deserializer, $class);
+        }
+
+        return $this->upcastArray($decoded, $deserializer);
     }
+
+    /**
+     * Deserializes all elements of an array, through the recursor.
+     */
+    protected function upcastArray(array $data, Deserializer $deserializer, ?string $type = null): array
+    {
+        $upcast = function(array $ret, XmlElement $v, int|string $k) use ($deserializer, $type, $data) {
+            $map = $type ? $deserializer->typeMapper->typeMapForClass($type) : null;
+            // @todo This will need to get more robust once we support attribute-based values.
+            // It also won't work with objects yet, I think...
+            $arrayType = $map?->findClass($v[$map?->keyField()]) ?? $type ?? get_debug_type($v->content);
+            $f = Field::create(serializedName: "$k", phpType: $arrayType);
+            $ret[$k] = $deserializer->deserialize($v, $f);
+            return $ret;
+        };
+
+        return reduceWithKeys([], $upcast)($data);
+    }
+
 
     public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
@@ -111,18 +161,18 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
                 $collectingArray = $propField;
             } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
                 $collectingObjects[] = $propField;
+            } elseif ($propField->typeCategory === TypeCategory::Array) {
+                $valueElements = $data[$propField->serializedName] ?? [];
+                $ret[$propField->serializedName] = $deserializer->deserialize($valueElements, $propField);
+            } elseif ($propField->typeCategory === TypeCategory::Object || $propField->typeCategory->isEnum()) {
+                $ret[$propField->serializedName] = $deserializer->deserialize($data[$propField->serializedName][0] ?? null, $propField);
             } else {
-                if ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound()) {
-                    $ret[$propField->serializedName] = $deserializer->deserialize($data[$propField->serializedName][0] ?? null, $propField);
-                } else {
-                    // @todo This needs to be enhanced to deal with attribute-based values, I think?
-                    // per-type deserialize methods also deal with that, but since the same element
-                    // may need to get passed multiple times to account for multiple attributes
-                    // on one element, I think it's necessary here, too.
-                    $valueElement = $this->getFieldData($propField, $data)[0];
-
-                    $ret[$propField->serializedName] = $deserializer->deserialize($valueElement, $propField);
-                }
+                // @todo This needs to be enhanced to deal with attribute-based values, I think?
+                // per-type deserialize methods also deal with that, but since the same element
+                // may need to get passed multiple times to account for multiple attributes
+                // on one element, I think it's necessary here, too.
+                $valueElement = $this->getFieldData($propField, $data)[0];
+                $ret[$propField->serializedName] = $deserializer->deserialize($valueElement, $propField);
             }
         }
 
