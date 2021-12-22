@@ -10,6 +10,9 @@ use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Sequence;
 use Crell\Serde\Serializer;
+use function Crell\fp\headtail;
+use function Crell\fp\reduce;
+use function Crell\fp\reduceWithKeys;
 
 class JsonStreamFormatter implements Formatter
 {
@@ -79,16 +82,14 @@ class JsonStreamFormatter implements Formatter
     {
         $runningValue->write('[');
 
-        $isFirst = true;
-
-        /** @var CollectionItem $item */
-        foreach ($next->items as $item) {
-            if (!$isFirst) {
+        $runningValue = headtail($runningValue,
+            static fn (FormatterStream $runningValue, CollectionItem $item) =>  $serializer->serialize($item->value, $runningValue->unnamedContext(), $item->field),
+            static function (FormatterStream $runningValue, CollectionItem $item) use ($serializer) {
                 $runningValue->write(',');
+                $serializer->serialize($item->value, $runningValue->unnamedContext(), $item->field);
+                return $runningValue;
             }
-            $isFirst = false;
-            $serializer->serialize($item->value, $runningValue->unnamedContext(), $item->field);
-        }
+        )($next->items);
 
         $runningValue->write(']');
 
@@ -106,24 +107,28 @@ class JsonStreamFormatter implements Formatter
 
         $runningValue->write('{');
 
-        $isFirst = true;
-
-        /** @var CollectionItem $item */
-        foreach ($next->items as $item) {
-            if (!$isFirst) {
+        $runningValue = headtail($runningValue,
+            static function (FormatterStream $runningValue, CollectionItem $item) use ($serializer) {
+                $runningValue->printf('"%s":', $item->field->serializedName);
+                $serializer->serialize($item->value, $runningValue->unnamedContext(), $item->field);
+                return $runningValue;
+            },
+            static function (FormatterStream $runningValue, CollectionItem $item) use ($serializer) {
                 $runningValue->write(',');
+                $runningValue->printf('"%s":', $item->field->serializedName);
+                $serializer->serialize($item->value, $runningValue->unnamedContext(), $item->field);
+                return $runningValue;
             }
-            $isFirst = false;
-            $runningValue->printf('"%s":', $item->field->serializedName);
-            $serializer->serialize($item->value, $runningValue->unnamedContext(), $item->field);
-        }
+        )($next->items);
 
-        foreach ($field->extraProperties as $k => $v) {
-            if (!$isFirst) {
-                fwrite($runningValue, ',');
-            }
+        // In the very weird case that the object has no properties but
+        // does have a type map, this will break with an extra , in the
+        // output. Don't bother fixing it unless someone actually tries
+        // doing that for a good reason.
+        reduceWithKeys($runningValue, function(FormatterStream $runningValue, $v, $k) {
+            $runningValue->write(',');
             $runningValue->printf('"%s":"%s"\n', $k, $v);
-        }
+        })($field->extraProperties);
 
         $runningValue->write('}');
 
