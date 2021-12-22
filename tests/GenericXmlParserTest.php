@@ -47,5 +47,12 @@ class GenericXmlParserTest extends TestCase
                 self::assertEquals('boop', $root->children[0]->namespace);
             }
         ];
+
+        yield 'empty' => [
+            'xml' => '',
+            'test'=> static function (?XmlElement $root): void {
+                self::assertNull($root);
+            }
+        ];
     }
 }

@@ -11,10 +11,12 @@ class GenericXmlParser
     /**
      * Parses an XML string into a nested tree of XmlElement objects.
      *
+     * If an empty string is passed, null is returned.
+     *
      * @param string $xml
-     * @return XmlElement
+     * @return ?XmlElement
      */
-    public function parseXml(string $xml): XmlElement
+    public function parseXml(string $xml): ?XmlElement
     {
         return pipe($xml,
             $this->parseTags(...),
@@ -83,9 +85,9 @@ class GenericXmlParser
      *
      * @param array $tags
      *   The enhanced tag list as returned by normalizeTags().
-     * @return XmlElement
+     * @return ?XmlElement
      */
-    protected function upcast(array $tags): XmlElement
+    protected function upcast(array $tags): ?XmlElement
     {
         $elements = [];  // the currently filling [child] XmlElement array
         $stack = [];
@@ -102,6 +104,6 @@ class GenericXmlParser
                 unset($stack[count($stack) - 1]);
             }
         }
-        return $elements[0];  // the single top-level element
+        return $elements[0] ?? null;  // the single top-level element
     }
 }
