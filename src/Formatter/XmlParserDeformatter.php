@@ -84,17 +84,11 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
     }
 
     /**
-     *
-     *
      * @param XmlElement $decoded
-     * @param Field $field
-     * @param Deserializer $deserializer
-     * @param TypeMapper|null $typeMap
-     * @return array|SerdeError
      */
     public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
    {
-        if ($decoded->name !== $field->serializedName) {
+        if ($decoded?->name !== $field->serializedName) {
             return SerdeError::Missing;
         }
 
@@ -119,7 +113,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
                 $collectingObjects[] = $propField;
             } else {
                 if ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound()) {
-                    $deserializer->deserialize($data, $propField);
+                    $ret[$propField->serializedName] = $deserializer->deserialize($data[$propField->serializedName][0] ?? null, $propField);
                 } else {
                     // @todo This needs to be enhanced to deal with attribute-based values, I think?
                     // per-type deserialize methods also deal with that, but since the same element
