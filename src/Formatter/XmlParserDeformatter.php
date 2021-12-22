@@ -12,6 +12,8 @@ use Crell\Serde\TypeCategory;
 use Crell\Serde\XmlElement;
 use Crell\Serde\XmlFormat;
 use function Crell\fp\firstValue;
+use function Crell\fp\keyedMap;
+use function Crell\fp\pipe;
 use function Crell\fp\reduceWithKeys;
 
 class XmlParserDeformatter implements Deformatter, SupportsCollecting
@@ -93,7 +95,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
     }
 
     /**
-     * @param array $decoded
+     * @param XmlElement[] $decoded
      */
     public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
@@ -103,18 +105,35 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
 
         $class = $field?->typeField?->arrayType ?? '';
         if (class_exists($class) || interface_exists($class)) {
-            return $this->upcastArray($decoded, $deserializer, $class);
+            return $this->upcastSequence($decoded, $deserializer, $class);
         }
 
-        return $this->upcastArray($decoded, $deserializer);
+        return $this->upcastSequence($decoded, $deserializer);
     }
 
     /**
-     * Deserializes all elements of an array, through the recursor.
+     * @param XmlElement[] $decoded
      */
-    protected function upcastArray(array $data, Deserializer $deserializer, ?string $type = null): array
+    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
-        $upcast = function(array $ret, XmlElement $v, int|string $k) use ($deserializer, $type, $data) {
+        if (empty($decoded)) {
+            return SerdeError::Missing;
+        }
+
+        $class = $field?->typeField?->arrayType ?? '';
+        if (class_exists($class) || interface_exists($class)) {
+            return $this->upcastDictionary($decoded[0]->children, $deserializer, $class);
+        }
+
+        return $this->upcastDictionary($decoded[0]->children, $deserializer);
+    }
+
+    /**
+     * Deserializes all elements of a sequence, recursing as needed.
+     */
+    protected function upcastSequence(array $data, Deserializer $deserializer, ?string $type = null): array
+    {
+        $upcast = function(array $ret, XmlElement $v, int|string $k) use ($deserializer, $type) {
             $map = $type ? $deserializer->typeMapper->typeMapForClass($type) : null;
             // @todo This will need to get more robust once we support attribute-based values.
             // It also won't work with objects yet, I think...
@@ -127,10 +146,23 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         return reduceWithKeys([], $upcast)($data);
     }
 
-
-    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
+    /**
+     * Deserializes all elements of a dictionary, recursing as needed.
+     */
+    protected function upcastDictionary(array $data, Deserializer $deserializer, ?string $type = null): array
     {
-        // TODO: Implement deserializeDictionary() method.
+        $map = $type ? $deserializer->typeMapper->typeMapForClass($type) : null;
+        // @todo This will need to get more robust once we support attribute-based values.
+        // @todo Skipping the type map for the moment.
+        // It also won't work with objects yet, I think...
+//        $arrayType = $map?->findClass($v[$map?->keyField()]) ?? $type ?? get_debug_type($v->content);
+        $arrayType = $type ?? get_debug_type($data[0]->content);
+        return pipe($data,
+            keyedMap(
+                values: static fn ($k, XmlElement $e) => $deserializer->deserialize($e, Field::create(serializedName: "$e->name", phpType: $arrayType)),
+                keys: static fn ($k, XmlElement $e) => $e->name,
+            )
+        );
     }
 
     /**
