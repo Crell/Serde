@@ -15,6 +15,8 @@ class XmlFormatterTest extends SerdeTest
         $this->formatters = [new XmlFormatter(), new XmlParserDeformatter()];
         $this->format = 'xml';
 
+        $this->emptyData = '';
+
         $this->aliasedData = <<<END
         <AliasedFields>
             <un>1</un>

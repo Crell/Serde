@@ -12,9 +12,7 @@ use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
 use Crell\Serde\Field;
 use Crell\Serde\Sequence;
-use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
-use Crell\Serde\TypeMapper;
 
 class XmlFormatter implements Formatter /*, Deformatter */
 {
@@ -50,9 +48,6 @@ class XmlFormatter implements Formatter /*, Deformatter */
 
     /**
      * @param \DOMNode $runningValue
-     * @param Field $field
-     * @param int $next
-     * @return mixed
      */
     public function serializeInt(mixed $runningValue, Field $field, int $next): \DOMNode
     {
@@ -61,6 +56,9 @@ class XmlFormatter implements Formatter /*, Deformatter */
         return $runningValue;
     }
 
+    /**
+     * @param \DOMNode $runningValue
+     */
     public function serializeFloat(mixed $runningValue, Field $field, float $next): mixed
     {
         $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
@@ -68,6 +66,9 @@ class XmlFormatter implements Formatter /*, Deformatter */
         return $runningValue;
     }
 
+    /**
+     * @param \DOMNode $runningValue
+     */
     public function serializeString(mixed $runningValue, Field $field, string $next): mixed
     {
         $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
@@ -75,6 +76,9 @@ class XmlFormatter implements Formatter /*, Deformatter */
         return $runningValue;
     }
 
+    /**
+     * @param \DOMNode $runningValue
+     */
     public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed
     {
         $node = $runningValue->ownerDocument->createElement($field->serializedName, (string)$next);
@@ -82,25 +86,27 @@ class XmlFormatter implements Formatter /*, Deformatter */
         return $runningValue;
     }
 
+    /**
+     * @param \DOMNode $runningValue
+     */
     public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): mixed
     {
-        // TODO: Implement serializeSequence() method.
+        return array_reduce(
+            array: $next->items,
+            callback: static fn(\DomNode $runningValue, CollectionItem $item): \DOMNode
+                => $serializer->serialize($item->value, $runningValue, $item->field->with(serializedName: $field->serializedName)),
+            initial: $runningValue,
+        );
     }
 
     /**
      * @param \DOMNode $runningValue
-     * @param Field $field
-     * @param Dict $next
-     * @param Serializer $serializer
-     * @return \DOMNode
      */
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): \DOMNode
     {
         $doc = $runningValue->ownerDocument ?? $runningValue;
         $node = $doc->createElement($field->serializedName);
 
-        // PHPStorm will complain about the argument names. PHPStorm is wrong.
-        // Its stubs are woefully out of date.
         $node = array_reduce(
             array: $next->items,
             callback: static fn(\DomNode $node, CollectionItem $item) => $serializer->serialize($item->value, $node, $item->field),
