@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Deserializer;
+use Crell\Serde\DictionaryField;
 use Crell\Serde\Field;
 use Crell\Serde\GenericXmlParser;
+use Crell\Serde\SequenceField;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\XmlElement;
@@ -103,12 +105,18 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
             return SerdeError::Missing;
         }
 
-        $class = $field?->typeField?->arrayType ?? '';
-        if (class_exists($class) || interface_exists($class)) {
-            return $this->upcastSequence($decoded, $deserializer, $class);
-        }
+        $class = $field?->typeField?->arrayType ?? null;
 
-        return $this->upcastSequence($decoded, $deserializer);
+        $upcast = function(array $ret, XmlElement $v, int|string $k) use ($deserializer, $class) {
+            $map = $class ? $deserializer->typeMapper->typeMapForClass($class) : null;
+            // @todo This will need to get more robust once we support attribute-based values.
+            $arrayType = $map?->findClass($v[$map?->keyField()]) ?? $class ?? get_debug_type($v->content);
+            $f = Field::create(serializedName: $v->name, phpType: $arrayType);
+            $ret[$k] = $deserializer->deserialize($v, $f);
+            return $ret;
+        };
+
+        return reduceWithKeys([], $upcast)($decoded);
     }
 
     /**
@@ -120,49 +128,55 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
             return SerdeError::Missing;
         }
 
-        $class = $field?->typeField?->arrayType ?? '';
-        if (class_exists($class) || interface_exists($class)) {
-            return $this->upcastDictionary($decoded[0]->children, $deserializer, $class);
-        }
+        $class = $field?->typeField?->arrayType ?? null;
 
-        return $this->upcastDictionary($decoded[0]->children, $deserializer);
-    }
+        $data = $this->groupedChildren($decoded[0]);
 
-    /**
-     * Deserializes all elements of a sequence, recursing as needed.
-     */
-    protected function upcastSequence(array $data, Deserializer $deserializer, ?string $type = null): array
-    {
-        $upcast = function(array $ret, XmlElement $v, int|string $k) use ($deserializer, $type) {
-            $map = $type ? $deserializer->typeMapper->typeMapForClass($type) : null;
-            // @todo This will need to get more robust once we support attribute-based values.
-            // It also won't work with objects yet, I think...
-            $arrayType = $map?->findClass($v[$map?->keyField()]) ?? $type ?? get_debug_type($v->content);
-            $f = Field::create(serializedName: "$k", phpType: $arrayType);
-            $ret[$k] = $deserializer->deserialize($v, $f);
-            return $ret;
-        };
-
-        return reduceWithKeys([], $upcast)($data);
-    }
-
-    /**
-     * Deserializes all elements of a dictionary, recursing as needed.
-     */
-    protected function upcastDictionary(array $data, Deserializer $deserializer, ?string $type = null): array
-    {
-        $map = $type ? $deserializer->typeMapper->typeMapForClass($type) : null;
+        $map = $class ? $deserializer->typeMapper->typeMapForClass($class) : null;
         // @todo This will need to get more robust once we support attribute-based values.
         // @todo Skipping the type map for the moment.
-        // It also won't work with objects yet, I think...
 //        $arrayType = $map?->findClass($v[$map?->keyField()]) ?? $type ?? get_debug_type($v->content);
-        $arrayType = $type ?? get_debug_type($data[0]->content);
+
+        // This monstrosity is begging to be refactored, but for now at least it works.
+        $ret = [];
+        foreach ($data as $name => $elements) {
+            if (count($elements) > 1) {
+                // Must be a nested sequence.
+                $f = Field::create(serializedName: $name, phpType: 'array');
+                $value = $deserializer->deserialize($elements, $f);
+            } else {
+                $e = $elements[0];
+                if (count($e->children)) {
+                    if ($class) {
+                        // This is a dictionary of objects.
+                        $f = Field::create(serializedName: $e->name, phpType: $class);
+                        $value = $deserializer->deserialize($e, $f);
+                    } else {
+                        // This is probably a nested dictionary?
+                        $f = Field::create(serializedName: $e->name, phpType: 'array')
+                            ->with(typeField: new DictionaryField());
+                        $value = $deserializer->deserialize([$e], $f);
+                    }
+                } else {
+                    // A nested primitive, probably.
+                    $elementType = $class ?? get_debug_type($e->content);
+                    $f = Field::create(serializedName: $e->name, phpType: $elementType);
+                    $value = $deserializer->deserialize($e, $f);
+                }
+            }
+            $ret[$name] = $value;
+        }
+        return $ret;
+
+        /*
+        $arrayType = $class ?? get_debug_type($data[0]->content);
         return pipe($data,
             keyedMap(
                 values: static fn ($k, XmlElement $e) => $deserializer->deserialize($e, Field::create(serializedName: "$e->name", phpType: $arrayType)),
                 keys: static fn ($k, XmlElement $e) => $e->name,
             )
         );
+        */
     }
 
     /**
@@ -195,7 +209,14 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
                 $collectingObjects[] = $propField;
             } elseif ($propField->typeCategory === TypeCategory::Array) {
                 $valueElements = $data[$propField->serializedName] ?? [];
-                $ret[$propField->serializedName] = $deserializer->deserialize($valueElements, $propField);
+                if ($propField?->typeField instanceof SequenceField || $this->isSequence($valueElements)) {
+                    $ret[$propField->serializedName] = $deserializer->deserialize($valueElements, $propField);
+                } else {
+                    if (!$propField->typeField) {
+                        $propField = $propField->with(typeField: new DictionaryField());
+                    }
+                    $ret[$propField->serializedName] = $deserializer->deserialize($valueElements, $propField);
+                }
             } elseif ($propField->typeCategory === TypeCategory::Object || $propField->typeCategory->isEnum()) {
                 $ret[$propField->serializedName] = $deserializer->deserialize($data[$propField->serializedName][0] ?? null, $propField);
             } else {
@@ -226,6 +247,24 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         }
 */
         return $ret;
+    }
+
+    /**
+     * @param XmlElement[] $valueElements
+     */
+    protected function isSequence(array $valueElements): bool
+    {
+        if (count($valueElements) > 1) {
+            return true;
+        }
+        $element = $valueElements[0];
+        if (count($element->children)) {
+            return false;
+        }
+        if ($element->content) {
+            return true;
+        }
+        return null;
     }
 
     /**
