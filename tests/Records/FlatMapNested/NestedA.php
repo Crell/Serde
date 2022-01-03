@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\FlatMapNested;
 
-use Crell\Serde\ClassNameTypeMap;
-use Crell\Serde\Field;
 use Crell\Serde\SequenceField;
 
-class HostObject
+class NestedA implements Nested
 {
     public function __construct(
-        #[Field(flatten: true)]
-        public Nested $nested,
+        public string $name,
+        public Item $item,
         #[SequenceField(arrayType: Item::class)]
-        public array $list,
-    ) {}
+        public array $items,
+    ) {
+    }
 }

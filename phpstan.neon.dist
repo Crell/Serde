@@ -2,6 +2,9 @@ parameters:
     level: 5
     paths:
         - src
+        - tests
+    excludePaths:
+        - tests/Records/*
     ignoreErrors:
         # PHPStan whines about every match without a default, even if logically it's still complete.
         - '#Match expression does not handle remaining value#'
