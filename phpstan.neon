@@ -1,6 +1,0 @@
-parameters:
-	level: 3
-	paths:
-		- src
-# Tests include an absurd number of classes that are by design not tricked-out, so don't
-# bother checking those.

@@ -131,7 +131,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
     protected function getDefaultValueFromConstructor(\ReflectionProperty $subject): mixed
     {
         /** @var array<string, \ReflectionParameter> $params */
-        $params = pipe($subject->getDeclaringClass()?->getConstructor()?->getParameters() ?? [],
+        $params = pipe($subject->getDeclaringClass()->getConstructor()?->getParameters() ?? [],
             indexBy(fn(\ReflectionParameter $p) => $p->getName()),
         );
 
@@ -187,7 +187,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
 
     public function fromTypeField(?TypeField $typeField): void
     {
-        if ($typeField && !$typeField?->acceptsType($this->phpType)) {
+        if ($typeField && !$typeField->acceptsType($this->phpType)) {
             throw FieldTypeIncompatible::create($typeField::class, $this->phpType);
         }
         // This may assign to null, which is OK as that will

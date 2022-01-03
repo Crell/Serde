@@ -17,7 +17,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
     public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         /** @var ?SequenceField $typeField */
-        $typeField = $field?->typeField;
+        $typeField = $field->typeField;
         if ($typeField?->shouldImplode()) {
             return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
@@ -39,10 +39,10 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
     public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         /** @var ?SequenceField $typeField */
-        $typeField = $field?->typeField;
+        $typeField = $field->typeField;
         // The extra type check is necessary because it might be a DictionaryField.
         // We cannot easily tell them apart at the moment.
-        if ($typeField instanceof SequenceField && $typeField?->implodeOn) {
+        if ($typeField instanceof SequenceField && $typeField->implodeOn) {
             $val = $deserializer->deformatter->deserializeString($source, $field);
             return $val === SerdeError::Missing
                 ? null
@@ -54,7 +54,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
 
     public function canWrite(Field $field, string $format): bool
     {
-        $typeField = $field?->typeField;
+        $typeField = $field->typeField;
         // This may still catch a dictionary that is unmarked. That is unavoidable.
         // Fortunately it doesn't break in practice because PHP doesn't care.
         return $field->phpType === 'array' && ($typeField === null || $typeField instanceof SequenceField);

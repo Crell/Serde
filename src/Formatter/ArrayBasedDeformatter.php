@@ -87,7 +87,7 @@ trait ArrayBasedDeformatter
     {
         $upcast = function(array $ret, mixed $v, int|string $k) use ($deserializer, $type, $data) {
             $map = $type ? $deserializer->typeMapper->typeMapForClass($type) : null;
-            $arrayType = $map?->findClass($v[$map?->keyField()]) ?? $type ?? get_debug_type($v);
+            $arrayType = $map?->findClass($v[$map->keyField()]) ?? $type ?? get_debug_type($v);
             $f = Field::create(serializedName: "$k", phpType: $arrayType);
             $ret[$k] = $deserializer->deserialize($data, $f);
             return $ret;

@@ -16,8 +16,11 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
 {
     public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        /** @var ?DictionaryField $typeField */
-        $typeField = $field?->typeField;
+        /** @var DictionaryField $typeField */
+        $typeField = $field->typeField;
+        // $field MAY not actually be DictionaryField, in which case $typeField
+        // will still be null.  I don't know how better to explain that to PHPStan.
+        // @phpstan-ignore-next-line
         if ($typeField?->shouldImplode()) {
             return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
@@ -38,11 +41,11 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
 
     public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
-        /** @var ?DictionaryField $typeField */
-        $typeField = $field?->typeField;
+        /** @var DictionaryField $typeField */
+        $typeField = $field->typeField;
         // The extra type check is necessary because it might be a SequenceField.
         // We cannot easily tell them apart at the moment.
-        if ($typeField instanceof DictionaryField && $typeField?->implodeOn) {
+        if ($typeField instanceof DictionaryField && $typeField->implodeOn) {
             $val = $deserializer->deformatter->deserializeString($source, $field);
             return $val === SerdeError::Missing
                 ? null
@@ -54,7 +57,7 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
 
     public function canWrite(Field $field, string $format): bool
     {
-        $typeField = $field?->typeField;
+        $typeField = $field->typeField;
 
         return $field->phpType === 'array' && ($typeField === null || $typeField instanceof DictionaryField);
     }

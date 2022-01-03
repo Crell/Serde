@@ -46,6 +46,11 @@ class DictionaryField implements TypeField
         );
     }
 
+    /**
+     * @param array<string, string> $array
+     * @param string $item
+     * @return array<string, string>
+     */
     protected function explodeReduce(array $array, string $item): array
     {
         if (!$item) {
@@ -57,6 +62,8 @@ class DictionaryField implements TypeField
             return $array;
         }
 
+        // PHPStan thinks $item could be null here.  PHPStan is wrong.
+        // @phpstan-ignore-next-line
         [$k, $v] = \explode($this->joinOn, $item);
         if ($this->trim) {
             $k = trim($k);

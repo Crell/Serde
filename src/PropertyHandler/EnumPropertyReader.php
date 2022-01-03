@@ -16,6 +16,8 @@ class EnumPropertyReader implements PropertyReader, PropertyWriter
     {
         $scalar = $value->value ?? $value->name;
 
+        // PHPStan can't handle match() without a default.
+        // @phpstan-ignore-next-line
         return match (true) {
             is_int($scalar) => $serializer->formatter->serializeInt($runningValue, $field, $scalar),
             is_string($scalar) => $serializer->formatter->serializeString($runningValue, $field, $scalar),

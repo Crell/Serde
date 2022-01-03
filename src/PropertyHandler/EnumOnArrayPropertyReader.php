@@ -11,7 +11,7 @@ class EnumOnArrayPropertyReader extends EnumPropertyReader
 {
     public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
-        if ($source[$field->serializedName] ?? null instanceof \UnitEnum) {
+        if (($source[$field->serializedName] ?? null) instanceof \UnitEnum) {
             return $source[$field->serializedName];
         }
         return parent::writeValue($deserializer, $field, $source);

@@ -35,7 +35,7 @@ class TypeMapper
         }
 
         return $this->getOverrideMapFor($class)
-            ?? $this->analyzer->analyze($class, ClassDef::class)?->typeMap;
+            ?? $this->analyzer->analyze($class, ClassDef::class)->typeMap;
     }
 
     public function getTargetClass(Field $field, array $dict): ?string

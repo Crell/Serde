@@ -1,0 +1,11 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    ignoreErrors:
+        # PHPStan whines about every match without a default, even if logically it's still complete.
+        - '#Match expression does not handle remaining value#'
+        # As far as I can tell, PHPStan is just buggy on explode(). It gives this error
+        # Even when it has been addressed and is impossible.
+        - '#Parameter \#1 \$separator of function explode expects non-empty-string#'
+        - '#Parameter \#1 \$delimiter of function Crell\\fp\\explode expects non-empty-string#'

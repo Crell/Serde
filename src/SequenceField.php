@@ -33,6 +33,10 @@ class SequenceField implements TypeField
         return \implode($this->implodeOn, $array);
     }
 
+    /**
+     * @param string $in
+     * @return string[]
+     */
     public function explode(string $in): array
     {
         $parts = \explode($this->implodeOn, $in);
