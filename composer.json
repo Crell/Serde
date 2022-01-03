@@ -16,16 +16,10 @@
             "role": "Developer"
         }
     ],
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/Crell/AttributeUtils.git"
-        }
-    ],
     "require": {
         "php": "~8.1",
-        "crell/attributeutils": ">= 0.4.2",
-        "crell/fp": ">= 0.2.13"
+        "crell/attributeutils": ">= 0.5.0",
+        "crell/fp": ">= 0.3.0"
     },
     "require-dev": {
         "phpbench/phpbench": "^1.1.2",
