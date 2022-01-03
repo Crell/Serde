@@ -59,7 +59,12 @@ enum Cases implements RenamingStrategy
         };
     }
 
-    // @todo This can almost certainly be better.
+    /**
+     * @todo This can likely be improved.
+     *
+     * @param string $input
+     * @return string[]
+     */
     protected function splitString(string $input): array
     {
         $words = preg_split(

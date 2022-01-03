@@ -1,10 +1,11 @@
 parameters:
-    level: 5
+    level: 6
     paths:
         - src
         - tests
     excludePaths:
         - tests/Records/*
+    checkGenericClassInNonGenericObjectType: false
     ignoreErrors:
         # PHPStan whines about every match without a default, even if logically it's still complete.
         - '#Match expression does not handle remaining value#'
@@ -12,3 +13,9 @@ parameters:
         # Even when it has been addressed and is impossible.
         - '#Parameter \#1 \$separator of function explode expects non-empty-string#'
         - '#Parameter \#1 \$delimiter of function Crell\\fp\\explode expects non-empty-string#'
+        -
+            message: '#type has no value type specified in iterable type array#'
+            path: tests/
+        -
+            message: '#type has no value type specified in iterable type iterable#'
+            path: tests/

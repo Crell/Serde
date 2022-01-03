@@ -9,6 +9,10 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
 class StaticTypeMap implements TypeMap
 {
+    /**
+     * @param string $key
+     * @param array<string, class-string> $map
+     */
     public function __construct(
         public readonly string $key,
         public readonly array $map,

@@ -12,6 +12,8 @@ class SequenceFieldTest extends TestCase
     /**
      * @test
      * @dataProvider explodeExamples
+     *
+     * @param string[] $expected
      */
     public function explode(string $implodeOn, string $in, array $expected): void
     {

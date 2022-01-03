@@ -16,6 +16,9 @@ class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
         return 'json';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function serializeInitialize(ClassDef $classDef): array
     {
         return ['root' => []];

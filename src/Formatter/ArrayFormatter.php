@@ -16,6 +16,9 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
         return 'array';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function serializeInitialize(ClassDef $classDef): array
     {
         return ['root' => []];
@@ -26,6 +29,16 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
         return $runningValue['root'];
     }
 
+    /**
+     *
+     *
+     * @param mixed $source
+     *   The deformatter-specific source value being passed around.
+     * @param string[] $used
+     *   A list of property names have have already been extracted, and so are
+     *   not "remaining."
+     * @return array<string, mixed>
+     */
     public function getRemainingData(mixed $source, array $used): array
     {
         return array_diff_key($source, array_flip($used));

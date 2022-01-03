@@ -35,6 +35,9 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
         $this->phpType ??= $subject->getName();
     }
 
+    /**
+     * @param Field[] $properties
+     */
     public function setProperties(array $properties): void
     {
         $this->properties = $properties;

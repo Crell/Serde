@@ -82,6 +82,11 @@ trait ArrayBasedDeformatter
 
     /**
      * Deserializes all elements of an array, through the recursor.
+     *
+     * @param array<int|string, mixed> $data
+     * @param Deserializer $deserializer
+     * @param string|null $type
+     * @return array<string|int, mixed>
      */
     protected function upcastArray(array $data, Deserializer $deserializer, ?string $type = null): array
     {
@@ -97,10 +102,10 @@ trait ArrayBasedDeformatter
     }
 
     /**
-     * @param mixed $decoded
+     * @param array<string, mixed> $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return array|SerdeError
+     * @return array<string, mixed>|SerdeError
      */
     public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
@@ -179,11 +184,26 @@ trait ArrayBasedDeformatter
         return $ret;
     }
 
+    /**
+     * Retrieves data from the incoming serialized data.
+     *
+     * This method handles the alias fallback logic, in case $serializedName
+     * isn't what it is named.
+     *
+     * @param Field $field
+     * @param array<string, mixed> $data
+     * @return mixed
+     */
     public function getFieldData(Field $field, array $data): mixed
     {
         return firstValue(fn(string $name): mixed => $data[$name] ?? null)([$field->serializedName, ...$field->alias]);
     }
 
+    /**
+     * @param mixed $source
+     * @param string[] $used
+     * @return array<string, mixed>
+     */
     public function getRemainingData(mixed $source, array $used): array
     {
         return array_diff_key($source, array_flip($used));

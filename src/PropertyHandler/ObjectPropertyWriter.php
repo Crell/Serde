@@ -32,10 +32,10 @@ class ObjectPropertyWriter implements PropertyWriter
     }
 
     /**
-     * @param array $dict
+     * @param array<string, mixed> $dict
      * @param string $class
      * @param Deserializer $deserializer
-     * @return array {object, array}
+     * @return array{object, mixed[]}
      */
     protected function populateObject(array $dict, string $class, Deserializer $deserializer): array
     {
@@ -100,6 +100,19 @@ class ObjectPropertyWriter implements PropertyWriter
         return [$this->createObject($class, $props, $classDef->postLoadCallacks), $remaining];
     }
 
+    /**
+     * Intantiates an object based on the provided data.
+     *
+     * @param string $class
+     *   The class of object to create.
+     * @param array<string, mixed> $props
+     *   An associative array of properties to inject into the new object.
+     * @param string[] $callbacks
+     *   An array of method names to invoke after the properties are populated.
+     * @return object
+     *   The populated object.
+     * @throws \ReflectionException
+     */
     protected function createObject(string $class, array $props, array $callbacks): object
     {
         // Make an empty instance of the target class.

@@ -76,25 +76,36 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
      * you should use yourself.
      *
      * @internal
+     *
+     * @var array<string, mixed>
      */
     public readonly array $extraProperties;
 
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
+    /**
+     * @param string|null $serializedName
+     *   A custom name to use for this field.
+     * @param RenamingStrategy|null $renameWith
+     *   Specify a field renaming strategy. Usually you can use the Cases enum.
+     * @param mixed|null $default
+     *   Use this default value if none is specified.
+     * @param bool $useDefault
+     *   True to use the default value on deserialization. False to skip setting it entirely.
+     * @param bool $flatten
+     *   True to flatten an array on serialization and collect into it when deserializing.
+     * @param bool $exclude
+     *   Set true to exclude this field from serialization entirely.
+     * @param string[] $alias
+     *   On deserialization, also check for values in fields with these names.
+     */
     public function __construct(
-        /** A custom name to use for this field */
         ?string $serializedName = null,
-        /** Specify a field renaming strategy. Usually you can use the Cases enum. */
         ?RenamingStrategy $renameWith = null,
-        /** Use this default value if none is specified. */
         mixed $default = null,
-        /** True to use the default value on deserialization. False to skip setting it entirely. */
         protected readonly bool $useDefault = true,
-        /** True to flatten an array on serialization and collect into it when deserializing. */
         public readonly bool $flatten = false,
-        /** Set true to exclude this field from serialization entirely. */
         public readonly bool $exclude = false,
-        /** On deserialization, also check for values in fields with these names. */
         public readonly array $alias = [],
     ) {
         if ($default) {
@@ -200,6 +211,8 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
      *
      * This method is to allow the serializer to create new pseudo-Fields
      * for nested values when flattening and collecting. Do not call it directly.
+     *
+     * @param array<string, mixed> $extraProperties
      */
     public static function create(
         ?string $serializedName = null,

@@ -82,7 +82,7 @@ class ObjectPropertyReader implements PropertyReader
         throw new \RuntimeException('Invalid flattening field type');
     }
 
-    protected function reduceArrayElement(Dict $dict, $val, $key, ?TypeMap $map): Dict
+    protected function reduceArrayElement(Dict $dict, mixed $val, string|int $key, ?TypeMap $map): Dict
     {
         $extra = [];
         if ($map) {

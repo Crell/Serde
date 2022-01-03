@@ -39,6 +39,10 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
         return 'yaml';
     }
 
+    /**
+     * @param ClassDef $classDef
+     * @return array<string, mixed>
+     */
     public function serializeInitialize(ClassDef $classDef): array
     {
         return ['root' => []];
@@ -49,6 +53,10 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
         return Yaml::dump($runningValue['root'], inline: $this->inline, indent: $this->indent, flags: $this->dumpFlags);
     }
 
+    /**
+     * @param mixed $serialized
+     * @return array<string, mixed>
+     */
     public function deserializeInitialize(mixed $serialized): array
     {
         return ['root' => Yaml::parse($serialized, $this->parseFlags)];

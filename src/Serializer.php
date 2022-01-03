@@ -14,6 +14,8 @@ class Serializer
 {
     /**
      * Used for circular reference loop detection.
+     *
+     * @var object[]
      */
     protected array $seenObjects = [];
 

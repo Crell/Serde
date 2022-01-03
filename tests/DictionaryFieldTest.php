@@ -11,6 +11,8 @@ class DictionaryFieldTest extends TestCase
     /**
      * @test
      * @dataProvider implosionExamples
+     *
+     * @param array<string, string> $in
      */
     public function implosion(string $implodeOn, string $joinOn, array $in, string $expected): void
     {
@@ -49,6 +51,8 @@ class DictionaryFieldTest extends TestCase
     /**
      * @test
      * @dataProvider explosionExamples
+     *
+     * @param array<string, string> $expected
      */
     public function explosion(string $implodeOn, string $joinOn, string $in, array $expected): void
     {

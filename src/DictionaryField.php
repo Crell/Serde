@@ -30,6 +30,10 @@ class DictionaryField implements TypeField
         return $this->implodeOn && $this->joinOn;
     }
 
+    /**
+     * @param array<string, string> $array
+     * @return string
+     */
     public function implode(array $array): string
     {
         return pipe($array,
@@ -38,6 +42,10 @@ class DictionaryField implements TypeField
         );
     }
 
+    /**
+     * @param string $in
+     * @return array<string, string>
+     */
     public function explode(string $in): array
     {
         return pipe($in,

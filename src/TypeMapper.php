@@ -38,7 +38,10 @@ class TypeMapper
             ?? $this->analyzer->analyze($class, ClassDef::class)->typeMap;
     }
 
-    public function getTargetClass(Field $field, array $dict): ?string
+    /**
+     * @param array<mixed> $data
+     */
+    public function getTargetClass(Field $field, array $data): ?string
     {
         if ($field->typeCategory !== TypeCategory::Object) {
             // @todo Better exception.
@@ -49,7 +52,7 @@ class TypeMapper
             return $field->phpType;
         }
 
-        if (! $key = ($dict[$map->keyField()] ?? null)) {
+        if (! $key = ($data[$map->keyField()] ?? null)) {
             return null;
         }
 
@@ -68,6 +71,10 @@ class TypeMapper
      * the type map is in the incoming data.
      * The key field is kept in the data so that the property writer
      * can also look up the right type.
+     *
+     * @param Field $field
+     * @param array<mixed> $data
+     * @return Field[]
      */
     public function propertyList(Field $field, array $data): array
     {

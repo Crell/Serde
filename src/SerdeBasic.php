@@ -44,12 +44,12 @@ class SerdeBasic extends Serde
      * @param ClassAnalyzer $analyzer
      * @param array<int, PropertyReader|PropertyWriter> $handlers
      * @param array<int, Formatter|Deformatter> $formatters
+     * @param array<class-string, TypeMap> $typeMaps
      */
     public function __construct(
         protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
         array $handlers = [],
         array $formatters = [],
-        /** @var array<class-string, TypeMap> */
         array $typeMaps = [],
     ) {
         $this->typeMapper = new TypeMapper($typeMaps, $this->analyzer);

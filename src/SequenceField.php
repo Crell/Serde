@@ -28,6 +28,9 @@ class SequenceField implements TypeField
         return !is_null($this->implodeOn);
     }
 
+    /**
+     * @param string[] $array
+     */
     public function implode(array $array): string
     {
         return \implode($this->implodeOn, $array);

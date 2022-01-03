@@ -76,6 +76,9 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
         return $new;
     }
 
+    /**
+     * @param array<mixed> $dict
+     */
     protected function getTargetClass(Field $field, array $dict): string
     {
         if ($map = $this->typeMap($field)) {

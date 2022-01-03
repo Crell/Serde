@@ -26,30 +26,60 @@ trait ArrayBasedFormatter
         return Field::create('root', $type);
     }
 
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param int $next
+     * @return array<string, mixed>
+     */
     public function serializeInt(mixed $runningValue, Field $field, int $next): array
     {
         $runningValue[$field->serializedName] = $next;
         return $runningValue;
     }
 
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param float $next
+     * @return array<string, mixed>
+     */
     public function serializeFloat(mixed $runningValue, Field $field, float $next): array
     {
         $runningValue[$field->serializedName] = $next;
         return $runningValue;
     }
 
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param string $next
+     * @return array<string, mixed>
+     */
     public function serializeString(mixed $runningValue, Field $field, string $next): array
     {
         $runningValue[$field->serializedName] = $next;
         return $runningValue;
     }
 
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param bool $next
+     * @return array<string, mixed>
+     */
     public function serializeBool(mixed $runningValue, Field $field, bool $next): array
     {
         $runningValue[$field->serializedName] = $next;
         return $runningValue;
     }
 
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param Sequence $next
+     * @return array<string, mixed>
+     */
     public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): array
     {
         $name = $field->serializedName;
@@ -62,6 +92,12 @@ trait ArrayBasedFormatter
         return $runningValue;
     }
 
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param Dict $next
+     * @return array<string, mixed>
+     */
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): array
     {
         $name = $field->serializedName;
@@ -77,6 +113,12 @@ trait ArrayBasedFormatter
         return $runningValue;
     }
 
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param Dict $next
+     * @return array<string, mixed>
+     */
     public function serializeObject(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): array
     {
         return $this->serializeDictionary($runningValue, $field, $next, $serializer);
