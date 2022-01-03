@@ -250,6 +250,8 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
     }
 
     /**
+     * @todo This method is a hack and is probably still buggy.
+     *
      * @param XmlElement[] $valueElements
      */
     protected function isSequence(array $valueElements): bool
@@ -264,7 +266,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         if ($element->content) {
             return true;
         }
-        return null;
+        return false;
     }
 
     /**
