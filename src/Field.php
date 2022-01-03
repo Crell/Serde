@@ -205,7 +205,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
         ?string $serializedName = null,
         string $phpType = null,
         array $extraProperties = [],
-    ): static
+    ): self
     {
         $new = new self();
         $new->serializedName = $serializedName;

@@ -9,7 +9,7 @@ class FieldTypeIncompatible extends \InvalidArgumentException
     public readonly string $typeField;
     public readonly string $propertyType;
 
-    public static function create(string $typeField, $propertyType): static
+    public static function create(string $typeField, $propertyType): self
     {
         $new = new self();
         $new->typeField = $typeField;

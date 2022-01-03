@@ -8,7 +8,7 @@ class UnsupportedType extends \RuntimeException
 {
     public readonly string $type;
 
-    public static function create(string $type): static
+    public static function create(string $type): self
     {
         $new = new self();
         $new->type = $type;

@@ -10,7 +10,7 @@ class NoWriterFound extends \RuntimeException
 
     public readonly string $format;
 
-    public static function create(string $type, string $format): static
+    public static function create(string $type, string $format): self
     {
         $new = new self();
         $new->type = $type;

@@ -8,7 +8,7 @@ class UnsupportedFormat extends \InvalidArgumentException
 {
     public readonly string $format;
 
-    public static function create(string $format, Direction $dir): static
+    public static function create(string $format, Direction $dir): self
     {
         $new = new self();
         $new->format = $format;

@@ -9,7 +9,7 @@ class NoTypeMapDefinedForKey extends \InvalidArgumentException
     public readonly string $key;
     public readonly string $fieldName;
 
-    public static function create(string $key, string $fieldName): static
+    public static function create(string $key, string $fieldName): self
     {
         $new = new self();
         $new->key = $key;

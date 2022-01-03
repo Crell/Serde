@@ -8,7 +8,7 @@ class ResourcePropertiesNotAllowed extends \InvalidArgumentException
 {
     public readonly string $name;
 
-    public static function create(string $name): static
+    public static function create(string $name): self
     {
         $new = new self();
         $new->name = $name;
