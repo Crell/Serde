@@ -160,6 +160,9 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
 
     protected function enumType(string $phpType): TypeCategory
     {
+        // The Reflector interface is insufficient, but getName() is defined
+        // on all types we care about. This is a reflection API limitation.
+        // @phpstan-ignore-next-line
         return match ((new \ReflectionEnum($phpType))?->getBackingType()?->getName()) {
             'int' => TypeCategory::IntEnum,
             'string' => TypeCategory::StringEnum,
@@ -204,7 +207,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
         array $extraProperties = [],
     ): static
     {
-        $new = new static();
+        $new = new self();
         $new->serializedName = $serializedName;
         $new->phpName ??= $serializedName;
         $new->phpType = $phpType;

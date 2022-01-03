@@ -35,7 +35,7 @@ class ObjectPropertyWriter implements PropertyWriter
      * @param array $dict
      * @param string $class
      * @param Deserializer $deserializer
-     * @return [object, array]
+     * @return array {object, array}
      */
     protected function populateObject(array $dict, string $class, Deserializer $deserializer): array
     {

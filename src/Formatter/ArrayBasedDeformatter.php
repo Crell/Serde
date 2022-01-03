@@ -48,6 +48,9 @@ trait ArrayBasedDeformatter
             return SerdeError::Missing;
         }
 
+        // This line is fine, because if typeField is somehow not of a type with an
+        // arrayType property, it resolves to null anyway, which is exactly what we want.
+        // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
         if (class_exists($class) || interface_exists($class)) {
             return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class);
@@ -66,6 +69,9 @@ trait ArrayBasedDeformatter
             return SerdeError::FormatError;
         }
 
+        // This line is fine, because if typeField is somehow not of a type with an
+        // arrayType property, it resolves to null anyway, which is exactly what we want.
+        // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
         if (class_exists($class) || interface_exists($class)) {
             return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class);

@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
+use Crell\fp\Newable;
+
 class FormatterStream
 {
+    use Newable;
+
     private bool $namedContext = false;
 
     public function __construct(
         public mixed $stream,
     ) {}
-
-    public static function new(...$args): static
-    {
-        return new static(...$args);
-    }
 
     public function namedContext(): static
     {
@@ -39,7 +38,7 @@ class FormatterStream
     /**
      * Wrapper for writing to the stream.
      *
-     * @param mixed $data
+     * @param string $data
      *   The data to write.  It will be passed verbatim to fwrite().
      * @return int|false
      *   The value returned from fwrite();
@@ -53,11 +52,11 @@ class FormatterStream
      * Wrapper for write() that accepts printf() syntax.
      *
      * @param string $format
-     * @param ...$args
+     * @param mixed ...$args
      * @return int|false
      *   The return value from fwrite().
      */
-    public function printf(string $format, ...$args): int|false
+    public function printf(string $format, mixed ...$args): int|false
     {
         return $this->write(sprintf($format, ...$args));
     }
