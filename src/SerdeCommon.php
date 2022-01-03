@@ -26,7 +26,9 @@ use Crell\Serde\PropertyHandler\SequencePropertyReader;
 use Symfony\Component\Yaml\Yaml;
 use function Crell\fp\afilter;
 use function Crell\fp\indexBy;
+use function Crell\fp\method;
 use function Crell\fp\pipe;
+use function Crell\fp\typeIs;
 
 /**
  * All-in serializer for most common cases.
@@ -87,19 +89,19 @@ class SerdeCommon extends Serde
             $formatters[] = new YamlFormatter();
         }
 
-        $this->readers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyReader);
-        $this->writers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyWriter);
+        $this->readers = array_filter($handlers, typeIs(PropertyReader::class));
+        $this->writers = array_filter($handlers, typeIs(PropertyWriter::class));
 
         $this->formatters = pipe(
             $formatters,
-            afilter(static fn ($formatter): bool => $formatter instanceof Formatter),
-            indexBy(static fn (Formatter $formatter): string => $formatter->format()),
+            afilter(typeIs(Formatter::class)),
+            indexBy(method('format')),
         );
 
         $this->deformatters = pipe(
             $formatters,
-            afilter(static fn ($formatter): bool => $formatter instanceof Deformatter),
-            indexBy(static fn (Deformatter $formatter): string => $formatter->format()),
+            afilter(typeIs(Deformatter::class)),
+            indexBy(method('format')),
         );
     }
 }

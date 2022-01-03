@@ -11,9 +11,12 @@ use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
+use phpDocumentor\Reflection\DocBlock\Tags\PropertyRead;
 use function Crell\fp\afilter;
 use function Crell\fp\indexBy;
+use function Crell\fp\method;
 use function Crell\fp\pipe;
+use function Crell\fp\typeIs;
 
 /**
  * An "empty" Serde instance with no configuration.
@@ -54,19 +57,19 @@ class SerdeBasic extends Serde
     ) {
         $this->typeMapper = new TypeMapper($typeMaps, $this->analyzer);
 
-        $this->readers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyReader);
-        $this->writers = array_filter($handlers, static fn ($handler): bool => $handler instanceof PropertyWriter);
+        $this->readers = array_filter($handlers, typeIs(PropertyReader::class));
+        $this->writers = array_filter($handlers, typeIs(PropertyWriter::class));
 
         $this->formatters = pipe(
             $formatters,
-            afilter(static fn ($formatter): bool => $formatter instanceof Formatter),
-            indexBy(static fn (Formatter $formatter): string => $formatter->format()),
+            afilter(typeIs(Formatter::class)),
+            indexBy(method('format')),
         );
 
         $this->deformatters = pipe(
             $formatters,
-            afilter(static fn ($formatter): bool => $formatter instanceof Deformatter),
-            indexBy(static fn (Deformatter $formatter): string => $formatter->format()),
+            afilter(typeIs(Deformatter::class)),
+            indexBy(method('format')),
         );
     }
 }

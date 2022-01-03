@@ -9,6 +9,7 @@ use Crell\AttributeUtils\FromReflectionClass;
 use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\ParseMethods;
 use Crell\AttributeUtils\ParseProperties;
+use function Crell\fp\prop;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes, ParseMethods
@@ -71,7 +72,7 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
     public function setMethods(array $methods): void
     {
         $this->postLoadCallacks = array_keys(
-            array_filter($methods, static fn (MethodDef $def) => $def->postLoadCallback)
+            array_filter($methods, prop('postLoadCallback'))
         );
     }
 

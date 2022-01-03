@@ -12,6 +12,7 @@ use Crell\fp\Evolvable;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
 use function Crell\fp\indexBy;
+use function Crell\fp\method;
 use function Crell\fp\pipe;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
@@ -143,7 +144,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
     {
         /** @var array<string, \ReflectionParameter> $params */
         $params = pipe($subject->getDeclaringClass()->getConstructor()?->getParameters() ?? [],
-            indexBy(fn(\ReflectionParameter $p) => $p->getName()),
+            indexBy(method('getName')),
         );
 
         $param = $params[$subject->getName()] ?? null;
