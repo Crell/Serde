@@ -286,7 +286,7 @@ abstract class SerdeTest extends TestCase
      * @test
      * @group typemap
      */
-    public function custom_object_reader(): void
+    public function static_typemap(): void
     {
         $typeMap = new StaticTypeMap(key: 'size', map: [
             'big' => BigTask::class,
@@ -304,14 +304,14 @@ abstract class SerdeTest extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->custom_object_reader_validate($serialized);
+        $this->static_type_map_validate($serialized);
 
         $result = $s->deserialize($serialized, from: $this->format, to: TaskContainer::class);
 
         self::assertEquals($data, $result);
     }
 
-    protected function custom_object_reader_validate(mixed $serialized): void
+    protected function static_type_map_validate(mixed $serialized): void
     {
 
     }

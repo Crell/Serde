@@ -71,7 +71,7 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('C', $toTest['c']);
     }
 
-    protected function custom_object_reader_validate(mixed $serialized): void
+    protected function static_type_map_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
 
