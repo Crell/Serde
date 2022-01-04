@@ -251,6 +251,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group flattening
      */
     public function flattening(): void
     {
@@ -284,6 +285,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function custom_object_reader(): void
     {
@@ -317,6 +319,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function dynamic_type_map(): void
     {
@@ -368,6 +371,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function typemap_on_parent_class(): void
     {
@@ -391,6 +395,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function classname_typemap(): void
     {
@@ -438,6 +443,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function root_type_map(): void
     {
@@ -461,6 +467,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function bad_type_map(): void
     {
@@ -505,6 +512,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function nested_objects_with_flattening(): void
     {
@@ -652,6 +660,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group flattening
      */
     public function mapped_collected_dictionary(): void
     {
@@ -685,6 +694,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group flattening
      */
     public function mapped_collected_sequence(): void
     {
@@ -718,6 +728,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group flattening
      */
     public function pagination_flatten_object(): void
     {
@@ -758,6 +769,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group flattening
      */
     public function pagination_flatten_multiple_object(): void
     {
@@ -826,6 +838,8 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
+     * @group flattening
      */
     public function flatten_and_map_objects(): void
     {
@@ -909,6 +923,8 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
+     * @group flattening
      */
     public function flat_map_nested(): void
     {
@@ -977,6 +993,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function mapped_arrays(): void
     {
@@ -1009,6 +1026,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function root_typemap(): void
     {
