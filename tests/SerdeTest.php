@@ -590,6 +590,7 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     * @group typemap
      */
     public function drupal_example(): void
     {
