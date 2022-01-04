@@ -30,7 +30,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
         return 'xml';
     }
 
-    public function initialField(Deserializer $deserializer, string $targetType): Field
+    public function rootField(Deserializer $deserializer, string $targetType): Field
     {
         $shortName = substr(strrchr($targetType, '\\'), 1);
         return Field::create(serializedName: $shortName, phpType: $targetType);
