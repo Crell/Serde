@@ -130,7 +130,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
     }
 
     /**
-     * @param XmlElement[] $decoded
+     * @param XmlElement|XmlElement[] $decoded
      */
     public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
@@ -140,7 +140,13 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
 
         $class = $field?->typeField?->arrayType ?? null;
 
-        $data = $this->groupedChildren($decoded[0]);
+        // When dealing with native serialized objects, $decoded will be an XmlElement, not an
+        // array of them.
+        if (is_array($decoded)) {
+            $decoded = $decoded[0];
+        }
+
+        $data = $this->groupedChildren($decoded);
 
         $map = $class ? $deserializer->typeMapper->typeMapForClass($class) : null;
         // @todo This will need to get more robust once we support attribute-based values.
@@ -169,7 +175,13 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
                     }
                 } else {
                     // A nested primitive, probably.
-                    $elementType = $class ?? get_debug_type($e->content);
+                    $elementType = match (true) {
+                        isset($class) => $class,
+                        ctype_digit($e->content) => 'int',
+                        is_numeric($e->content) => 'float',
+                        is_string($e->content) => 'string',
+                        default => get_debug_type($e->content),
+                    };
                     $f = Field::create(serializedName: $e->name, phpType: $elementType);
                     $value = $deserializer->deserialize($e, $f);
                 }
