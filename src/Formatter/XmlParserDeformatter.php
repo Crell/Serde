@@ -38,10 +38,11 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
 
     /**
      * @param string $serialized
+     * @param Field $rootField
      */
-    public function deserializeInitialize(mixed $serialized): XmlElement
+    public function deserializeInitialize(mixed $serialized, Field $rootField): XmlElement
     {
-        return $this->parser->parseXml($serialized);
+        return $this->parser->parseXml($serialized) ?? new XmlElement(name: $rootField->serializedName);
     }
 
     /**
@@ -193,7 +194,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
      */
     public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
    {
-       if (!in_array($decoded->name, [$field->serializedName, ...$field->alias], true)) {
+       if (! isset($decoded->name) || !in_array($decoded->name, [$field->serializedName, ...$field->alias], true)) {
            return SerdeError::Missing;
        }
 
@@ -217,8 +218,10 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
             } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
                 $collectingObjects[] = $propField;
             } elseif ($propField->typeCategory === TypeCategory::Array) {
-                $valueElements = $data[$propField->serializedName] ?? [];
-                if ($propField?->typeField instanceof SequenceField || $this->isSequence($valueElements)) {
+                $valueElements = $this->getFieldData($propField, $data);
+                if (!$valueElements) {
+                    $ret[$propField->serializedName] = SerdeError::Missing;
+                } elseif ($propField?->typeField instanceof SequenceField || $this->isSequence($valueElements)) {
                     $ret[$propField->serializedName] = $deserializer->deserialize($valueElements, $propField);
                 } else {
                     if (!$propField->typeField) {

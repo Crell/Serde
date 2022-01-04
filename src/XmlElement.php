@@ -23,6 +23,26 @@ class XmlElement
      */
     public array $children = [];
 
+    public function __construct(
+        ?string $name = null,
+        ?string $namespace = null,
+        ?string $content = null,
+        ?array $attributes = null
+    ) {
+        if (!is_null($name)) {
+            $this->name = $name;
+        }
+        if (!is_null($namespace)) {
+            $this->namespace = $namespace;
+        }
+        if (!is_null($content)) {
+            $this->content = $content;
+        }
+        if (!is_null($attributes)) {
+            $this->attributes = $attributes;
+        }
+    }
+
     /**
      *
      *

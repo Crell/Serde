@@ -26,13 +26,13 @@ class XmlFormatter implements Formatter /*, Deformatter */
         return 'xml';
     }
 
-    public function initialField(Serializer $serializer, string $type): Field
+    public function rootField(Serializer $serializer, string $type): Field
     {
         $shortName = substr(strrchr($type, '\\'), 1);
         return Field::create(serializedName: $shortName, phpType: $type);
     }
 
-    public function serializeInitialize(ClassDef $classDef): \DOMDocument
+    public function serializeInitialize(ClassDef $classDef, Field $rootField): \DOMDocument
     {
         return new \DOMDocument();
     }
