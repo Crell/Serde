@@ -90,10 +90,18 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
     }
 
     /**
-     * @param XmlElement $decoded
+     * @param XmlElement|XmlElement[] $decoded
      */
     public function deserializeString(mixed $decoded, Field $field): string|SerdeError
     {
+        // If the field has been imploded, $decoded may be an array of one element
+        // instead of just one element. That's because when the data is passed forward
+        // from deserializeObject(), it doesn't know that it's going to be exploded later.
+        // That distinction needs to get handled here, unfortunately.
+        if (is_array($decoded)) {
+            $decoded = $decoded[0];
+        }
+
         return $this->getValueFromElement($decoded, $field);
     }
 
