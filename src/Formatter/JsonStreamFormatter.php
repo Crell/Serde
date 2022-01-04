@@ -21,12 +21,12 @@ class JsonStreamFormatter implements Formatter
         return 'json-stream';
     }
 
-    public function initialField(Serializer $serializer, string $type): Field
+    public function rootField(Serializer $serializer, string $type): Field
     {
         return Field::create('root', $type);
     }
 
-    public function serializeInitialize(ClassDef $classDef): FormatterStream
+    public function serializeInitialize(ClassDef $classDef, Field $rootField): FormatterStream
     {
         return FormatterStream::new(fopen('php://temp/', 'wb'));
     }

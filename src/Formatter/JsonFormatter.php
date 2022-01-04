@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde\Formatter;
 
 use Crell\Serde\ClassDef;
+use Crell\Serde\Field;
 
 class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
 {
@@ -17,9 +18,10 @@ class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
     }
 
     /**
+     * @param Field $rootField
      * @return array<string, mixed>
      */
-    public function serializeInitialize(ClassDef $classDef): array
+    public function serializeInitialize(ClassDef $classDef, Field $rootField): array
     {
         return ['root' => []];
     }
@@ -29,7 +31,7 @@ class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
         return json_encode($runningValue['root'], JSON_THROW_ON_ERROR);
     }
 
-    public function deserializeInitialize(mixed $serialized): mixed
+    public function deserializeInitialize(mixed $serialized, Field $rootField): mixed
     {
         return ['root' => json_decode($serialized, true, 512, JSON_THROW_ON_ERROR)];
     }

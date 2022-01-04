@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde\Formatter;
 
 use Crell\Serde\ClassDef;
+use Crell\Serde\Field;
 
 class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 {
@@ -17,9 +18,10 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
     }
 
     /**
+     * @param Field $rootField
      * @return array<string, mixed>
      */
-    public function serializeInitialize(ClassDef $classDef): array
+    public function serializeInitialize(ClassDef $classDef, Field $rootField): array
     {
         return ['root' => []];
     }
@@ -44,7 +46,7 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
         return array_diff_key($source, array_flip($used));
     }
 
-    public function deserializeInitialize(mixed $serialized): mixed
+    public function deserializeInitialize(mixed $serialized, Field $rootField): mixed
     {
         return ['root' => $serialized];
     }

@@ -12,9 +12,9 @@ interface Deformatter
 {
     public function format(): string;
 
-    public function initialField(Deserializer $deserializer, string $targetType): Field;
+    public function rootField(Deserializer $deserializer, string $targetType): Field;
 
-    public function deserializeInitialize(mixed $serialized): mixed;
+    public function deserializeInitialize(mixed $serialized, Field $rootField): mixed;
 
     public function deserializeInt(mixed $decoded, Field $field): int|SerdeError;
 

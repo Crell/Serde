@@ -21,7 +21,7 @@ use Crell\Serde\Serializer;
  */
 trait ArrayBasedFormatter
 {
-    public function initialField(Serializer|Deserializer $serializer, string $type): Field
+    public function rootField(Serializer|Deserializer $serializer, string $type): Field
     {
         return Field::create('root', $type);
     }
