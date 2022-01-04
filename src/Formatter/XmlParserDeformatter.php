@@ -13,6 +13,7 @@ use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\XmlElement;
 use Crell\Serde\XmlFormat;
+use function Crell\fp\first;
 use function Crell\fp\firstValue;
 use function Crell\fp\keyedMap;
 use function Crell\fp\pipe;
@@ -184,9 +185,9 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
      */
     public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
    {
-        if ($decoded?->name !== $field->serializedName) {
-            return SerdeError::Missing;
-        }
+       if (!in_array($decoded->name, [$field->serializedName, ...$field->alias], true)) {
+           return SerdeError::Missing;
+       }
 
         $data = $this->groupedChildren($decoded);
         // @todo This is going to break on typemapped fields, but deal with that later.
@@ -218,14 +219,19 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
                     $ret[$propField->serializedName] = $deserializer->deserialize($valueElements, $propField);
                 }
             } elseif ($propField->typeCategory === TypeCategory::Object || $propField->typeCategory->isEnum()) {
-                $ret[$propField->serializedName] = $deserializer->deserialize($data[$propField->serializedName][0] ?? null, $propField);
+                $valueElements = $this->getFieldData($propField, $data);
+                $ret[$propField->serializedName] = $valueElements
+                    ? $deserializer->deserialize($valueElements[0], $propField)
+                    : SerdeError::Missing;
             } else {
                 // @todo This needs to be enhanced to deal with attribute-based values, I think?
                 // per-type deserialize methods also deal with that, but since the same element
                 // may need to get passed multiple times to account for multiple attributes
                 // on one element, I think it's necessary here, too.
-                $valueElement = $this->getFieldData($propField, $data)[0];
-                $ret[$propField->serializedName] = $deserializer->deserialize($valueElement, $propField);
+                $valueElements = $this->getFieldData($propField, $data);
+                $ret[$propField->serializedName] = $valueElements
+                    ? $deserializer->deserialize($valueElements[0], $propField)
+                    : SerdeError::Missing;
             }
         }
 
