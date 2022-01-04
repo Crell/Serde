@@ -6,6 +6,22 @@ namespace Crell\Serde;
 
 use function Crell\fp\pipe;
 
+/**
+ * @phpstan-type TagDefinition array{
+ *     name: string,
+ *     namespace: string,
+ *     attributes: array<string, string>,
+ *     value: string
+ *  }
+ *
+ * @phpstan-type XmlParseStruct array{
+ *     tag: string,
+ *     type: string,
+ *     level: int,
+ *     attributes: ?array,
+ *     value: ?string
+ * }
+ */
 class GenericXmlParser
 {
     /**
@@ -32,9 +48,9 @@ class GenericXmlParser
      *
      * @param string $xml
      *   A well-formed XML string to parse.
-     * @return array
+     * @return XmlParseStruct[]
      *   A nested array of tag definitions.  The format is the same as created by
-     *   xml_parse_into_struct(), but with defaults added and a few derived properties.
+     *   xml_parse_into_struct().
      */
     protected function parseTags(string $xml): array
     {
@@ -53,9 +69,9 @@ class GenericXmlParser
      *
      * @see https://www.php.net/manual/en/function.xml-parse-into-struct.php
      *
-     * @param array $tags
+     * @param XmlParseStruct[] $tags
      *   An array of tags as returned by xml_parser.
-     * @return array
+     * @return TagDefinition
      *   A nested array of tag definitions.  The format is the same as created by
      *   xml_parse_into_struct(), but with defaults added and a few derived properties.
      */
