@@ -151,7 +151,6 @@ class JsonStreamFormatterTest extends TestCase
                 backedSize: BackedSize::Large,
                 implodedSeq: [1, 2, 3],
                 implodedDict: ['a' => 'A', 'b' => 'B'],
-                flattenedObject: new ThingOneA(first: 'a', second: 'b'),
             )
         ];
     }
