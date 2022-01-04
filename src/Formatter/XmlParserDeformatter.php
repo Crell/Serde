@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
+use Crell\Serde\ClassDef;
 use Crell\Serde\Deserializer;
 use Crell\Serde\DictionaryField;
 use Crell\Serde\Field;
@@ -13,10 +14,7 @@ use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\XmlElement;
 use Crell\Serde\XmlFormat;
-use function Crell\fp\first;
 use function Crell\fp\firstValue;
-use function Crell\fp\keyedMap;
-use function Crell\fp\pipe;
 use function Crell\fp\reduceWithKeys;
 
 class XmlParserDeformatter implements Deformatter, SupportsCollecting
@@ -175,13 +173,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
                     }
                 } else {
                     // A nested primitive, probably.
-                    $elementType = match (true) {
-                        isset($class) => $class,
-                        ctype_digit($e->content) => 'int',
-                        is_numeric($e->content) => 'float',
-                        is_string($e->content) => 'string',
-                        default => get_debug_type($e->content),
-                    };
+                    $elementType = $class ?? $this->elementType($e);
                     $f = Field::create(serializedName: $e->name, phpType: $elementType);
                     $value = $deserializer->deserialize($e, $f);
                 }
@@ -205,14 +197,15 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
      * @param XmlElement $decoded
      */
     public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
-   {
-       if (! isset($decoded->name) || !in_array($decoded->name, [$field->serializedName, ...$field->alias], true)) {
-           return SerdeError::Missing;
-       }
+    {
+        if (! isset($decoded->name) || !in_array($decoded->name, [$field->serializedName, ...$field->alias], true)) {
+            return SerdeError::Missing;
+        }
 
         $data = $this->groupedChildren($decoded);
         // @todo This is going to break on typemapped fields, but deal with that later.
-        $properties = $deserializer->typeMapper->propertyList($field, $data);
+
+        $properties = $this->propertyList($deserializer, $field, $data);
 
         $usedNames = [];
         $collectingArray = null;
@@ -258,24 +251,74 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
             }
         }
 
-        /*
-        // Any other values are for a collecting field, if any,
-        // but may need further processing according to the collecting field.
         $remaining = $this->getRemainingData($data, $usedNames);
-        // Object collecting doesn't support type maps, so can be handled by
-        // the generic version in the else clause.
-        if ($collectingField?->phpType === 'array' && $collectingField?->typeMap) {
-            foreach ($remaining as $name => $entry) {
-                $class = $collectingField->typeMap->findClass($entry[$collectingField->typeMap->keyField()]);
-                $ret[$name] = $deserializer->deserialize($remaining, Field::create(serializedName: "$name", phpType: $class));
-            }
-        } else {
-            foreach ($remaining as $k => $v) {
-                $ret[$k] = $v;
+
+/*
+        // First upcast any values that will become properties of a collecting object.
+        $remaining = $this->getRemainingData($data, $usedNames);
+        foreach ($collectingObjects as $collectingField) {
+            $remaining = $this->getRemainingData($remaining, $usedNames);
+            $nestedProps = $this->propertyList($deserializer, $collectingField, $remaining);
+            foreach ($nestedProps as $propField) {
+                $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
+                    ? $deserializer->deserialize($data, $propField)
+                    : $remaining[$propField->serializedName] ?? SerdeError::Missing;
+                $usedNames[] = $propField->serializedName;
             }
         }
 */
+
+        // Then IF the remaining data is going to be collected to an array,
+        // and that array has a type map, upcast all elements of that array to
+        // the appropriate type.
+        $remaining = $this->getRemainingData($remaining, $usedNames);
+        if ($collectingArray && $map = $deserializer->typeMapper->typeMapForField($collectingArray)) {
+            foreach ($remaining as $k => $v) {
+                $class = $map->findClass($v[$map->keyField()]);
+                $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: "$k", phpType: $class));
+            }
+        } else {
+            // Otherwise, just tack on whatever is left to the processed data.
+            foreach ($remaining as $k => $v) {
+                if (count($v) === 1) {
+                    $elementType = $this->elementType($v[0]);
+                    $ret[$k] = $deserializer->deserialize($v[0], Field::create(serializedName: "$k", phpType: $elementType));
+                }
+            }
+        }
+
         return $ret;
+    }
+
+    /**
+     * Derives the native type equivalent of an element.
+     *
+     * @param XmlElement $element
+     *   The element to derive.
+     * @return string
+     */
+    protected function elementType(XmlElement $element): string
+    {
+        return match (true) {
+            ctype_digit($element->content) => 'int',
+            is_numeric($element->content) => 'float',
+            is_string($element->content) => 'string',
+            default => get_debug_type($element->content),
+        };
+    }
+
+    protected function propertyList(Deserializer $deserializer, Field $field, array $data): array
+    {
+        $class = $field->phpType;
+
+        // @todo This will need to change for attribute-based values.
+        // Assuming we allow the map key to be an attribute?
+        if ($map = $deserializer->typeMapper->typeMapForField($field)) {
+            $key = $map->keyField();
+            $class = $map->findClass($data[$key][0]->content);
+        }
+
+        return $deserializer->analyzer->analyze($class, ClassDef::class)->properties;
     }
 
     /**
