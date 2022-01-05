@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde\Records\BadMap;
+namespace Crell\Serde\Records\RootMap;
 
 class TypeA implements Type
 {
