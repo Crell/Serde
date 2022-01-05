@@ -29,7 +29,14 @@ class XmlFormatter implements Formatter /*, Deformatter */
     public function rootField(Serializer $serializer, string $type): Field
     {
         $shortName = substr(strrchr($type, '\\'), 1);
-        return Field::create(serializedName: $shortName, phpType: $type);
+
+        $field = Field::create(serializedName: $shortName, phpType: $type);
+
+        if ($map = $serializer->typeMapper->typeMapForClass($type)) {
+            $field = $field->with(typeMap: $map);
+        }
+
+        return $field;
     }
 
     public function serializeInitialize(ClassDef $classDef, Field $rootField): \DOMDocument
