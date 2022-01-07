@@ -647,6 +647,29 @@ You may also write your own Type Maps as attributes.  The only requirements are:
 
 ## Extending Serde
 
+Internally, Serde has five types of extensions that work in concert to produce a serialized or deserialized product.
+
+* Type Maps, as discussed above, are optional and translate a class name to a lookup identifier and back.
+* A [`PropertyReader`](src/PropertyHandler/PropertyReader.php) is responsible for pulling values off of an object, processing them if necessary, and then passing them on to a Formatter.  This is part of the Serialization pipeline.
+* A [`PropertyWriter`](src/PropertyHandler/PropertyWriter.php) is responsible for using a Deformatter to extract data from incoming data and then translate it as necessary to be written to an object.  This is part of the Deserialization pipeline.
+* A [`Formatter`](src/Formatter/Formatter.php) is responsible for writing to a specific output format, like JSON or YAML.  This is part of the Serialization pipeline.
+* A [`Deformatter`](src/Formatter/Deformatter.php) is responsible for reading data off of an incoming format and passing it back to a `PropertyWriter`.  This is part of the Deserialization pipeline.
+
+Collectively, `PropertyReader` and `PropertyWriter` instances are called "handlers."
+
+In general, `PropertyReader`s and `PropertyWriters` are *PHP-type specific*, while `Formatter`s and `Deformatter`s are *serialized-format specific*.  Custom Readers or Writers can also declare themselves to be format-specific if they contain format-sensitive optimizations.
+
+`PropertyReader` and `PropertyWriter` may be implemented on the same object, or not.  Similarly, `Formatter` and `Deformatter` may be implemented together or not.  That is up to whatever seems easiest for the particular implementation, and the provided extensions do a little of each depending on the use case.
+
+The interfaces linked above provide more precise explanations of how to use them.  In most cases, you would only need to implement a Formatter or Deformatter to support a new format.  You would only need to implement a Property Readers or Property Writers when dealing with a specific class that needs extra special handling for whatever reason, such as its serialized representation having little or no relationship with its object representation.
+
+As an example, a few custom handlers are included to deal with common cases.
+
+* [`DateTimePropertyReader`](src/PropertyHandler/DateTimePropertyReader.php): This object will translate `DateTime` and `DateTimeImmutable` objects to and from a serialized form as a string.  Specifically, it will use the `\DateTimeInterface::RFC3339_EXTENDED` format for the string when serializing.  The timestamp will then appear in the serialized output as a normal string.  When deserializing, it will accept any datetime format supported by `DateTime`'s constructor.
+* [`DateTimeZonePropertyReader`](src/PropertyHandler/DateTimeZonePropertyReader.php): This object will translate `DateTimeZone` objects to and from a serialized form as a timezone string.  That is, `DateTimeZone('America/Chicago`)` will be represented in the format as the string `America/Chicago`.
+* [`NativeSerializePropertyReader`](src/PropertyHandler/NativeSerializePropertyReader.php): This object will apply to any class that has a `__serialize()` method (when serializing) or `__unserialize()` method (when deserializing).  These PHP magic methods provide alternate representations of an object intended for use with PHP's native `serialize()` and `unserialize()` methods, but can also be used for any other format.  If `__serialize()` is defined, it will be invoked and whatever associative array it returns will be written to the selected format as a dictionary.  If `__unserialize()` is defined, this object will read a dictionary from the incoming data and then pass it to that method on a newly created object, which will then be responsible for populating the object as appropriate.  No further processing will be done in either direction.
+* [`EnumOnArrayPropertyReader`](src/PropertyHandler/EnumOnArrayPropertyReader.php): Serde natively supports PHP Enums and can serialize them as ints or strings as appropriate.  However, in the special case of reading from a PHP array format this object will take over and support reading an Enum literal in the incoming data.  That allows, for example, a configuration array to include hand-inserted Enum values and still be cleanly imported into a typed, defined object.
+
 ## Dependency Injection configuration
 
 Serde is designed to be usable "out of the box" without any additional setup.  However, when included in a larger system it is best to configure it propertly via Dependency Injection.
@@ -657,7 +680,7 @@ There are three ways you can setup Serde.
 2. The `SerdeBasic` class has pre-built configuration whatsoever; you will need to provide all of the Handlers, Formatters, or Type Maps you want yourself, in the order you want them applied.
 3. You may also extend the `Serde` base class itself and create your own custom pre-made configuration, with just the Handlers or Formatters (provided or custom) that you want.
 
-Both `SerdeCommon` and `SerdeBasic`  four arguments: The [`ClassAnalyzer`](https://github.com/Crell/AttributeUtils) to use, an array of Handlers, an array of Formatters, and an array of Type Maps.  If no analyzer is provided, Serde creates a memory-cached Analyzer by default so that it will always work.  However, in a DI configuration it is strongly recommended that you configure the Analyzer yourself, with appropriate caching, and inject that into Serde as a dependency to avoid duplicate Analyzers (and duplicate caches).
+Both `SerdeCommon` and `SerdeBasic`  four arguments: The [`ClassAnalyzer`](https://github.com/Crell/AttributeUtils) to use, an array of Handlers, an array of Formatters, and an array of Type Maps.  If no analyzer is provided, Serde creates a memory-cached Analyzer by default so that it will always work.  However, in a DI configuration it is strongly recommended that you configure the Analyzer yourself, with appropriate caching, and inject that into Serde as a dependency to avoid duplicate Analyzers (and duplicate caches).  If you have multiple different Serde configurations in different services, it may also be beneficial to make all handlers and formatters services as well and explicitly inject them into `SerdeBasic` rather than relying on `SerdeCommon`.
 
 ## Change log
 
