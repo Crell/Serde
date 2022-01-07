@@ -422,6 +422,229 @@ Will serialize/deserialize to this JSON:
 
 As with `SequenceField`, values will automatically be `trim()`ed unless `trim: false` is specified in the attribute's argument list.
 
+### TypeMaps
+
+Type maps are a powerful feature of Serde that allows precise control over how objects with inheritance are serialized and deserialized.  Type Maps translate between the class of an object and some unique identifier that is included in the serialized data.
+
+In the abstract, a Type Map is any object that implements the [`TypeMap`](src/TypeMap.php) interface.  TypeMaps may be provided as an attribute on a property, or on a class or interface, or provided to Serde when it is set up to allow for arbitrary maps.
+
+Consider the following example, which will be used for the remaining explanations of Type Maps:
+
+```php
+interface Product {}
+
+interface Book extends Product {}
+
+class PaperBook implements Book
+{
+    protected string $title;
+    protected int $pages;
+}
+
+class DigitalBook implements Book
+{
+    protected string $title;
+    protected int $bytes;
+}
+
+class Sale
+{
+    protected Book $book;
+
+    protected float $discountRate;
+}
+
+class Order
+{
+    protected string $orderId;
+
+    #[SequenceField(arrayType: Book::class)]
+    protected array $products;
+}
+```
+
+Both `Sale` and `Order` reference `Book`, but that value could be a `PaperBook`, `DigitalBook`, or any other class that implements `Book`.  Type Maps provide a way for Serde to tell which concrete type it is.
+
+#### Class name maps
+
+The simplest case of a class map is to include a `#[ClassNameTypeMap]` attribute on an object property.  For example, 
+
+```php
+use Crell\Serde\ClassNameTypeMap;
+
+class Sale
+{
+    #[ClassNameTypeMap(key: 'type')]
+    protected Book $book;
+
+    protected float $discountRate;
+}
+```
+
+Now when a `Sale` is serialized, an extra property will be included named `type` that contains the class name.  So a sale on a digital book would serialize like so:
+
+```json
+{
+    "book": {
+        "type": "Your\\App\\DigitalBook",
+        "title": "Thinking Functionally in PHP",
+        "bytes": 45000
+    },
+    "discountRate": 0.2
+}
+```
+
+On deserialization, the "type" property will be read and used to determine that the remaining values should be used to construct a `DigitalBook` instance, specifically.
+
+Class name maps have the advantage that they are very simple, and will work with any class that implements that interface, even those you haven't thought of yet.  The downside is that they put a PHP implementation detail (the class name) into the output, which may not be desireable.
+
+#### Static Maps
+
+Static maps allow you to provide a fixed map from classes to meaningful keys.
+
+```php
+use Crell\Serde\StaticTypeMap;
+
+class Sale
+{
+    #[StaticTypeMap(key: 'type', map: [
+        'paper' => Book::class,
+        'ebook' => DigitalBook::class,
+    ])]
+    protected Book $book;
+
+    protected float $discountRate;
+}
+```
+
+Now, if a `Sale` object is serialized it will look like this:
+
+```json
+{
+    "book": {
+        "type": "ebook",
+        "title": "Thinking Functionally in PHP",
+        "bytes": 45000
+    },
+    "discountRate": 0.2
+}
+```
+
+Static maps have the advantage of simplicity and not polluting the output with PHP-specific implementation details.  The downside is that they are static: They can only handle the classes you know about at code time, and will throw an exception if they encounter any other class.
+
+#### Type maps on collections
+
+Type Maps may also be applied to array properties, either sequence or dictionary.  In that case, they will apply to all values in that collection.  For example:
+
+```php
+class Order
+{
+    protected string $orderId;
+
+    #[SequenceField(arrayType: Book::class)]
+    #[StaticTypeMap(key: 'type', map: [
+        'paper' => Book::class,
+        'ebook' => DigitalBook::class,
+    ])]
+    protected array $books;
+}
+```
+
+`$products` is an array of objects that implement `Book`, but could be either `PaperBook` or `DigitalBook`.  A serialized copy of this object may look like:
+
+```json
+{
+    "orderId": "abc123",
+    "products": [
+        {
+            "type": "ebook",
+            "title": "Thinking Functionally in PHP",
+            "bytes": 45000
+        },
+        {
+            "type": "paper",
+            "title": "Category Theory for Programmers",
+            "pages": 335
+        }
+    ]
+}
+```
+
+On deserialization, the `type` property will again be used to determine the class that the rest of the properties should be hydrated into.
+
+#### Type mapped classes
+
+In addition to putting a type map on a property, you may also place it on the class or interface that the property references.
+
+```php
+#[StaticTypeMap(key: 'type', map: [
+    'paper' => Book::class,
+    'ebook' => DigitalBook::class,
+])]
+interface Book {}
+```
+
+Now, that Type Map will apply to both `Sale::$book` and to `Order::$books` with no further work on our part.
+
+Type Maps also inherit.  That means we can put a type map on `Product` instead if we wanted:
+
+```php
+#[StaticTypeMap(key: 'type', map: [
+    'paper' => Book::class,
+    'ebook' => DigitalBook::class,
+    'toy' => Gadget::class,
+])]
+interface Product {}
+```
+
+And both `Sale` and `Order` will still serialize with the appropriate key.
+
+#### Dynamic type maps
+
+Type Maps may also be provided directly to the Serde object when it is created.  Any object that implements `TypeMap` may be used.  This is most useful when the list of possible classes is dynamic based on user configuration, database values, what plugins are installed in your application, etc.
+
+```php
+class ProductTypeMap implements TypeMap
+{
+    public function __construct(protected readonly Connection $db) {}
+
+    public function keyField(): string
+    {
+        return 'type';
+    }
+
+    public function findClass(string $id): ?string
+    {
+        return $this->db->someLookup($id);
+    }
+
+    public function findIdentifier(string $class): ?string
+    {
+        return $this->db->someMappingLogic($class);
+    }
+}
+
+$typeMap = new ProductTypeMap($dbConnection);
+
+$serde = new SerdeCommon(typeMaps: [
+    Your\App\Product::class => $typeMap,
+]);
+
+$json = $serde->serialize($aBook, to: 'json');
+```
+
+In practice, you would likely set that up via your Dependency Injection system.
+
+Note that `ClassNameTypeMap` and `StaticTypeMap` may be injected as well, as can any other class that implements `TypeMap`.
+
+#### Custom type maps
+
+You may also write your own Type Maps as attributes.  The only requirements are:
+
+1. The class implements the `TypeMap` interface.
+2. The class is marked as an #[\Attribute].
+3. The class is legal on *both* classes and properties. That is, `#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]`
+
 ## Advanced setup
 
 
