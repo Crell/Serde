@@ -10,7 +10,7 @@ services:
     php81:
         build: ./docker/php/81
         volumes:
-#            - ~/.composer:/.composer #uncomment this line to allow usage of local composer cache
+            - ~/.composer:/.composer #uncomment this line to allow usage of local composer cache
             - .:/usr/src/myapp
             - ./docker/php/81/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
             - ./docker/php/conf.d/error_reporting.ini:/usr/local/etc/php/conf.d/error_reporting.ini
