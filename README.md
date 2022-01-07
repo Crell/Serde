@@ -645,9 +645,19 @@ You may also write your own Type Maps as attributes.  The only requirements are:
 2. The class is marked as an #[\Attribute].
 3. The class is legal on *both* classes and properties. That is, `#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]`
 
-## Advanced setup
+## Extending Serde
 
+## Dependency Injection configuration
 
+Serde is designed to be usable "out of the box" without any additional setup.  However, when included in a larger system it is best to configure it propertly via Dependency Injection.
+
+There are three ways you can setup Serde.
+
+1. The `SerdeCommon` class includes most available handlers and formatters out of the box, ready to go, although you can add additional ones via the constructor.
+2. The `SerdeBasic` class has pre-built configuration whatsoever; you will need to provide all of the Handlers, Formatters, or Type Maps you want yourself, in the order you want them applied.
+3. You may also extend the `Serde` base class itself and create your own custom pre-made configuration, with just the Handlers or Formatters (provided or custom) that you want.
+
+Both `SerdeCommon` and `SerdeBasic`  four arguments: The [`ClassAnalyzer`](https://github.com/Crell/AttributeUtils) to use, an array of Handlers, an array of Formatters, and an array of Type Maps.  If no analyzer is provided, Serde creates a memory-cached Analyzer by default so that it will always work.  However, in a DI configuration it is strongly recommended that you configure the Analyzer yourself, with appropriate caching, and inject that into Serde as a dependency to avoid duplicate Analyzers (and duplicate caches).
 
 ## Change log
 
