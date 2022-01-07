@@ -18,10 +18,6 @@ use Crell\Serde\TypeMap;
 
 class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
 {
-    public function __construct(
-        protected readonly ClassAnalyzer $analyzer = new MemoryCacheAnalyzer(new Analyzer()),
-    ) {}
-
     public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $propValues = $value->__serialize();
@@ -35,7 +31,7 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
             );
         }
 
-        if ($map = $this->typeMap($field)) {
+        if ($map = $serializer->typeMapper->typeMapForField($field)) {
             $f = Field::create(serializedName: $map->keyField(), phpType: 'string');
             // The type map field MUST come first so that streaming deformatters
             // can know their context.
@@ -43,11 +39,6 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
         }
 
         return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
-    }
-
-    protected function typeMap(Field $field): ?TypeMap
-    {
-        return $field->typeMap;
     }
 
     public function canRead(Field $field, mixed $value, string $format): bool
@@ -65,7 +56,7 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
             return null;
         }
 
-        $class = $this->getTargetClass($field, $dict);
+        $class = $deserializer->typeMapper->getTargetClass($field, $dict);
 
         // Make an empty instance of the target class.
         $rClass = new \ReflectionClass($class);
@@ -74,17 +65,6 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
         $new->__unserialize($dict);
 
         return $new;
-    }
-
-    /**
-     * @param array<mixed> $dict
-     */
-    protected function getTargetClass(Field $field, array $dict): string
-    {
-        if ($map = $this->typeMap($field)) {
-            return $map->findClass($dict[$map->keyField()]);
-        }
-        return $field->phpType;
     }
 
     public function canWrite(Field $field, string $format): bool
