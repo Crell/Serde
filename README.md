@@ -58,7 +58,7 @@ Serde can deserialize from:
 
 (YAML support requires the [`Symfony/Yaml`](https://github.com/symfony/yaml) library.)  XML support is in progress.
 
-### Supported objects
+### Robust object support
 
 Serde automatically supports nested objects in properties of other objects, which will be handled recursively as long as there are no circular references.
 
@@ -67,6 +67,8 @@ Serde handles `public`, `private`, `protected`, and `readonly` properties, both 
 If you try to serialize or deserialize an object that implements PHP's [`__serialize()`](https://www.php.net/manual/en/language.oop5.magic.php#object.serialize) or [`__unserialize()`](https://www.php.net/manual/en/language.oop5.magic.php#object.unserialize) hooks, those will be respected.  (If you want to read/write from PHP's internal serialization format, just call `serialize()`/`unserialize()` directly.)
 
 Serde also supports post-load callbacks that allow you to re-initialize derived information if necessary without storing it in the serialized format.
+
+PHP objects can be mutated to and from a serialized format.  Nested objects can be flattened or collected, classes with common interfaces can be mapped to the appropriate object, and array values can be imploded into a string for serialization and exploded back into an array when reading.
 
 ## Configuration
 
