@@ -4,7 +4,7 @@
 [![Software License][ico-license]](LICENSE.md)
 [![Total Downloads][ico-downloads]][link-downloads]
 
-Serde (pronounced "seer-dee") is a fast, flexible, powerful, and easy to use serialization and deserialization library for PHP.  It draws inspiration from both Rust's Serde crate and Symfony Serializer, although it is not directly based on either.
+Serde (pronounced "seer-dee") is a fast, flexible, powerful, and easy to use serialization and deserialization library for PHP that supports a number of standard formats.  It draws inspiration from both Rust's Serde crate and Symfony Serializer, although it is not directly based on either.
 
 At this time, Serde supports serializing PHP objects to and from PHP arrays, JSON, and YAML.  It also supports serializing to JSON via a stream.  Further support is planned, but by design can also be extended by anyone.
 
@@ -37,9 +37,36 @@ $deserializedObject = $serde->deserialize($jsonString, from: 'json', to: SomeCla
 
 (The named arguments are optional, but recommended.)
 
-Serde is highly configurable, but common cases are supported by just using the `SerdeCommon` class as provided.  For most basic cases, that is all you need.  Out of the box, `SerdeCommon` supports `array`, `json`, `json-stream` (serialize only), and `yaml` (if the [`Symfony/Yaml`](https://github.com/symfony/yaml) library is found) formats.
+Serde is highly configurable, but common cases are supported by just using the `SerdeCommon` class as provided.  For most basic cases, that is all you need.
 
-Serde automatically supports nested objects in properties, which will be handled recursively as long as there are no circular references.
+## Key features
+
+### Supported formats
+
+Serde can serialize to:
+
+* PHP arrays (`array`)
+* JSON (`json`)
+* Streaming JSON (`json-stream`)
+* YAML (`yaml`)
+
+Serde can deserialize from:
+
+* PHP arrays
+* JSON
+* YAML
+
+(YAML support requires the [`Symfony/Yaml`](https://github.com/symfony/yaml) library.)  XML support is in progress.
+
+### Supported objects
+
+Serde automatically supports nested objects in properties of other objects, which will be handled recursively as long as there are no circular references.
+
+Serde handles `public`, `private`, `protected`, and `readonly` properties, both reading and writing, with optional default values.
+
+If you try to serialize or deserialize an object that implements PHP's [`__serialize()`](https://www.php.net/manual/en/language.oop5.magic.php#object.serialize) or [`__unserialize()`](https://www.php.net/manual/en/language.oop5.magic.php#object.unserialize) hooks, those will be respected.  (If you want to read/write from PHP's internal serialization format, just call `serialize()`/`unserialize()` directly.)
+
+Serde also supports post-load callbacks that allow you to re-initialize derived information if necessary without storing it in the serialized format.
 
 ### Attribute configuration
 
