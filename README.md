@@ -68,7 +68,7 @@ If you try to serialize or deserialize an object that implements PHP's [`__seria
 
 Serde also supports post-load callbacks that allow you to re-initialize derived information if necessary without storing it in the serialized format.
 
-### Attribute configuration
+## Configuration
 
 Serde's behavior is driven almost entirely through attributes.  Any class may be serialized from or desrialized to as-is with no additional configuration, but there is a great deal of configuration that may be opted-in to.
 
@@ -78,11 +78,11 @@ The main attribute is the `Crell\Serde\Field` attribute, which may be placed on 
 
 Although not required, it is strongly recommended that you always use named arguments with attributes.  The precise order of arguments is *not guaranteed*.
 
-#### `exclude` (bool, default false)
+### `exclude` (bool, default false)
 
 If set to `true`, Serde will ignore the property entirely on both serializing and deserializing.
 
-#### `serializedName` (string, default null)
+### `serializedName` (string, default null)
 
 If provided, this string will be used as the name of a property when serialized out to a format and when reading it back in.  for example:
 
@@ -102,7 +102,7 @@ Round trips to/from:
 }
 ```
 
-#### `renameWith` (RenamingStrategy, default null)
+### `renameWith` (RenamingStrategy, default null)
 
 The `renameWith` key specifies a way to mangle the name of the property to produce a serializedName.  The most common examples here would be case folding, say if serializing to a format that uses a different convention than PHP does.
 
@@ -168,7 +168,7 @@ Serializes to/from:
 
 If both `serializedName` and `renameWith` are specified, `serializedName` will be used and `renameWith` ignored.
 
-#### `alias` (array, default `[]`)
+### `alias` (array, default `[]`)
 
 When deserializing (only), if the expected serialized name is not found in the incoming data, these additional property names will be examined to see if the value can be found.  If so, the value will be read from that key in the incoming data.  If not, it will behave the same as if the value was simply not found in the first place.
 
