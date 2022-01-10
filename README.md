@@ -23,6 +23,8 @@ $ composer require crell/serde
 Serde is designed to be both quick to start using and robust in more advanced cases.  In its most basic form, you can do the following:
 
 ```php
+use Crell\Serde\SerdeCommon;
+
 $serde = new SerdeCommon();
 
 $object = new SomeClass();
@@ -144,6 +146,8 @@ If both `serializedName` and `renameWith` are specified, `serializedName` will b
 When deserializing (only), if the expected serialized name is not found in the incoming data, these additional property names will be examined to see if the value can be found.  If so, the value will be read from that key in the incoming data.  If not, it will behave the same as if the value was simply not found in the first place.
 
 ```php
+use Crell\Serde\Field;
+
 class Person
 {
     #[Field(alias: ['layout', 'design']
@@ -186,6 +190,8 @@ The default value to use is derived from a number of different locations.  The p
 So for example, the following class:
 
 ```php
+use Crell\Serde\Field;
+
 class Person
 {
     #[Field(default: 'Hidden')]
@@ -217,6 +223,9 @@ As an example, consider pagination.  It may be very helpful to represent paginat
 Given this set of classes:
 
 ```php
+use Crell\Serde\Field;
+use Crell\Serde\SequenceField;
+
 class Results
 {
     public function __construct(
@@ -270,6 +279,9 @@ The extra "layer" of the `Pagination` object has been removed.  When deserializi
 Now consider this more complex example:
 
 ```php
+use Crell\Serde\Field;
+use Crell\Serde\SequenceField;
+
 class DetailedResults
 {
     public function __construct(
@@ -354,6 +366,8 @@ If `arrayType` is specified, then all values of that array are assumed to be of 
 For example:
 
 ```php
+use Crell\Serde\SequenceField;
+
 class Order
 {
     public string $orderId;
@@ -376,6 +390,8 @@ When deserializing, the otherwise object-ignorant data will be upcast back to `P
 The `implodeOn` argument to `SequenceField`, if present, indicates that the value should be joined into a string serialization, using the provided value as glue.  For example:
 
 ```php
+use Crell\Serde\SequenceField;
+
 class Order
 {
     #[SequenceField(implodeOn: ',')]
@@ -402,6 +418,8 @@ By default, on deserialization the individual values will be `trim()`ed to remov
 For example:
 
 ```php
+use Crell\Serde\DictionaryField;
+
 class Settings
 {
     #[DictionaryField(implodeOn: ',', joinOn: '=')]
@@ -431,6 +449,8 @@ In the abstract, a Type Map is any object that implements the [`TypeMap`](src/Ty
 Consider the following example, which will be used for the remaining explanations of Type Maps:
 
 ```php
+use Crell\Serde\SequenceField;
+
 interface Product {}
 
 interface Book extends Product {}
@@ -537,6 +557,9 @@ Static maps have the advantage of simplicity and not polluting the output with P
 Type Maps may also be applied to array properties, either sequence or dictionary.  In that case, they will apply to all values in that collection.  For example:
 
 ```php
+use Crell\Serde\SequenceField;
+use Crell\Serde\StaticTypeMap;
+
 class Order
 {
     protected string $orderId;
@@ -577,6 +600,8 @@ On deserialization, the `type` property will again be used to determine the clas
 In addition to putting a type map on a property, you may also place it on the class or interface that the property references.
 
 ```php
+use Crell\Serde\StaticTypeMap;
+
 #[StaticTypeMap(key: 'type', map: [
     'paper' => Book::class,
     'ebook' => DigitalBook::class,
@@ -589,6 +614,8 @@ Now, that Type Map will apply to both `Sale::$book` and to `Order::$books` with 
 Type Maps also inherit.  That means we can put a type map on `Product` instead if we wanted:
 
 ```php
+use Crell\Serde\StaticTypeMap;
+
 #[StaticTypeMap(key: 'type', map: [
     'paper' => Book::class,
     'ebook' => DigitalBook::class,
@@ -604,6 +631,8 @@ And both `Sale` and `Order` will still serialize with the appropriate key.
 Type Maps may also be provided directly to the Serde object when it is created.  Any object that implements `TypeMap` may be used.  This is most useful when the list of possible classes is dynamic based on user configuration, database values, what plugins are installed in your application, etc.
 
 ```php
+use Crell\Serde\TypeMap;
+
 class ProductTypeMap implements TypeMap
 {
     public function __construct(protected readonly Connection $db) {}
