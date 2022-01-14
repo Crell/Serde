@@ -2,20 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Attributes;
 
 use Attribute;
+use Crell\Serde\TypeMap;
 
+/**
+ * A special case of a type map where the class name is its own identifier.
+ */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
-class StaticTypeMap implements TypeMap
+class ClassNameTypeMap implements TypeMap
 {
-    /**
-     * @param string $key
-     * @param array<string, class-string> $map
-     */
     public function __construct(
         public readonly string $key,
-        public readonly array $map,
     ) {}
 
     public function keyField(): string
@@ -25,11 +24,11 @@ class StaticTypeMap implements TypeMap
 
     public function findClass(string $id): ?string
     {
-        return $this->map[$id] ?? null;
+        return $id;
     }
 
     public function findIdentifier(string $class): ?string
     {
-        return array_search($class, $this->map, true) ?: null;
+        return $class;
     }
 }

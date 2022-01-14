@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
+use Crell\Serde\Attributes\DictionaryField;
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
-use Crell\Serde\DictionaryField;
-use Crell\Serde\Field;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 

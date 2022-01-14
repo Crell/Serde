@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\Pagination;
 
-use Crell\Serde\Field;
-use Crell\Serde\SequenceField;
+use Crell\Serde\Attributes\Field;
+use Crell\Serde\Attributes\SequenceField;
 
 class Results
 {

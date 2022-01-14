@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\Shapes;
 
-use Crell\Serde\ClassDef;
-use Crell\Serde\StaticTypeMap;
+use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\StaticTypeMap;
 
 #[ClassDef]
 #[StaticTypeMap(key: 'shape', map: [

@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
-use Crell\Serde\ClassDef;
+use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
-use Crell\Serde\Field;
 use Crell\Serde\Sequence;
 use Crell\Serde\Serializer;
 use function Crell\fp\headtail;
-use function Crell\fp\reduce;
 use function Crell\fp\reduceWithKeys;
 
 class JsonStreamFormatter implements Formatter

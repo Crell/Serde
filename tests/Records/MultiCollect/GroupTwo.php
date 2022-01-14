@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\MultiCollect;
 
-use Crell\Serde\StaticTypeMap;
+use Crell\Serde\Attributes\StaticTypeMap;
 
 #[StaticTypeMap(key: 'group_two', map: [
     'thing_c' => ThingTwoC::class,

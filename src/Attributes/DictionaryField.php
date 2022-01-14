@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Attributes;
 
 use Attribute;
+use Crell\Serde\TypeField;
 use function Crell\fp\amapWithKeys;
 use function Crell\fp\explode;
 use function Crell\fp\implode;
@@ -64,7 +65,7 @@ class DictionaryField implements TypeField
         if (!$item) {
             return $array;
         }
-        if (!str_contains($item, $this->joinOn)) {
+        if (!\str_contains($item, $this->joinOn)) {
             $k = $this->trim ? trim($item) : $item;
             $array[$k] = '';
             return $array;

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\Pagination;
 
-use Crell\Serde\Field;
-
 class Pagination
 {
     public function __construct(

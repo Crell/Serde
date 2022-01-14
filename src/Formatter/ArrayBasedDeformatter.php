@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
-use Crell\Serde\Field;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use function Crell\fp\first;

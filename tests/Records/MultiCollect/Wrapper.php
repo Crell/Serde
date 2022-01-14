@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\MultiCollect;
 
-use Crell\Serde\Field;
+use Crell\Serde\Attributes\Field;
 
 class Wrapper
 {

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
-use Crell\Serde\ClassDef;
-use Crell\Serde\Field;
+use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\Field;
 use Symfony\Component\Yaml\Yaml;
 
 class YamlFormatter implements Formatter, Deformatter, SupportsCollecting

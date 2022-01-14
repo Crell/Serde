@@ -6,7 +6,7 @@ namespace Crell\Serde\Records\Drupal;
 
 use Crell\Serde;
 
-#[Serde\ClassDef]
+#[Serde\Attributes\ClassDef]
 class Field
 {
     public int $nid;

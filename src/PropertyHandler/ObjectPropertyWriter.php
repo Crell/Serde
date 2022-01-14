@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
-use Crell\Serde\ClassDef;
+use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
-use Crell\Serde\Field;
 use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;

@@ -2,15 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Attributes;
 
 use Attribute;
 use Crell\AttributeUtils\Excludable;
 use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
 use Crell\fp\Evolvable;
+use Crell\Serde\FieldTypeIncompatible;
+use Crell\Serde\IntersectionTypesNotSupported;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
+use Crell\Serde\SerdeError;
+use Crell\Serde\TypeCategory;
+use Crell\Serde\TypeField;
+use Crell\Serde\TypeMap;
+use Crell\Serde\UnionTypesNotSupported;
+use Crell\Serde\UnsupportedType;
 use function Crell\fp\indexBy;
 use function Crell\fp\method;
 use function Crell\fp\pipe;

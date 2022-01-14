@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Attributes;
 
 use Attribute;
 use Crell\AttributeUtils\FromReflectionClass;
 use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\ParseMethods;
 use Crell\AttributeUtils\ParseProperties;
+use Crell\Serde\TypeMap;
 use function Crell\fp\prop;
 
 #[Attribute(Attribute::TARGET_CLASS)]

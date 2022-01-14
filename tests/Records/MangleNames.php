@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records;
 
-use Crell\Serde\ClassDef;
-use Crell\Serde\Field;
+use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\Renaming\Cases;
 use Crell\Serde\Renaming\Prefix;
 

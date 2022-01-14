@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\Field;
 use function Crell\fp\first;
 use function Crell\fp\pipe;
 

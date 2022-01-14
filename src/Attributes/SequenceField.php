@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Attributes;
 
 use Attribute;
+use Crell\Serde\TypeField;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class SequenceField implements TypeField

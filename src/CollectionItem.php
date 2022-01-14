@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Attributes\Field;
+
 /**
  * Entry in a sequence or dictionary.
  *

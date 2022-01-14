@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\MappedCollected;
 
-use Crell\Serde\ClassNameTypeMap;
-use Crell\Serde\Field;
+use Crell\Serde\Attributes\ClassNameTypeMap;
+use Crell\Serde\Attributes\Field;
 
 class ThingList
 {

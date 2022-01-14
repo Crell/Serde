@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Attributes\DictionaryField;
 use PHPUnit\Framework\TestCase;
 
 class DictionaryFieldTest extends TestCase

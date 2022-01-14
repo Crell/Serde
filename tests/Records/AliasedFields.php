@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records;
 
-use Crell\Serde\Field;
+use Crell\Serde\Attributes\Field;
 
 class AliasedFields
 {

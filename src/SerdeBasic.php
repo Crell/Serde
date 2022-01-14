@@ -11,7 +11,6 @@ use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\PropertyHandler\PropertyReader;
 use Crell\Serde\PropertyHandler\PropertyWriter;
-use phpDocumentor\Reflection\DocBlock\Tags\PropertyRead;
 use function Crell\fp\afilter;
 use function Crell\fp\indexBy;
 use function Crell\fp\method;

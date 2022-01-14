@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\Callbacks;
 
-use Crell\Serde\Field;
-use Crell\Serde\PostLoad;
+use Crell\Serde\Attributes\Field;
+use Crell\Serde\Attributes\PostLoad;
 
 class CallbackHost
 {

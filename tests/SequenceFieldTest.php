@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Attributes\SequenceField;
 use PHPUnit\Framework\TestCase;
 
 class SequenceFieldTest extends TestCase

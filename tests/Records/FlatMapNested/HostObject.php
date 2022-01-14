@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records\FlatMapNested;
 
-use Crell\Serde\ClassNameTypeMap;
-use Crell\Serde\Field;
-use Crell\Serde\SequenceField;
+use Crell\Serde\Attributes\Field;
+use Crell\Serde\Attributes\SequenceField;
 
 class HostObject
 {

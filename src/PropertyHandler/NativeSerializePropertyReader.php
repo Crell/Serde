@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
-use Crell\AttributeUtils\Analyzer;
-use Crell\AttributeUtils\ClassAnalyzer;
-use Crell\AttributeUtils\MemoryCacheAnalyzer;
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
-use Crell\Serde\Field;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
-use Crell\Serde\TypeMap;
 
 class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
 {
