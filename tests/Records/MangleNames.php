@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records;
 
-use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Renaming\Cases;
 use Crell\Serde\Renaming\Prefix;
 
-#[ClassDef]
+#[ClassSettings]
 class MangleNames
 {
     public function __construct(

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
-use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
@@ -31,7 +31,7 @@ class ObjectPropertyReader implements PropertyReader
 
         /** @var \Crell\Serde\Dict $dict */
         $dict = pipe(
-            $serializer->analyzer->analyze($value, ClassDef::class)->properties,
+            $serializer->analyzer->analyze($value, ClassSettings::class)->properties,
             reduce(new Dict(), fn(Dict $dict, Field $f) => $this->flattenValue($dict, $f, $propReader, $serializer)),
         );
 
@@ -67,7 +67,7 @@ class ObjectPropertyReader implements PropertyReader
             $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
             // This really wants to be explicit partial application. :-(
             $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader, $serializer);
-            $properties = $serializer->analyzer->analyze($value::class, ClassDef::class)->properties;
+            $properties = $serializer->analyzer->analyze($value::class, ClassSettings::class)->properties;
             $dict = reduce($dict, $c)($properties);
             if ($map = $serializer->typeMapper->typeMapForField($field)) {
                 $f = Field::create(serializedName: $map->keyField(), phpType: 'string');

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
-use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Formatter\SupportsCollecting;
@@ -39,7 +39,7 @@ class ObjectPropertyWriter implements PropertyWriter
      */
     protected function populateObject(array $dict, string $class, Deserializer $deserializer): array
     {
-        $classDef = $deserializer->analyzer->analyze($class, ClassDef::class);
+        $classDef = $deserializer->analyzer->analyze($class, ClassSettings::class);
 
         $props = [];
         $usedNames = [];

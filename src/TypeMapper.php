@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\AttributeUtils\ClassAnalyzer;
-use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use function Crell\fp\first;
 use function Crell\fp\pipe;
@@ -37,7 +37,7 @@ class TypeMapper
         }
 
         return $this->getOverrideMapFor($class)
-            ?? $this->analyzer->analyze($class, ClassDef::class)->typeMap;
+            ?? $this->analyzer->analyze($class, ClassSettings::class)->typeMap;
     }
 
     /**
@@ -83,7 +83,7 @@ class TypeMapper
         $class = $this->getTargetClass($field, $data);
 
         return $class ?
-            $this->analyzer->analyze($class, ClassDef::class)->properties
+            $this->analyzer->analyze($class, ClassSettings::class)->properties
             : [];
     }
 

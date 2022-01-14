@@ -13,7 +13,7 @@ use Crell\Serde\TypeMap;
 use function Crell\fp\prop;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes, ParseMethods
+class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttributes, ParseMethods
 {
     /**
      * The type map, if any, that applies to this class.
@@ -68,7 +68,7 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
     }
 
     /**
-     * @param MethodDef[] $methods
+     * @param MethodSettings[] $methods
      */
     public function setMethods(array $methods): void
     {
@@ -84,6 +84,6 @@ class ClassDef implements FromReflectionClass, ParseProperties, HasSubAttributes
 
     public function methodAttribute(): string
     {
-        return MethodDef::class;
+        return MethodSettings::class;
     }
 }

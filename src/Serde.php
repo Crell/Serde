@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\AttributeUtils\ClassAnalyzer;
-use Crell\Serde\Attributes\ClassDef;
+use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\PropertyHandler\PropertyReader;
@@ -47,7 +47,7 @@ abstract class Serde
     {
         $formatter = $this->formatters[$format] ?? throw UnsupportedFormat::create($format, Direction::Serialize);
 
-        $classDef = $this->analyzer->analyze($object, ClassDef::class);
+        $classDef = $this->analyzer->analyze($object, ClassSettings::class);
 
         $inner = new Serializer(
             analyzer: $this->analyzer,

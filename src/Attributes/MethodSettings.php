@@ -9,7 +9,7 @@ use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\Inheritable;
 
 #[Attribute(Attribute::TARGET_METHOD)]
-class MethodDef implements Inheritable, HasSubAttributes
+class MethodSettings implements Inheritable, HasSubAttributes
 {
     public readonly bool $postLoadCallback;
 
