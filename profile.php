@@ -4,17 +4,23 @@ declare(strict_types=1);
 
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
+use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Formatter\JsonFormatter;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\Pagination\DetailedResults;
+use Crell\Serde\Records\Pagination\NestedPagination;
+use Crell\Serde\Records\Pagination\PaginationState;
+use Crell\Serde\Records\Pagination\Product;
+use Crell\Serde\Records\Pagination\ProductType;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Size;
 use Crell\Serde\SerdeCommon;
 
 require 'vendor/autoload.php';
 
-function run(): void
+function setupAnalyzer(): ClassAnalyzer
 {
     $analyzer = new MemoryCacheAnalyzer(new Analyzer());
 
@@ -23,9 +29,14 @@ function run(): void
     $analyzer->analyze(Size::class, ClassSettings::class);
     $analyzer->analyze(BackedSize::class, ClassSettings::class);
 
+    return $analyzer;
+}
+
+function run(ClassAnalyzer $analyzer): void
+{
+
     $serde = new SerdeCommon(
         analyzer: $analyzer,
-        formatters: [new JsonFormatter($analyzer)]
     );
 
     $data = new AllFieldTypes(
@@ -49,11 +60,33 @@ function run(): void
         backedSize: BackedSize::Large,
     );
 
-    $serialized = $serde->serialize($data, 'json');
+    $serialized = $serde->serialize($data, 'array');
+    $result = $serde->deserialize($serialized, from: 'array', to: AllFieldTypes::class);
 
-    $result = $serde->deserialize($serialized, from: 'json', to: AllFieldTypes::class);
+    $data = new DetailedResults(
+        pagination: new NestedPagination(
+            total: 500,
+            limit: 10,
+            state: new PaginationState(40),
+        ),
+        type: new ProductType(
+            name: 'Beep',
+            category: 'Boop'
+        ),
+        products: [
+            new Product('Widget', 4.95),
+            new Product('Gadget', 99.99),
+            new Product('Dohickey', 11.50),
+        ],
+        other: ['narf' => 'poink', 'bleep' => 'bloop']
+    );
+
+    $serialized = $serde->serialize($data, 'array');
+    $result = $serde->deserialize($serialized, from: 'array', to: DetailedResults::class);
 }
 
+$analyzer = setupAnalyzer();
+
 for ($i=0; $i < 100; ++$i) {
-    run();
+    run($analyzer);
 }

@@ -17,3 +17,9 @@ test: build
 
 phpstan: build
 	$(compose_command) vendor/bin/phpstan
+
+profile: build
+	$(compose_command) php profile.php
+
+blackfire:
+	$(compose_command) blackfire run php profile.php
