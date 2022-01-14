@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Attributes;
 
 use Attribute;
 use Crell\AttributeUtils\Inheritable;

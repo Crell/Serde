@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde;
+namespace Crell\Serde\Attributes;
 
 #[\Attribute]
 class XmlFormat implements FormatField

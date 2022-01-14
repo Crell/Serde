@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
-use Crell\Serde\ClassDef;
+use Crell\Serde\Attributes\ClassSettings;
+use Crell\Serde\Attributes\DictionaryField;
+use Crell\Serde\Attributes\Field;
+use Crell\Serde\Attributes\SequenceField;
+use Crell\Serde\Attributes\XmlFormat;
 use Crell\Serde\Deserializer;
-use Crell\Serde\DictionaryField;
-use Crell\Serde\Field;
 use Crell\Serde\GenericXmlParser;
-use Crell\Serde\SequenceField;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\XmlElement;
-use Crell\Serde\XmlFormat;
 use function Crell\fp\firstValue;
 use function Crell\fp\reduceWithKeys;
 
@@ -318,7 +318,7 @@ class XmlParserDeformatter implements Deformatter, SupportsCollecting
             $class = $map->findClass($data[$key][0]->content);
         }
 
-        return $deserializer->analyzer->analyze($class, ClassDef::class)->properties;
+        return $deserializer->analyzer->analyze($class, ClassSettings::class)->properties;
     }
 
     /**

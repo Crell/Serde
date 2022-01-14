@@ -7,10 +7,10 @@ namespace Crell\Serde\Formatter;
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
-use Crell\Serde\ClassDef;
+use Crell\Serde\Attributes\ClassSettings;
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
-use Crell\Serde\Field;
 use Crell\Serde\Sequence;
 use Crell\Serde\Serializer;
 
@@ -39,7 +39,7 @@ class XmlFormatter implements Formatter /*, Deformatter */
         return $field;
     }
 
-    public function serializeInitialize(ClassDef $classDef, Field $rootField): \DOMDocument
+    public function serializeInitialize(ClassSettings $classDef, Field $rootField): \DOMDocument
     {
         return new \DOMDocument();
     }
@@ -48,7 +48,7 @@ class XmlFormatter implements Formatter /*, Deformatter */
      * @param \DOMDocument $runningValue
      * @return mixed
      */
-    public function serializeFinalize(mixed $runningValue, ClassDef $classDef): string
+    public function serializeFinalize(mixed $runningValue, ClassSettings $classDef): string
     {
         return $runningValue->saveXML();
     }
