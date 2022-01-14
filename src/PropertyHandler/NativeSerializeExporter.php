@@ -12,9 +12,9 @@ use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
-class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
+class NativeSerializeExporter implements Exporter, Importer
 {
-    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+    public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $propValues = $value->__serialize();
 
@@ -37,12 +37,12 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
         return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
     }
 
-    public function canRead(Field $field, mixed $value, string $format): bool
+    public function canExport(Field $field, mixed $value, string $format): bool
     {
         return $field->typeCategory === TypeCategory::Object && method_exists($value, '__serialize');
     }
 
-    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         // The data may not have any relation at all to the original object's
         // properties.  So deserialize as a basic dictionary instead.
@@ -63,7 +63,7 @@ class NativeSerializePropertyReader implements PropertyReader, PropertyWriter
         return $new;
     }
 
-    public function canWrite(Field $field, string $format): bool
+    public function canImport(Field $field, string $format): bool
     {
         return $field->typeCategory === TypeCategory::Object && method_exists($field->phpType, '__unserialize');
     }

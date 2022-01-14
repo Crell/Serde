@@ -9,9 +9,9 @@ use Crell\Serde\Deserializer;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
-class ScalarPropertyReader implements PropertyReader, PropertyWriter
+class ScalarExporter implements Exporter, Importer
 {
-    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+    public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         return match ($field->phpType) {
             'int' => $serializer->formatter->serializeInt($runningValue, $field, $value),
@@ -21,7 +21,7 @@ class ScalarPropertyReader implements PropertyReader, PropertyWriter
         };
     }
 
-    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         return match ($field->phpType) {
             'int' => $deserializer->deformatter->deserializeInt($source, $field),
@@ -31,12 +31,12 @@ class ScalarPropertyReader implements PropertyReader, PropertyWriter
         };
     }
 
-    public function canRead(Field $field, mixed $value, string $format): bool
+    public function canExport(Field $field, mixed $value, string $format): bool
     {
         return $field->typeCategory === TypeCategory::Scalar;
     }
 
-    public function canWrite(Field $field, string $format): bool
+    public function canImport(Field $field, string $format): bool
     {
         return $field->typeCategory === TypeCategory::Scalar;
     }

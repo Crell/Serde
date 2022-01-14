@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Formatter\ArrayFormatter;
-use Crell\Serde\PropertyHandler\EnumOnArrayPropertyReader;
+use Crell\Serde\PropertyHandler\EnumOnArrayExporter;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\LiteralEnums;
 use Crell\Serde\Records\Size;
@@ -40,7 +40,7 @@ class ArrayFormatterTest extends ArrayBasedFormatterTest
      */
     public function literal_enums(): void
     {
-        $s = new SerdeCommon(handlers: [new EnumOnArrayPropertyReader()], formatters: $this->formatters);
+        $s = new SerdeCommon(handlers: [new EnumOnArrayExporter()], formatters: $this->formatters);
 
         $serialized = [
             'size' => Size::Medium,

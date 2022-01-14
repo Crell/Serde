@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class NoReaderFound extends \RuntimeException
+class NoExporterFound extends \RuntimeException
 {
     public readonly string $type;
 
@@ -16,7 +16,7 @@ class NoReaderFound extends \RuntimeException
         $new->type = $type;
         $new->format = $format;
 
-        $new->message = sprintf('No Property Reader is available that can process %s types for format %s.', $type, $format);
+        $new->message = sprintf('No Exporter is available that can process %s types for format %s.', $type, $format);
         return $new;
     }
 }

@@ -9,8 +9,8 @@ use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
-use Crell\Serde\PropertyHandler\PropertyReader;
-use Crell\Serde\PropertyHandler\PropertyWriter;
+use Crell\Serde\PropertyHandler\Exporter;
+use Crell\Serde\PropertyHandler\Importer;
 use function Crell\fp\afilter;
 use function Crell\fp\indexBy;
 use function Crell\fp\method;
@@ -28,11 +28,11 @@ use function Crell\fp\typeIs;
  */
 class SerdeBasic extends Serde
 {
-    /** @var PropertyReader[]  */
-    protected readonly array $readers;
+    /** @var Exporter[]  */
+    protected readonly array $exporters;
 
-    /** @var PropertyWriter[] */
-    protected readonly array $writers;
+    /** @var Importer[] */
+    protected readonly array $importers;
 
     /** @var Formatter[] */
     protected readonly array $formatters;
@@ -44,7 +44,7 @@ class SerdeBasic extends Serde
 
     /**
      * @param ClassAnalyzer $analyzer
-     * @param array<int, PropertyReader|PropertyWriter> $handlers
+     * @param array<int, Exporter|Importer> $handlers
      * @param array<int, Formatter|Deformatter> $formatters
      * @param array<class-string, TypeMap> $typeMaps
      */
@@ -56,8 +56,8 @@ class SerdeBasic extends Serde
     ) {
         $this->typeMapper = new TypeMapper($typeMaps, $this->analyzer);
 
-        $this->readers = array_filter($handlers, typeIs(PropertyReader::class));
-        $this->writers = array_filter($handlers, typeIs(PropertyWriter::class));
+        $this->exporters = array_filter($handlers, typeIs(Exporter::class));
+        $this->importers = array_filter($handlers, typeIs(Importer::class));
 
         $this->formatters = pipe(
             $formatters,

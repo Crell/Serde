@@ -12,9 +12,9 @@ use Crell\Serde\Dict;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 
-class DictionaryPropertyReader implements PropertyReader, PropertyWriter
+class DictionaryExporter implements Exporter, Importer
 {
-    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+    public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         /** @var DictionaryField $typeField */
         $typeField = $field->typeField;
@@ -34,12 +34,12 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
         return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
     }
 
-    public function canRead(Field $field, mixed $value, string $format): bool
+    public function canExport(Field $field, mixed $value, string $format): bool
     {
         return $field->phpType === 'array' && !\array_is_list($value);
     }
 
-    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         /** @var DictionaryField $typeField */
         $typeField = $field->typeField;
@@ -55,7 +55,7 @@ class DictionaryPropertyReader implements PropertyReader, PropertyWriter
         return $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer);
     }
 
-    public function canWrite(Field $field, string $format): bool
+    public function canImport(Field $field, string $format): bool
     {
         $typeField = $field->typeField;
 

@@ -15,7 +15,7 @@ use function Crell\fp\pipe;
 use function Crell\fp\reduce;
 use function Crell\fp\reduceWithKeys;
 
-class ObjectPropertyReader implements PropertyReader
+class ObjectExporter implements Exporter
 {
     /**
      * @param Serializer $serializer
@@ -24,7 +24,7 @@ class ObjectPropertyReader implements PropertyReader
      * @param mixed $runningValue
      * @return mixed
      */
-    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+    public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         // This lets us read private values without messing with the Reflection API.
         $propReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
@@ -103,7 +103,7 @@ class ObjectPropertyReader implements PropertyReader
         return $dict;
     }
 
-    public function canRead(Field $field, mixed $value, string $format): bool
+    public function canExport(Field $field, mixed $value, string $format): bool
     {
         return $field->typeCategory === TypeCategory::Object;
     }

@@ -10,9 +10,9 @@ use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
-class EnumPropertyReader implements PropertyReader, PropertyWriter
+class EnumExporter implements Exporter, Importer
 {
-    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+    public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $scalar = $value->value ?? $value->name;
 
@@ -24,12 +24,12 @@ class EnumPropertyReader implements PropertyReader, PropertyWriter
         };
     }
 
-    public function canRead(Field $field, mixed $value, string $format): bool
+    public function canExport(Field $field, mixed $value, string $format): bool
     {
         return $field->typeCategory->isEnum();
     }
 
-    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         // It's kind of amusing that both of these work, but they work.
         $val = match ($field->typeCategory) {
@@ -49,7 +49,7 @@ class EnumPropertyReader implements PropertyReader, PropertyWriter
         };
     }
 
-    public function canWrite(Field $field, string $format): bool
+    public function canImport(Field $field, string $format): bool
     {
         return $field->typeCategory->isEnum();
     }

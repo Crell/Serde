@@ -8,8 +8,8 @@ use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
-use Crell\Serde\PropertyHandler\PropertyReader;
-use Crell\Serde\PropertyHandler\PropertyWriter;
+use Crell\Serde\PropertyHandler\Exporter;
+use Crell\Serde\PropertyHandler\Importer;
 
 /**
  * Common base class for Serde executors.
@@ -27,11 +27,11 @@ use Crell\Serde\PropertyHandler\PropertyWriter;
  */
 abstract class Serde
 {
-    /** @var PropertyReader[]  */
-    protected readonly array $readers;
+    /** @var Exporter[]  */
+    protected readonly array $exporters;
 
-    /** @var PropertyWriter[] */
-    protected readonly array $writers;
+    /** @var Importer[] */
+    protected readonly array $importers;
 
     /** @var Formatter[] */
     protected readonly array $formatters;
@@ -51,7 +51,7 @@ abstract class Serde
 
         $inner = new Serializer(
             analyzer: $this->analyzer,
-            readers: $this->readers,
+            exporters: $this->exporters,
             formatter: $formatter,
             typeMapper: $this->typeMapper,
         );
@@ -70,7 +70,7 @@ abstract class Serde
 
         $inner = new Deserializer(
             analyzer: $this->analyzer,
-            writers: $this->writers,
+            importers: $this->importers,
             deformatter: $formatter,
             typeMapper: $this->typeMapper,
         );

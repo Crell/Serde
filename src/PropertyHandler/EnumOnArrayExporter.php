@@ -7,17 +7,17 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 
-class EnumOnArrayPropertyReader extends EnumPropertyReader
+class EnumOnArrayExporter extends EnumExporter
 {
-    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         if (($source[$field->serializedName] ?? null) instanceof \UnitEnum) {
             return $source[$field->serializedName];
         }
-        return parent::writeValue($deserializer, $field, $source);
+        return parent::importValue($deserializer, $field, $source);
     }
 
-    public function canWrite(Field $field, string $format): bool
+    public function canImport(Field $field, string $format): bool
     {
         return $field->typeCategory->isEnum() && $format === 'array';
     }

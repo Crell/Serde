@@ -7,37 +7,39 @@ namespace Crell\Serde;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Formatter\Deformatter;
-use Crell\Serde\PropertyHandler\PropertyWriter;
+use Crell\Serde\PropertyHandler\Importer;
 
 // This exists mainly just to create a closure over the format and formatter.
 // But that does simplify a number of functions.
 class Deserializer
 {
+    /**
+     * @param Importer[] $importers
+     */
     public function __construct(
         public readonly ClassAnalyzer $analyzer,
-        /** @var PropertyWriter[] */
-        protected readonly array $writers,
+        protected readonly array $importers,
         public readonly Deformatter $deformatter,
         public readonly TypeMapper $typeMapper,
     ) {}
 
     public function deserialize(mixed $decoded, Field $field): mixed
     {
-        $writer = $this->findWriter($field);
-        $result = $writer->writeValue($this, $field, $decoded);
+        $writer = $this->findImporter($field);
+        $result = $writer->importValue($this, $field, $decoded);
 
         return $result;
     }
 
-    protected function findWriter(Field $field): PropertyWriter
+    protected function findImporter(Field $field): Importer
     {
         $format = $this->deformatter->format();
-        foreach ($this->writers as $w) {
-            if ($w->canWrite($field, $format)) {
+        foreach ($this->importers as $w) {
+            if ($w->canImport($field, $format)) {
                 return $w;
             }
         }
 
-        throw NoWriterFound::create($field->phpType, $format);
+        throw NoImporterFound::create($field->phpType, $format);
     }
 }

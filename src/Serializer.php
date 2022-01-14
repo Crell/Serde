@@ -7,7 +7,7 @@ namespace Crell\Serde;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Formatter\Formatter;
-use Crell\Serde\PropertyHandler\PropertyReader;
+use Crell\Serde\PropertyHandler\Exporter;
 
 // This exists mainly just to create a closure over the formatter.
 // But that does simplify a number of functions.
@@ -20,10 +20,12 @@ class Serializer
      */
     protected array $seenObjects = [];
 
+    /**
+     * @param Exporter[] $exporters
+     */
     public function __construct(
         public readonly ClassAnalyzer $analyzer,
-        /** @var PropertyReader[]  */
-        protected readonly array $readers,
+        protected readonly array $exporters,
         public readonly Formatter $formatter,
         public readonly TypeMapper $typeMapper,
     ) {}
@@ -39,8 +41,8 @@ class Serializer
             $this->seenObjects[] = $value;
         }
 
-        $reader = $this->findReader($field, $value);
-        $result = $reader->readValue($this, $field, $value, $runningValue);
+        $reader = $this->findExporter($field, $value);
+        $result = $reader->exportValue($this, $field, $value, $runningValue);
 
         if (is_object($value)) {
             array_pop($this->seenObjects);
@@ -49,15 +51,15 @@ class Serializer
         return $result;
     }
 
-    protected function findReader(Field $field, mixed $value): PropertyReader
+    protected function findExporter(Field $field, mixed $value): Exporter
     {
         $format = $this->formatter->format();
-        foreach ($this->readers as $r) {
-            if ($r->canRead($field, $value, $format)) {
+        foreach ($this->exporters as $r) {
+            if ($r->canExport($field, $value, $format)) {
                 return $r;
             }
         }
 
-        throw NoReaderFound::create($field->phpType, $format);
+        throw NoExporterFound::create($field->phpType, $format);
     }
 }

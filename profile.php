@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Crell\AttributeUtils\Analyzer;
 use Crell\AttributeUtils\MemoryCacheAnalyzer;
-use Crell\Serde\ClassDef;
+use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Formatter\JsonFormatter;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
@@ -18,10 +18,10 @@ function run(): void
 {
     $analyzer = new MemoryCacheAnalyzer(new Analyzer());
 
-    $analyzer->analyze(AllFieldTypes::class, ClassDef::class);
-    $analyzer->analyze(Point::class, ClassDef::class);
-    $analyzer->analyze(Size::class, ClassDef::class);
-    $analyzer->analyze(BackedSize::class, ClassDef::class);
+    $analyzer->analyze(AllFieldTypes::class, ClassSettings::class);
+    $analyzer->analyze(Point::class, ClassSettings::class);
+    $analyzer->analyze(Size::class, ClassSettings::class);
+    $analyzer->analyze(BackedSize::class, ClassSettings::class);
 
     $serde = new SerdeCommon(
         analyzer: $analyzer,

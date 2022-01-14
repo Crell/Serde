@@ -9,7 +9,7 @@ use Crell\Serde\Deserializer;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 
-class DateTimeZonePropertyReader implements PropertyReader, PropertyWriter
+class DateTimeZoneExporter implements Exporter, Importer
 {
     /**
      * @param Serializer $serializer
@@ -18,18 +18,18 @@ class DateTimeZonePropertyReader implements PropertyReader, PropertyWriter
      * @param mixed $runningValue
      * @return mixed
      */
-    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+    public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $string = $value->getName();
         return $serializer->formatter->serializeString($runningValue, $field, $string);
     }
 
-    public function canRead(Field $field, mixed $value, string $format): bool
+    public function canExport(Field $field, mixed $value, string $format): bool
     {
         return $field->phpType === \DateTimeZone::class;
     }
 
-    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         $string = $deserializer->deformatter->deserializeString($source, $field);
 
@@ -40,7 +40,7 @@ class DateTimeZonePropertyReader implements PropertyReader, PropertyWriter
         return new \DateTimeZone($string);
     }
 
-    public function canWrite(Field $field, string $format): bool
+    public function canImport(Field $field, string $format): bool
     {
         return $field->phpType === \DateTimeZone::class;
     }

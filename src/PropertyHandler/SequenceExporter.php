@@ -12,9 +12,9 @@ use Crell\Serde\Sequence;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 
-class SequencePropertyReader implements PropertyReader, PropertyWriter
+class SequenceExporter implements Exporter, Importer
 {
-    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+    public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         /** @var ?SequenceField $typeField */
         $typeField = $field->typeField;
@@ -31,12 +31,12 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
         return $serializer->formatter->serializeSequence($runningValue, $field, $seq, $serializer);
     }
 
-    public function canRead(Field $field, mixed $value, string $format): bool
+    public function canExport(Field $field, mixed $value, string $format): bool
     {
         return $field->phpType === 'array' && \array_is_list($value);
     }
 
-    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         /** @var ?SequenceField $typeField */
         $typeField = $field->typeField;
@@ -52,7 +52,7 @@ class SequencePropertyReader implements PropertyReader, PropertyWriter
         return $deserializer->deformatter->deserializeSequence($source, $field, $deserializer);
     }
 
-    public function canWrite(Field $field, string $format): bool
+    public function canImport(Field $field, string $format): bool
     {
         $typeField = $field->typeField;
         // This may still catch a dictionary that is unmarked. That is unavoidable.

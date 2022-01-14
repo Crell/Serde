@@ -11,12 +11,12 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 
-class ObjectPropertyWriter implements PropertyWriter
+class ObjectImporter implements Importer
 {
     protected readonly \Closure $populator;
     protected readonly \Closure $methodCaller;
 
-    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         // Get the raw data as an array from the source.
         $dict = $deserializer->deformatter->deserializeObject($source, $field, $deserializer);
@@ -143,7 +143,7 @@ class ObjectPropertyWriter implements PropertyWriter
         return $new;
     }
 
-    public function canWrite(Field $field, string $format): bool
+    public function canImport(Field $field, string $format): bool
     {
         return $field->typeCategory === TypeCategory::Object;
     }

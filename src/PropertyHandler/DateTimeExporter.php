@@ -9,7 +9,7 @@ use Crell\Serde\Deserializer;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 
-class DateTimePropertyReader implements PropertyReader, PropertyWriter
+class DateTimeExporter implements Exporter, Importer
 {
     /**
      * @param Serializer $serializer
@@ -18,18 +18,18 @@ class DateTimePropertyReader implements PropertyReader, PropertyWriter
      * @param mixed $runningValue
      * @return mixed
      */
-    public function readValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+    public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         $string = $value->format(\DateTimeInterface::RFC3339_EXTENDED);
         return $serializer->formatter->serializeString($runningValue, $field, $string);
     }
 
-    public function canRead(Field $field, mixed $value, string $format): bool
+    public function canExport(Field $field, mixed $value, string $format): bool
     {
         return $value instanceof \DateTimeInterface;
     }
 
-    public function writeValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
         $string = $deserializer->deformatter->deserializeString($source, $field);
 
@@ -40,7 +40,7 @@ class DateTimePropertyReader implements PropertyReader, PropertyWriter
         return new ($field->phpType)($string);
     }
 
-    public function canWrite(Field $field, string $format): bool
+    public function canImport(Field $field, string $format): bool
     {
         return in_array($field->phpType, [\DateTimeInterface::class, \DateTime::class, \DateTimeImmutable::class]);
     }
