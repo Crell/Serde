@@ -76,9 +76,24 @@ Serde's behavior is driven almost entirely through attributes.  Any class may be
 
 Attribute handling is provided by [`Crell/AttributeUtils`](https://github.com/Crell/AttributeUtils).  It is worth looking into as well.
 
-The main attribute is the `Crell\Serde\Field` attribute, which may be placed on any object property.  (Static properties are ignored.)  All of its arguments are optional, as is the `Field` itself.  (That is, adding `#[Field]` with no arguments is the same as not specifying it at all.)  The meaning of the available arguments is listed below.
+The main attribute is the `Crell\Serde\Attributes\Field` attribute, which may be placed on any object property.  (Static properties are ignored.)  All of its arguments are optional, as is the `Field` itself.  (That is, adding `#[Field]` with no arguments is the same as not specifying it at all.)  The meaning of the available arguments is listed below.
 
 Although not required, it is strongly recommended that you always use named arguments with attributes.  The precise order of arguments is *not guaranteed*.
+
+In the examples below, the `Field` is generally referenced directly.  However, you may also import the namespace and then use namespaced versions of the attributes, like so:
+
+```php
+use Crell\Serde\Attributes as Serde;
+
+#[Serde\ClassSettings(includeFieldsByDefault: false)]
+class Person
+{
+    #[Serde\Field(serializedName: 'callme')]
+    protected string $name = 'Larry';
+}
+```
+
+Which you do is mostly a matter of preference, although if you are mixing Serde attributes with attributes from other libraries then the namespaced approach is advisable.
 
 ### `exclude` (bool, default false)
 
@@ -89,6 +104,8 @@ If set to `true`, Serde will ignore the property entirely on both serializing an
 If provided, this string will be used as the name of a property when serialized out to a format and when reading it back in.  for example:
 
 ```php
+use Crell\Serde\Attributes\Field;
+
 class Person
 {
     #[Field(serializedName: 'callme')]
@@ -113,6 +130,7 @@ The value of `renameWith` can be any object that implements the [`RenamingStrate
 The `Cases` enum implements `RenamingStrategy` and provides a series of instances (cases) for common renaming.  For example:
 
 ```php
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\Renaming\Cases;
 
 class Person
@@ -139,6 +157,7 @@ Available cases are `Cases::UPPERCASE`, `Cases::lowercase`, `Cases::snake_case`,
 The `Prefix` class attaches a prefix to values when serialized, but otherwise leaves the property name intact.
 
 ```php
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\Renaming\Prefix;
 
 class MailConfig
@@ -175,11 +194,11 @@ If both `serializedName` and `renameWith` are specified, `serializedName` will b
 When deserializing (only), if the expected serialized name is not found in the incoming data, these additional property names will be examined to see if the value can be found.  If so, the value will be read from that key in the incoming data.  If not, it will behave the same as if the value was simply not found in the first place.
 
 ```php
-use Crell\Serde\Field;
+use Crell\Serde\Attributes\Field;
 
 class Person
 {
-    #[Field(alias: ['layout', 'design']
+    #[Field(alias: ['layout', 'design'])]
     protected string $format = '';
 }
 ```
@@ -219,7 +238,7 @@ The default value to use is derived from a number of different locations.  The p
 So for example, the following class:
 
 ```php
-use Crell\Serde\Field;
+use Crell\Serde\Attributes\Field;
 
 class Person
 {
@@ -252,15 +271,14 @@ As an example, consider pagination.  It may be very helpful to represent paginat
 Given this set of classes:
 
 ```php
-use Crell\Serde\Field;
-use Crell\Serde\SequenceField;
+use Crell\Serde\Attributes as Serde;
 
 class Results
 {
     public function __construct(
-        #[Field(flatten: true)]
+        #[Serde\Field(flatten: true)]
         public Pagination $pagination,
-        #[SequenceField(arrayType: Product::class)]
+        #[Serde\SequenceField(arrayType: Product::class)]
         public array $products,
     ) {}
 }
@@ -308,19 +326,18 @@ The extra "layer" of the `Pagination` object has been removed.  When deserializi
 Now consider this more complex example:
 
 ```php
-use Crell\Serde\Field;
-use Crell\Serde\SequenceField;
+use Crell\Serde\Attributes as Serde;
 
 class DetailedResults
 {
     public function __construct(
-        #[Field(flatten: true)]
+        #[Serde\Field(flatten: true)]
         public NestedPagination $pagination,
-        #[Field(flatten: true)]
+        #[Serde\Field(flatten: true)]
         public ProductType $type,
-        #[SequenceField(arrayType: Product::class)]
+        #[Serde\SequenceField(arrayType: Product::class)]
         public array $products,
-        #[Field(flatten: true)]
+        #[Serde\Field(flatten: true)]
         public array $other = [],
     ) {}
 }
@@ -330,7 +347,7 @@ class NestedPagination
     public function __construct(
         public int $total,
         public int $limit,
-        #[Field(flatten: true)]
+        #[Serde\Field(flatten: true)]
         public PaginationState $state,
     ) {}
 }
@@ -395,7 +412,7 @@ If `arrayType` is specified, then all values of that array are assumed to be of 
 For example:
 
 ```php
-use Crell\Serde\SequenceField;
+use Crell\Serde\Attributes\SequenceField;
 
 class Order
 {
@@ -419,7 +436,7 @@ When deserializing, the otherwise object-ignorant data will be upcast back to `P
 The `implodeOn` argument to `SequenceField`, if present, indicates that the value should be joined into a string serialization, using the provided value as glue.  For example:
 
 ```php
-use Crell\Serde\SequenceField;
+use Crell\Serde\Attributes\SequenceField;
 
 class Order
 {
@@ -447,7 +464,7 @@ By default, on deserialization the individual values will be `trim()`ed to remov
 For example:
 
 ```php
-use Crell\Serde\DictionaryField;
+use Crell\Serde\Attributes\DictionaryField;
 
 class Settings
 {
@@ -478,7 +495,7 @@ In the abstract, a Type Map is any object that implements the [`TypeMap`](src/Ty
 Consider the following example, which will be used for the remaining explanations of Type Maps:
 
 ```php
-use Crell\Serde\SequenceField;
+use Crell\Serde\Attributes\SequenceField;
 
 interface Product {}
 
@@ -552,7 +569,7 @@ Class name maps have the advantage that they are very simple, and will work with
 Static maps allow you to provide a fixed map from classes to meaningful keys.
 
 ```php
-use Crell\Serde\StaticTypeMap;
+use Crell\Serde\Attributes\StaticTypeMap;
 
 class Sale
 {
@@ -586,15 +603,14 @@ Static maps have the advantage of simplicity and not polluting the output with P
 Type Maps may also be applied to array properties, either sequence or dictionary.  In that case, they will apply to all values in that collection.  For example:
 
 ```php
-use Crell\Serde\SequenceField;
-use Crell\Serde\StaticTypeMap;
+use Crell\Serde\Attributes as Serde;
 
 class Order
 {
     protected string $orderId;
 
-    #[SequenceField(arrayType: Book::class)]
-    #[StaticTypeMap(key: 'type', map: [
+    #[Serde\SequenceField(arrayType: Book::class)]
+    #[Serde\StaticTypeMap(key: 'type', map: [
         'paper' => Book::class,
         'ebook' => DigitalBook::class,
     ])]
@@ -629,7 +645,7 @@ On deserialization, the `type` property will again be used to determine the clas
 In addition to putting a type map on a property, you may also place it on the class or interface that the property references.
 
 ```php
-use Crell\Serde\StaticTypeMap;
+use Crell\Serde\Attributes\StaticTypeMap;
 
 #[StaticTypeMap(key: 'type', map: [
     'paper' => Book::class,
@@ -643,7 +659,7 @@ Now, that Type Map will apply to both `Sale::$book` and to `Order::$books` with 
 Type Maps also inherit.  That means we can put a type map on `Product` instead if we wanted:
 
 ```php
-use Crell\Serde\StaticTypeMap;
+use Crell\Serde\Attributes\StaticTypeMap;
 
 #[StaticTypeMap(key: 'type', map: [
     'paper' => Book::class,
@@ -701,38 +717,38 @@ You may also write your own Type Maps as attributes.  The only requirements are:
 
 1. The class implements the `TypeMap` interface.
 2. The class is marked as an #[\Attribute].
-3. The class is legal on *both* classes and properties. That is, `#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]`
+3. The class is legal on *both* classes and properties. That is, `#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]`
 
 ## Extending Serde
 
 Internally, Serde has five types of extensions that work in concert to produce a serialized or deserialized product.
 
 * Type Maps, as discussed above, are optional and translate a class name to a lookup identifier and back.
-* A [`PropertyReader`](src/PropertyHandler/PropertyReader.php) is responsible for pulling values off of an object, processing them if necessary, and then passing them on to a Formatter.  This is part of the Serialization pipeline.
-* A [`PropertyWriter`](src/PropertyHandler/PropertyWriter.php) is responsible for using a Deformatter to extract data from incoming data and then translate it as necessary to be written to an object.  This is part of the Deserialization pipeline.
+* A [`Exporter`](src/PropertyHandler/Exporter.php) is responsible for pulling values off of an object, processing them if necessary, and then passing them on to a Formatter.  This is part of the Serialization pipeline.
+* A [`Importer`](src/PropertyHandler/Importer.php) is responsible for using a Deformatter to extract data from incoming data and then translate it as necessary to be written to an object.  This is part of the Deserialization pipeline.
 * A [`Formatter`](src/Formatter/Formatter.php) is responsible for writing to a specific output format, like JSON or YAML.  This is part of the Serialization pipeline.
-* A [`Deformatter`](src/Formatter/Deformatter.php) is responsible for reading data off of an incoming format and passing it back to a `PropertyWriter`.  This is part of the Deserialization pipeline.
+* A [`Deformatter`](src/Formatter/Deformatter.php) is responsible for reading data off of an incoming format and passing it back to an `Importer`.  This is part of the Deserialization pipeline.
 
-Collectively, `PropertyReader` and `PropertyWriter` instances are called "handlers."
+Collectively, `Importer` and `Exporter` instances are called "handlers."
 
-In general, `PropertyReader`s and `PropertyWriters` are *PHP-type specific*, while `Formatter`s and `Deformatter`s are *serialized-format specific*.  Custom Readers or Writers can also declare themselves to be format-specific if they contain format-sensitive optimizations.
+In general, `Importer`s and `Exporter`s are *PHP-type specific*, while `Formatter`s and `Deformatter`s are *serialized-format specific*.  Custom Importers and Exporters can also declare themselves to be format-specific if they contain format-sensitive optimizations.
 
-`PropertyReader` and `PropertyWriter` may be implemented on the same object, or not.  Similarly, `Formatter` and `Deformatter` may be implemented together or not.  That is up to whatever seems easiest for the particular implementation, and the provided extensions do a little of each depending on the use case.
+`Importer` and `Exporter` may be implemented on the same object, or not.  Similarly, `Formatter` and `Deformatter` may be implemented together or not.  That is up to whatever seems easiest for the particular implementation, and the provided extensions do a little of each depending on the use case.
 
-The interfaces linked above provide more precise explanations of how to use them.  In most cases, you would only need to implement a Formatter or Deformatter to support a new format.  You would only need to implement a Property Readers or Property Writers when dealing with a specific class that needs extra special handling for whatever reason, such as its serialized representation having little or no relationship with its object representation.
+The interfaces linked above provide more precise explanations of how to use them.  In most cases, you would only need to implement a Formatter or Deformatter to support a new format.  You would only need to implement an Importer or Exporter when dealing with a specific class that needs extra special handling for whatever reason, such as its serialized representation having little or no relationship with its object representation.
 
 As an example, a few custom handlers are included to deal with common cases.
 
-* [`DateTimePropertyReader`](src/PropertyHandler/DateTimePropertyReader.php): This object will translate `DateTime` and `DateTimeImmutable` objects to and from a serialized form as a string.  Specifically, it will use the `\DateTimeInterface::RFC3339_EXTENDED` format for the string when serializing.  The timestamp will then appear in the serialized output as a normal string.  When deserializing, it will accept any datetime format supported by `DateTime`'s constructor.
-* [`DateTimeZonePropertyReader`](src/PropertyHandler/DateTimeZonePropertyReader.php): This object will translate `DateTimeZone` objects to and from a serialized form as a timezone string.  That is, `DateTimeZone('America/Chicago`)` will be represented in the format as the string `America/Chicago`.
-* [`NativeSerializePropertyReader`](src/PropertyHandler/NativeSerializePropertyReader.php): This object will apply to any class that has a `__serialize()` method (when serializing) or `__unserialize()` method (when deserializing).  These PHP magic methods provide alternate representations of an object intended for use with PHP's native `serialize()` and `unserialize()` methods, but can also be used for any other format.  If `__serialize()` is defined, it will be invoked and whatever associative array it returns will be written to the selected format as a dictionary.  If `__unserialize()` is defined, this object will read a dictionary from the incoming data and then pass it to that method on a newly created object, which will then be responsible for populating the object as appropriate.  No further processing will be done in either direction.
-* [`EnumOnArrayPropertyReader`](src/PropertyHandler/EnumOnArrayPropertyReader.php): Serde natively supports PHP Enums and can serialize them as ints or strings as appropriate.  However, in the special case of reading from a PHP array format this object will take over and support reading an Enum literal in the incoming data.  That allows, for example, a configuration array to include hand-inserted Enum values and still be cleanly imported into a typed, defined object.
+* [`DateTimeExporter`](src/PropertyHandler/DateTimeExporter.php): This object will translate `DateTime` and `DateTimeImmutable` objects to and from a serialized form as a string.  Specifically, it will use the `\DateTimeInterface::RFC3339_EXTENDED` format for the string when serializing.  The timestamp will then appear in the serialized output as a normal string.  When deserializing, it will accept any datetime format supported by `DateTime`'s constructor.
+* [`DateTimeZoneExporter`](src/PropertyHandler/DateTimeZoneExporter.php): This object will translate `DateTimeZone` objects to and from a serialized form as a timezone string.  That is, `DateTimeZone('America/Chicago`)` will be represented in the format as the string `America/Chicago`.
+* [`NativeSerializeExporter`](src/PropertyHandler/NativeSerializeExporter.php): This object will apply to any class that has a `__serialize()` method (when serializing) or `__unserialize()` method (when deserializing).  These PHP magic methods provide alternate representations of an object intended for use with PHP's native `serialize()` and `unserialize()` methods, but can also be used for any other format.  If `__serialize()` is defined, it will be invoked and whatever associative array it returns will be written to the selected format as a dictionary.  If `__unserialize()` is defined, this object will read a dictionary from the incoming data and then pass it to that method on a newly created object, which will then be responsible for populating the object as appropriate.  No further processing will be done in either direction.
+* [`EnumOnArrayImporter`](src/PropertyHandler/EnumOnArrayImporter.php): Serde natively supports PHP Enums and can serialize them as ints or strings as appropriate.  However, in the special case of reading from a PHP array format this object will take over and support reading an Enum literal in the incoming data.  That allows, for example, a configuration array to include hand-inserted Enum values and still be cleanly imported into a typed, defined object.
 
 ## Dependency Injection configuration
 
-Serde is designed to be usable "out of the box" without any additional setup.  However, when included in a larger system it is best to configure it propertly via Dependency Injection.
+Serde is designed to be usable "out of the box" without any additional setup.  However, when included in a larger system it is best to configure it properly via Dependency Injection.
 
-There are three ways you can setup Serde.
+There are three ways you can set up Serde.
 
 1. The `SerdeCommon` class includes most available handlers and formatters out of the box, ready to go, although you can add additional ones via the constructor.
 2. The `SerdeBasic` class has pre-built configuration whatsoever; you will need to provide all of the Handlers, Formatters, or Type Maps you want yourself, in the order you want them applied.
