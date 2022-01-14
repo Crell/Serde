@@ -7,7 +7,7 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 
-class EnumOnArrayExporter extends EnumExporter
+class EnumOnArrayImporter extends EnumExporter
 {
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
