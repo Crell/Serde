@@ -7,7 +7,7 @@ namespace Crell\Serde;
 use Crell\AttributeUtils\ClassAnalyzer;
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
-use function Crell\fp\first;
+use function Crell\fp\firstWithKeys;
 use function Crell\fp\pipe;
 
 class TypeMapper
@@ -90,7 +90,7 @@ class TypeMapper
     protected function getOverrideMapFor(string $class): ?TypeMap
     {
         return pipe($this->typeMaps,
-            first(static fn (TypeMap $map, string $overrideClass) => is_a($class, $overrideClass, true)),
+            firstWithKeys(static fn (TypeMap $map, string $overrideClass) => is_a($class, $overrideClass, true)),
         );
     }
 }
