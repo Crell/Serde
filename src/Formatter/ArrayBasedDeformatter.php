@@ -160,9 +160,9 @@ trait ArrayBasedDeformatter
             $remaining = $this->getRemainingData($remaining, $usedNames);
             $nestedProps = $deserializer->typeMapper->propertyList($collectingField, $remaining);
             foreach ($nestedProps as $propField) {
-                $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
-                    ? $deserializer->deserialize($data, $propField)
-                    : $remaining[$propField->serializedName] ?? SerdeError::Missing;
+                // All values need to be sent through the full pipeline, even primitive ones,
+                // so that their types can be treated the same as non-collected properties.
+                $ret[$propField->serializedName] = $deserializer->deserialize($data, $propField);
                 $usedNames[] = $propField->serializedName;
             }
         }
