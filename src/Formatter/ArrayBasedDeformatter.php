@@ -8,8 +8,8 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
+use Crell\Serde\TypeMismatch;
 use function Crell\fp\first;
-use function Crell\fp\firstValue;
 use function Crell\fp\pipe;
 use function Crell\fp\reduceWithKeys;
 
@@ -24,22 +24,70 @@ trait ArrayBasedDeformatter
 {
     public function deserializeInt(mixed $decoded, Field $field): int|SerdeError
     {
-        return $decoded[$field->serializedName] ?? SerdeError::Missing;
+        if (!isset($decoded[$field->serializedName])) {
+            return SerdeError::Missing;
+        }
+
+        if ($field->strict) {
+            if (!is_int($decoded[$field->serializedName])) {
+                throw TypeMismatch::create($field->serializedName, 'int', \get_debug_type($decoded[$field->serializedName]));
+            }
+            return $decoded[$field->serializedName];
+        }
+
+        // Weak mode.
+        return (int)($decoded[$field->serializedName]);
     }
 
     public function deserializeFloat(mixed $decoded, Field $field): float|SerdeError
     {
-        return $decoded[$field->serializedName] ?? SerdeError::Missing;
+        if (!isset($decoded[$field->serializedName])) {
+            return SerdeError::Missing;
+        }
+
+        if ($field->strict) {
+            if (!is_float($decoded[$field->serializedName])) {
+                throw TypeMismatch::create($field->serializedName, 'float', \get_debug_type($decoded[$field->serializedName]));
+            }
+            return $decoded[$field->serializedName];
+        }
+
+        // Weak mode.
+        return (float)($decoded[$field->serializedName]);
     }
 
     public function deserializeBool(mixed $decoded, Field $field): bool|SerdeError
     {
-        return $decoded[$field->serializedName] ?? SerdeError::Missing;
+        if (!isset($decoded[$field->serializedName])) {
+            return SerdeError::Missing;
+        }
+
+        if ($field->strict) {
+            if (!is_bool($decoded[$field->serializedName])) {
+                throw TypeMismatch::create($field->serializedName, 'bool', \get_debug_type($decoded[$field->serializedName]));
+            }
+            return $decoded[$field->serializedName];
+        }
+
+        // Weak mode.
+        return (bool)($decoded[$field->serializedName]);
     }
 
     public function deserializeString(mixed $decoded, Field $field): string|SerdeError
     {
-        return $decoded[$field->serializedName] ?? SerdeError::Missing;
+        if (!isset($decoded[$field->serializedName])) {
+            return SerdeError::Missing;
+        }
+
+        if ($field->strict) {
+            if (!is_string($decoded[$field->serializedName])) {
+                throw TypeMismatch::create($field->serializedName, 'string', \get_debug_type($decoded[$field->serializedName]));
+            }
+            return $decoded[$field->serializedName];
+        }
+
+        // Weak mode.
+        return (string)($decoded[$field->serializedName]);
     }
 
     public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
@@ -144,10 +192,16 @@ trait ArrayBasedDeformatter
                 $collectingArray = $propField;
             } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
                 $collectingObjects[] = $propField;
+            } elseif (isset($data[$propField->serializedName])) {
+                $ret[$propField->serializedName] = $deserializer->deserialize($data, $propField) ?? SerdeError::Missing;
             } else {
-                $ret[$propField->serializedName] = ($propField->typeCategory->isEnum() || $propField->typeCategory->isCompound())
-                    ? $deserializer->deserialize($data, $propField)
-                    : $this->getFieldData($propField, $data) ?? SerdeError::Missing;
+                $key = pipe(
+                    $propField->alias,
+                    first(fn(string $name): bool => isset($data[$name])),
+                );
+                $ret[$propField->serializedName] = $key
+                    ? $deserializer->deserialize($data, $propField->with(serializedName: $key))
+                    : SerdeError::Missing;
             }
         }
 
@@ -182,21 +236,6 @@ trait ArrayBasedDeformatter
         }
 
         return $ret;
-    }
-
-    /**
-     * Retrieves data from the incoming serialized data.
-     *
-     * This method handles the alias fallback logic, in case $serializedName
-     * isn't what it is named.
-     *
-     * @param Field $field
-     * @param array<string, mixed> $data
-     * @return mixed
-     */
-    public function getFieldData(Field $field, array $data): mixed
-    {
-        return firstValue(fn(string $name): mixed => $data[$name] ?? null)([$field->serializedName, ...$field->alias]);
     }
 
     /**

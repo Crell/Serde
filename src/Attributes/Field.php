@@ -107,6 +107,10 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
      *   Set true to exclude this field from serialization entirely.
      * @param string[] $alias
      *   On deserialization, also check for values in fields with these names.
+     * @param bool $strict
+     *   On deserialization, set to true to require incoming data to be of the
+     *   correct type. If false, the system will attempt to cast values to
+     *   the correct type.
      */
     public function __construct(
         ?string $serializedName = null,
@@ -116,6 +120,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
         public readonly bool $flatten = false,
         public readonly bool $exclude = false,
         public readonly array $alias = [],
+        public readonly bool $strict = true,
     ) {
         if ($default) {
             $this->defaultValue = $default;

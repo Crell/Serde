@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\NonStrict\NonStrictFlattenedProperty;
+use Crell\Serde\NonStrict\NonStrictProperties;
+use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\FlatMapNested\NestedA;
 use Crell\Serde\Records\MappedCollected\ThingA;
 use Crell\Serde\Records\MappedCollected\ThingB;
@@ -277,5 +280,105 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('rect', $toTest['shape']);
         self::assertEquals(1, $toTest['topLeft']['x']);
         self::assertEquals(4, $toTest['bottomRight']['y']);
+    }
+
+    /**
+     * @test
+     * @dataProvider non_strict_properties_examples()
+     */
+    public function non_strict_mode_casts_values(mixed $serialized, object $expected): void
+    {
+        $s = new SerdeCommon();
+
+        $result = $s->deserialize($serialized, from: $this->format, to: NonStrictFlattenedProperty::class);
+
+        self::assertEquals($expected, $result);
+    }
+
+    abstract public function non_strict_properties_examples(): iterable;
+
+    public function non_strict_properties_examples_data(): iterable
+    {
+        yield 'clean cast' => [
+            'serialized' => [
+                'int' => '1',
+                'float' => '1.5',
+                'string' => 5,
+                'bool' => 1,
+            ],
+            'expected' => new NonStrictFlattenedProperty(new NonStrictProperties(1, 1.5, '5', true)),
+        ];
+
+        yield 'lossy cast' => [
+            'serialized' => [
+                'int' => '1beep',
+                'float' => '1.5beep',
+                'string' => 5,
+                'bool' => '',
+            ],
+            'expected' => new NonStrictFlattenedProperty(new NonStrictProperties(1, 1.5, '5', false)),
+        ];
+
+        yield 'lossy cast 2' => [
+            'serialized' => [
+                'int' => 'beep',
+                'float' => 'beep',
+                'string' => 3.14,
+                'bool' => 'beep',
+            ],
+            'expected' => new NonStrictFlattenedProperty(new NonStrictProperties(0, 0, '3.14', true)),
+        ];
+    }
+
+
+    /**
+     * @test
+     * @dataProvider strict_mode_throws_examples
+     */
+    public function strict_mode_throws_correct_exception(mixed $serialized, string $errorField, string $expectedType, string $foundType): void
+    {
+        $s = new SerdeCommon();
+
+        try {
+            $result = $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
+            $this->fail('No exception was generated.');
+        } catch (TypeMismatch $e) {
+            self::assertEquals($errorField, $e->name);
+            self::assertEquals($expectedType, $e->expectedType);
+            self::assertEquals($foundType, $e->foundType);
+        }
+    }
+
+    abstract public function strict_mode_throws_examples(): iterable;
+
+    public function strict_mode_throws_examples_data(): iterable
+    {
+        yield [
+            'serialized' => ['anint' => '5'],
+            'errorField' => 'anint',
+            'expectedType' => 'int',
+            'foundType' => 'string',
+        ];
+
+        yield [
+            'serialized' => ['string' => 5],
+            'errorField' => 'string',
+            'expectedType' => 'string',
+            'foundType' => 'int',
+        ];
+
+        yield [
+            'serialized' => ['afloat' => '3.14'],
+            'errorField' => 'afloat',
+            'expectedType' => 'float',
+            'foundType' => 'string',
+        ];
+
+        yield [
+            'serialized' => ['bool' => 1],
+            'errorField' => 'bool',
+            'expectedType' => 'bool',
+            'foundType' => 'int',
+        ];
     }
 }

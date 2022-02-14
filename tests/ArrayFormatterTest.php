@@ -53,4 +53,18 @@ class ArrayFormatterTest extends ArrayBasedFormatterTest
 
         self::assertEquals($expected, $result);
     }
+
+    public function non_strict_properties_examples(): iterable
+    {
+        foreach ($this->non_strict_properties_examples_data() as $k => $v) {
+            yield $k => $v;
+        }
+    }
+
+    public function strict_mode_throws_examples(): iterable
+    {
+        foreach ($this->strict_mode_throws_examples_data() as $k => $v) {
+            yield $k => $v;
+        }
+    }
 }

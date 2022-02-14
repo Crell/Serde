@@ -32,4 +32,20 @@ class YamlFormatterTest extends ArrayBasedFormatterTest
     {
         return Yaml::parse($serialized);
     }
+
+    public function non_strict_properties_examples(): iterable
+    {
+        foreach ($this->non_strict_properties_examples_data() as $k => $v) {
+            $v['serialized'] = Yaml::dump($v['serialized']);
+            yield $k => $v;
+        }
+    }
+
+    public function strict_mode_throws_examples(): iterable
+    {
+        foreach ($this->strict_mode_throws_examples_data() as $k => $v) {
+            $v['serialized'] = Yaml::dump($v['serialized']);
+            yield $k => $v;
+        }
+    }
 }
