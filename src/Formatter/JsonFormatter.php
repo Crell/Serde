@@ -33,7 +33,7 @@ class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
 
     public function deserializeInitialize(mixed $serialized, Field $rootField): mixed
     {
-        return ['root' => json_decode($serialized, true, 512, JSON_THROW_ON_ERROR)];
+        return ['root' => json_decode($serialized ?: '{}', true, 512, JSON_THROW_ON_ERROR)];
     }
 
     public function deserializeFinalize(mixed $decoded): void

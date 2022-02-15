@@ -48,7 +48,7 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 
     public function deserializeInitialize(mixed $serialized, Field $rootField): mixed
     {
-        return ['root' => $serialized];
+        return ['root' => $serialized ?: []];
     }
 
     public function deserializeFinalize(mixed $decoded): void

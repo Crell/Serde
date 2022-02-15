@@ -210,12 +210,30 @@ abstract class SerdeTest extends TestCase
 
     /**
      * @test
+     *
+     * This tests an empty object value, which means something different in different formats.
      */
     public function empty_input(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $serialized = $this->emptyData;
+
+        $result = $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
+
+        self::assertEquals(new AllFieldTypes(), $result);
+    }
+
+    /**
+     * @test
+     *
+     * This tests an empty string of input.
+     */
+    public function empty_string(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = '';
 
         $result = $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
 
