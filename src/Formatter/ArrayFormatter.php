@@ -46,7 +46,7 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
         return array_diff_key($source, array_flip($used));
     }
 
-    public function deserializeInitialize(mixed $serialized, Field $rootField): mixed
+    public function deserializeInitialize(mixed $serialized, Field $rootField): array
     {
         return ['root' => $serialized ?: []];
     }
