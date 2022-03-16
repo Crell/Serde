@@ -130,9 +130,8 @@ class ObjectImporter implements Importer
         // Cache the method invoker  same way.
         $this->methodCaller ??= fn(string $fn) => $this->$fn();
 
-        // Bind the populator to the object to bypass visibility rules,
-        // then invoke it on the object to populate it.
-        $this->populator->bindTo($new, $new)($props);
+        // Call the populator with the scope of the new object.
+        $this->populator->call($new, $props);
 
         // Invoke any post-load callbacks, even if they're private.
         $invoker = $this->methodCaller->bindTo($new, $new);
