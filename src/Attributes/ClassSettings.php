@@ -29,6 +29,9 @@ class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttri
     /** @var string[] */
     public readonly array $postLoadCallacks;
 
+    /**
+     * @param array<string|null> $scopes
+     */
     public function __construct(
         public readonly bool $includeFieldsByDefault = true,
         public readonly array $scopes = [null],

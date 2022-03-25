@@ -112,7 +112,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      *   On deserialization, set to true to require incoming data to be of the
      *   correct type. If false, the system will attempt to cast values to
      *   the correct type.
-     * @param array $scopes
+     * @param array<string|null> $scopes
      *   If specified, this Field entry will be included only when operating in
      *   the specified scopes.  To also be included in the default "unscoped" case,
      *   include an array element of `null`, or include a non-scoped copy of the

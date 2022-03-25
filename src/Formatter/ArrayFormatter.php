@@ -6,6 +6,7 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
+use JetBrains\PhpStorm\ArrayShape;
 
 class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 {
@@ -18,7 +19,6 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
     }
 
     /**
-     * @param Field $rootField
      * @return array<string, mixed>
      */
     public function serializeInitialize(ClassSettings $classDef, Field $rootField): array
@@ -32,8 +32,6 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
     }
 
     /**
-     *
-     *
      * @param mixed $source
      *   The deformatter-specific source value being passed around.
      * @param string[] $used
@@ -46,6 +44,9 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
         return array_diff_key($source, array_flip($used));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function deserializeInitialize(mixed $serialized, Field $rootField): array
     {
         return ['root' => $serialized ?: []];

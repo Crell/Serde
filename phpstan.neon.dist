@@ -19,3 +19,6 @@ parameters:
         -
             message: '#type has no value type specified in iterable type iterable#'
             path: tests/
+        # PHPStan is overly aggressive on readonly properties.
+        - '#Class (.*) has an uninitialized readonly property (.*). Assign it in the constructor.#'
+        - '#Readonly property (.*) is assigned outside of the constructor.#'
