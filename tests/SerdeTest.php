@@ -598,6 +598,7 @@ abstract class SerdeTest extends TestCase
 
         $this->exclude_values_validate($serialized);
 
+        /** @var Exclusions $result */
         $result = $s->deserialize($serialized, from: $this->format, to: Exclusions::class);
 
         self::assertEquals('one', $result->one);

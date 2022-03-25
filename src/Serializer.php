@@ -71,7 +71,7 @@ class Serializer
      * This is context-aware, so will include filtering for the current
      * scope, for instance.
      *
-     * @param string $class
+     * @param class-string $class
      * @return Field[]
      */
     public function propertiesFor(string $class): array

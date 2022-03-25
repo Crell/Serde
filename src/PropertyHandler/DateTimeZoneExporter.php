@@ -33,7 +33,7 @@ class DateTimeZoneExporter implements Exporter, Importer
     {
         $string = $deserializer->deformatter->deserializeString($source, $field);
 
-        if ($string === SerdeError::Missing) {
+        if ($string instanceof SerdeError) {
             return null;
         }
 

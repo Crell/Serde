@@ -48,7 +48,7 @@ class NativeSerializeExporter implements Exporter, Importer
         // properties.  So deserialize as a basic dictionary instead.
         $dict = $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer);
 
-        if ($dict === SerdeError::Missing) {
+        if ($dict instanceof SerdeError) {
             return null;
         }
 
@@ -58,6 +58,9 @@ class NativeSerializeExporter implements Exporter, Importer
         $rClass = new \ReflectionClass($class);
         $new = $rClass->newInstanceWithoutConstructor();
 
+        // We wouldn't have gotten here unless this method is defined, but PHPStan
+        // can't know that.
+        // @phpstan-ignore-next-line
         $new->__unserialize($dict);
 
         return $new;

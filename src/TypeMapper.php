@@ -42,6 +42,7 @@ class TypeMapper
 
     /**
      * @param array<mixed> $data
+     * @return class-string|null
      */
     public function getTargetClass(Field $field, array $data): ?string
     {
@@ -51,6 +52,7 @@ class TypeMapper
         }
 
         if (!$map = $this->typeMapForField($field)) {
+            // @phpstan-ignore-next-line
             return $field->phpType;
         }
 

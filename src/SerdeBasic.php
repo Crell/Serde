@@ -56,7 +56,11 @@ class SerdeBasic extends Serde
     ) {
         $this->typeMapper = new TypeMapper($typeMaps, $this->analyzer);
 
+        // These lines by definition filter the array to the correct type, but
+        // PHPStan doesn't know that.
+        // @phpstan-ignore-next-line
         $this->exporters = array_filter($handlers, typeIs(Exporter::class));
+        // @phpstan-ignore-next-line
         $this->importers = array_filter($handlers, typeIs(Importer::class));
 
         $this->formatters = pipe(

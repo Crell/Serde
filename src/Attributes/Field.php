@@ -43,6 +43,8 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
     /**
      * The native PHP type, as the reflection system defines it.
+     *
+     * @var string|class-string
      */
     public readonly string $phpType;
 

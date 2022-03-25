@@ -44,9 +44,9 @@ class SequenceExporter implements Exporter, Importer
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof SequenceField && $typeField->implodeOn) {
             $val = $deserializer->deformatter->deserializeString($source, $field);
-            return $val === SerdeError::Missing
-                ? null
-                : $typeField->explode($val);
+            // This is already an exhaustive match, but PHPStan doesn't know that.
+            // @phpstan-ignore-next-line
+            return $val === SerdeError::Missing ? null : $typeField->explode($val);
         }
 
         return $deserializer->deformatter->deserializeSequence($source, $field, $deserializer);

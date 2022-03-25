@@ -22,11 +22,19 @@ class ClassNameTypeMap implements TypeMap
         return $this->key;
     }
 
+    /**
+     * @param class-string $id
+     * @return class-string|null
+     */
     public function findClass(string $id): ?string
     {
         return $id;
     }
 
+    /**
+     * @param class-string $class
+     * @return class-string|null
+     */
     public function findIdentifier(string $class): ?string
     {
         return $class;

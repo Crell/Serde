@@ -21,7 +21,7 @@ class ObjectImporter implements Importer
         // Get the raw data as an array from the source.
         $dict = $deserializer->deformatter->deserializeObject($source, $field, $deserializer);
 
-        if ($dict === SerdeError::Missing) {
+        if ($dict instanceof SerdeError) {
             return null;
         }
 
@@ -33,7 +33,7 @@ class ObjectImporter implements Importer
 
     /**
      * @param array<string, mixed> $dict
-     * @param string $class
+     * @param class-string $class
      * @param Deserializer $deserializer
      * @return array{object, mixed[]}
      */
@@ -103,7 +103,7 @@ class ObjectImporter implements Importer
     /**
      * Intantiates an object based on the provided data.
      *
-     * @param string $class
+     * @param class-string $class
      *   The class of object to create.
      * @param array<string, mixed> $props
      *   An associative array of properties to inject into the new object.

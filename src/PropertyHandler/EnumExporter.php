@@ -38,12 +38,14 @@ class EnumExporter implements Exporter, Importer
             TypeCategory::StringEnum => $deserializer->deformatter->deserializeString($source, $field),
         };
 
-        if ($val === SerdeError::Missing) {
+        if ($val instanceof SerdeError) {
             return $val;
         }
 
         // It's kind of amusing that both of these work, but they work.
         return match ($field->typeCategory) {
+            // The first line will only be called if $val is a string, but PHPStan thinks it could be an array.
+            // @phpstan-ignore-next-line
             TypeCategory::UnitEnum => (new \ReflectionEnum($field->phpType))->getCase($val)->getValue(),
             TypeCategory::IntEnum, TypeCategory::StringEnum => $field->phpType::from($val),
         };

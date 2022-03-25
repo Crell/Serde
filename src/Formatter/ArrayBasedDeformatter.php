@@ -122,9 +122,15 @@ trait ArrayBasedDeformatter
         // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
         if (class_exists($class) || interface_exists($class)) {
+            // PHPStan can't tell that in this case the key of the array is guaranteed
+            // to be a string, but it is.
+            // @phpstan-ignore-next-line
             return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class);
         }
 
+        // PHPStan can't tell that in this case the key of the array is guaranteed
+        // to be a string, but it is.
+        // @phpstan-ignore-next-line
         return $this->upcastArray($decoded[$field->serializedName], $deserializer);
     }
 
