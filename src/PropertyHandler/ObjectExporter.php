@@ -31,7 +31,7 @@ class ObjectExporter implements Exporter
 
         /** @var \Crell\Serde\Dict $dict */
         $dict = pipe(
-            $serializer->analyzer->analyze($value, ClassSettings::class)->properties,
+            $serializer->propertiesFor($value::class),
             reduce(new Dict(), fn(Dict $dict, Field $f) => $this->flattenValue($dict, $f, $propReader, $serializer)),
         );
 
@@ -67,7 +67,7 @@ class ObjectExporter implements Exporter
             $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
             // This really wants to be explicit partial application. :-(
             $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader, $serializer);
-            $properties = $serializer->analyzer->analyze($value::class, ClassSettings::class)->properties;
+            $properties = $serializer->propertiesFor($value::class);
             $dict = reduce($dict, $c)($properties);
             if ($map = $serializer->typeMapper->typeMapForField($field)) {
                 $f = Field::create(serializedName: $map->keyField(), phpType: 'string');

@@ -48,6 +48,7 @@ use Crell\Serde\Records\Pagination\Results;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
+use Crell\Serde\Records\MultipleScopes;
 use Crell\Serde\Records\Shapes\Box;
 use Crell\Serde\Records\Shapes\Circle;
 use Crell\Serde\Records\Shapes\Rectangle;
@@ -1071,7 +1072,7 @@ abstract class SerdeTest extends TestCase
     /**
      * @test
      */
-    function field_aliases(): void
+    public function field_aliases(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
@@ -1086,5 +1087,39 @@ abstract class SerdeTest extends TestCase
         );
 
         self::assertEquals($expected, $result);
+    }
+
+    /**
+     * @test
+     * @dataProvider scopes_examples()
+     */
+    public function scopes(?string $scope, MultipleScopes $expected): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new MultipleScopes(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E');
+
+        $serialized = $s->serialize($data, $this->format, scope: $scope);
+
+        // Note that we're deserializing into no-scope here, so that we can gete the default
+        // values for the missing properties.
+        $result = $s->deserialize($serialized, from: $this->format, to: MultipleScopes::class);
+        self::assertEquals($expected, $result);
+    }
+
+    public function scopes_examples(): iterable
+    {
+        yield 'default' => [
+            'scope' => null,
+            'expected' => new MultipleScopes(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+        ];
+        yield 'one' => [
+            'scope' => 'one',
+            'expected' => new MultipleScopes(a: 'A', b: 'B', c: '', d: ''),
+        ];
+        yield 'two' => [
+            'scope' => 'two',
+            'expected' => new MultipleScopes(a: 'A', b: '', c: 'C', d: ''),
+        ];
     }
 }

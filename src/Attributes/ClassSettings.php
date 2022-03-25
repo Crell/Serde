@@ -9,11 +9,12 @@ use Crell\AttributeUtils\FromReflectionClass;
 use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\ParseMethods;
 use Crell\AttributeUtils\ParseProperties;
+use Crell\AttributeUtils\SupportsScopes;
 use Crell\Serde\TypeMap;
 use function Crell\fp\prop;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttributes, ParseMethods
+class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttributes, ParseMethods, SupportsScopes
 {
     /**
      * The type map, if any, that applies to this class.
@@ -30,11 +31,17 @@ class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttri
 
     public function __construct(
         public readonly bool $includeFieldsByDefault = true,
+        public readonly array $scopes = [null],
     ) {}
 
     public function fromReflection(\ReflectionClass $subject): void
     {
         $this->phpType ??= $subject->getName();
+    }
+
+    public function scopes(): array
+    {
+        return $this->scopes;
     }
 
     /**

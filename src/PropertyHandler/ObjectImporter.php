@@ -39,7 +39,7 @@ class ObjectImporter implements Importer
      */
     protected function populateObject(array $dict, string $class, Deserializer $deserializer): array
     {
-        $classDef = $deserializer->analyzer->analyze($class, ClassSettings::class);
+        $classDef = $deserializer->analyzer->analyze($class, ClassSettings::class, scope: $deserializer->scope);
 
         $props = [];
         $usedNames = [];

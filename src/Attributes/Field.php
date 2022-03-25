@@ -8,6 +8,7 @@ use Attribute;
 use Crell\AttributeUtils\Excludable;
 use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
+use Crell\AttributeUtils\SupportsScopes;
 use Crell\fp\Evolvable;
 use Crell\Serde\FieldTypeIncompatible;
 use Crell\Serde\IntersectionTypesNotSupported;
@@ -23,8 +24,8 @@ use function Crell\fp\indexBy;
 use function Crell\fp\method;
 use function Crell\fp\pipe;
 
-#[Attribute(Attribute::TARGET_PROPERTY)]
-class Field implements FromReflectionProperty, HasSubAttributes, Excludable
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
+class Field implements FromReflectionProperty, HasSubAttributes, Excludable, SupportsScopes
 {
     use Evolvable;
 
@@ -111,6 +112,11 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
      *   On deserialization, set to true to require incoming data to be of the
      *   correct type. If false, the system will attempt to cast values to
      *   the correct type.
+     * @param array $scopes
+     *   If specified, this Field entry will be included only when operating in
+     *   the specified scopes.  To also be included in the default "unscoped" case,
+     *   include an array element of `null`, or include a non-scoped copy of the
+     *   Field.
      */
     public function __construct(
         ?string $serializedName = null,
@@ -121,6 +127,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
         public readonly bool $exclude = false,
         public readonly array $alias = [],
         public readonly bool $strict = true,
+        public readonly array $scopes = [null],
     ) {
         if ($default) {
             $this->defaultValue = $default;
@@ -129,6 +136,11 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable
         $this->rename ??=
             $renameWith
             ?? ($serializedName ? new LiteralName($serializedName) : null);
+    }
+
+    public function scopes(): array
+    {
+        return $this->scopes;
     }
 
     public function fromReflection(\ReflectionProperty $subject): void

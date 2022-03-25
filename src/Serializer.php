@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\AttributeUtils\ClassAnalyzer;
+use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\PropertyHandler\Exporter;
@@ -28,6 +29,7 @@ class Serializer
         protected readonly array $exporters,
         public readonly Formatter $formatter,
         public readonly TypeMapper $typeMapper,
+        public readonly ?string $scope = null,
     ) {}
 
     public function serialize(mixed $value, mixed $runningValue, Field $field): mixed
@@ -61,5 +63,19 @@ class Serializer
         }
 
         throw NoExporterFound::create($field->phpType, $format);
+    }
+
+    /**
+     * Look up properties for the specified class.
+     *
+     * This is context-aware, so will include filtering for the current
+     * scope, for instance.
+     *
+     * @param string $class
+     * @return Field[]
+     */
+    public function propertiesFor(string $class): array
+    {
+        return $this->analyzer->analyze($class, ClassSettings::class, $this->scope)->properties;
     }
 }
