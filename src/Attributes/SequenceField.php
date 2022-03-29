@@ -51,6 +51,8 @@ class SequenceField implements TypeField, SupportsScopes
      */
     public function implode(array $array): string
     {
+        // This property is guaranteed to have a value by now in practice.
+        // @phpstan-ignore-next-line
         return \implode($this->implodeOn, $array);
     }
 
@@ -60,6 +62,8 @@ class SequenceField implements TypeField, SupportsScopes
      */
     public function explode(string $in): array
     {
+        // This property is guaranteed to have a value by now in practice.
+        // @phpstan-ignore-next-line
         $parts = \explode($this->implodeOn, $in);
         if ($this->trim) {
             $parts = array_map(trim(...), $parts);

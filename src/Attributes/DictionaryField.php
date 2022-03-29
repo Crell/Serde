@@ -57,6 +57,8 @@ class DictionaryField implements TypeField, SupportsScopes
     {
         return pipe($array,
             amapWithKeys(fn ($v, $k) => "{$k}{$this->joinOn}{$v}"),
+            // This property is guaranteed to have a value by now in practice.
+            // @phpstan-ignore-next-line
             implode($this->implodeOn),
         );
     }
@@ -83,13 +85,15 @@ class DictionaryField implements TypeField, SupportsScopes
         if (!$item) {
             return $array;
         }
+        // This property is guaranteed to have a value by now in practice.
+        // @phpstan-ignore-next-line
         if (!\str_contains($item, $this->joinOn)) {
             $k = $this->trim ? trim($item) : $item;
             $array[$k] = '';
             return $array;
         }
 
-        // PHPStan thinks $item could be null here.  PHPStan is wrong.
+        // This property is guaranteed to have a value by now in practice.
         // @phpstan-ignore-next-line
         [$k, $v] = \explode($this->joinOn, $item);
         if ($this->trim) {

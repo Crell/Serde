@@ -54,6 +54,10 @@ class NativeSerializeExporter implements Exporter, Importer
 
         $class = $deserializer->typeMapper->getTargetClass($field, $dict);
 
+        if (is_null($class)) {
+            return null;
+        }
+
         // Make an empty instance of the target class.
         $rClass = new \ReflectionClass($class);
         $new = $rClass->newInstanceWithoutConstructor();

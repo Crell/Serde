@@ -1,5 +1,5 @@
 parameters:
-    level: 7
+    level: 8
     paths:
         - src
         - tests
@@ -11,7 +11,6 @@ parameters:
         - '#Match expression does not handle remaining value#'
         # As far as I can tell, PHPStan is just buggy on explode(). It gives this error
         # Even when it has been addressed and is impossible.
-        - '#Parameter \#1 \$separator of function explode expects non-empty-string#'
         - '#Parameter \#1 \$delimiter of function Crell\\fp\\explode expects non-empty-string#'
         -
             message: '#type has no value type specified in iterable type array#'

@@ -27,6 +27,10 @@ class ObjectImporter implements Importer
 
         $class = $deserializer->typeMapper->getTargetClass($field, $dict);
 
+        if (is_null($class)) {
+            return null;
+        }
+
         [$object, $remaining] = $this->populateObject($dict, $class, $deserializer);
         return $object;
     }
@@ -135,8 +139,13 @@ class ObjectImporter implements Importer
 
         // Invoke any post-load callbacks, even if they're private.
         $invoker = $this->methodCaller->bindTo($new, $new);
-        foreach ($callbacks as $fn) {
-            $invoker($fn);
+        // bindTo() technically could return null on error, but there's no
+        // indication of when that would happen. So this is really just to
+        // keep static analyzers happy.
+        if ($invoker) {
+            foreach ($callbacks as $fn) {
+                $invoker($fn);
+            }
         }
 
         return $new;

@@ -238,23 +238,28 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     }
 
     /**
-     * @internal
-     *
      * This method is to allow the serializer to create new pseudo-Fields
      * for nested values when flattening and collecting. Do not call it directly.
      *
+     * @internal
+     *
+     * @param string $serializedName
+     * @param string|null $phpType
      * @param array<string, mixed> $extraProperties
+     * @return Field
      */
     public static function create(
-        ?string $serializedName = null,
-        string $phpType = null,
+        string $serializedName,
+        ?string $phpType = null,
         array $extraProperties = [],
     ): self
     {
         $new = new self();
         $new->serializedName = $serializedName;
-        $new->phpName ??= $serializedName;
-        $new->phpType = $phpType;
+        $new->phpName = $serializedName;
+        if ($phpType) {
+            $new->phpType = $phpType;
+        }
         $new->typeMap = null;
         $new->typeField = null;
         $new->extraProperties = $extraProperties;
