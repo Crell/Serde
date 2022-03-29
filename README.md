@@ -52,9 +52,9 @@ Serde can serialize to:
 
 Serde can deserialize from:
 
-* PHP arrays
-* JSON
-* YAML
+* PHP arrays (`array`)
+* JSON (`json`)
+* YAML (`yaml`)
 
 (YAML support requires the [`Symfony/Yaml`](https://github.com/symfony/yaml) library.)  XML support is in progress.
 
@@ -72,7 +72,7 @@ PHP objects can be mutated to and from a serialized format.  Nested objects can 
 
 ## Configuration
 
-Serde's behavior is driven almost entirely through attributes.  Any class may be serialized from or desrialized to as-is with no additional configuration, but there is a great deal of configuration that may be opted-in to.
+Serde's behavior is driven almost entirely through attributes.  Any class may be serialized from or deserialized to as-is with no additional configuration, but there is a great deal of configuration that may be opted-in to.
 
 Attribute handling is provided by [`Crell/AttributeUtils`](https://github.com/Crell/AttributeUtils).  It is worth looking into as well.
 
@@ -152,7 +152,14 @@ Serializes to/from:
 }
 ```
 
-Available cases are `Cases::UPPERCASE`, `Cases::lowercase`, `Cases::snake_case`, `Cases::kebab_case` (renders with dashes, not underscores), `Cases::CamelCase`, and `Cases::lowerCamelCase`.
+Available cases are:
+
+* `Cases::UPPERCASE`
+* `Cases::lowercase`
+* `Cases::snake_case`
+* `Cases::kebab_case` (renders with dashes, not underscores)
+* `Cases::CamelCase`
+* `Cases::lowerCamelCase`
 
 The `Prefix` class attaches a prefix to values when serialized, but otherwise leaves the property name intact.
 
@@ -461,7 +468,7 @@ Will serialize in JSON to:
 
 On deserialization, that string will get automatically get exploded back into an array when placed into the object.
 
-By default, on deserialization the individual values will be `trim()`ed to remove excess whitespace.  That can be disabled by setting the `trim` attribute argument to false.
+By default, on deserialization the individual values will be `trim()`ed to remove excess whitespace.  That can be disabled by setting the `trim` attribute argument to `false`.
 
 #### `joinOn`
 
@@ -757,7 +764,7 @@ Serde is designed to be usable "out of the box" without any additional setup.  H
 There are three ways you can set up Serde.
 
 1. The `SerdeCommon` class includes most available handlers and formatters out of the box, ready to go, although you can add additional ones via the constructor.
-2. The `SerdeBasic` class has pre-built configuration whatsoever; you will need to provide all of the Handlers, Formatters, or Type Maps you want yourself, in the order you want them applied.
+2. The `SerdeBasic` class has no pre-built configuration whatsoever; you will need to provide all Handlers, Formatters, or Type Maps you want yourself, in the order you want them applied.
 3. You may also extend the `Serde` base class itself and create your own custom pre-made configuration, with just the Handlers or Formatters (provided or custom) that you want.
 
 Both `SerdeCommon` and `SerdeBasic` take four arguments: The [`ClassAnalyzer`](https://github.com/Crell/AttributeUtils) to use, an array of Handlers, an array of Formatters, and an array of Type Maps.  If no analyzer is provided, Serde creates a memory-cached Analyzer by default so that it will always work.  However, in a DI configuration it is strongly recommended that you configure the Analyzer yourself, with appropriate caching, and inject that into Serde as a dependency to avoid duplicate Analyzers (and duplicate caches).  If you have multiple different Serde configurations in different services, it may also be beneficial to make all handlers and formatters services as well and explicitly inject them into `SerdeBasic` rather than relying on `SerdeCommon`.
