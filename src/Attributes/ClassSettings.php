@@ -42,6 +42,9 @@ class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttri
         $this->phpType ??= $subject->getName();
     }
 
+    /**
+     * @return array<string|null>
+     */
     public function scopes(): array
     {
         return $this->scopes;

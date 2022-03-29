@@ -1094,6 +1094,8 @@ abstract class SerdeTest extends TestCase
     /**
      * @test
      * @dataProvider scopes_examples()
+     *
+     * @param array<string|null> $scopes
      */
     public function scopes(object $data, array $scopes, MultipleScopes|MultipleScopesDefaultTrue $expected): void
     {

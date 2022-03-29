@@ -16,18 +16,29 @@ use function Crell\fp\reduce;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class DictionaryField implements TypeField, SupportsScopes
 {
+    /**
+     * @param string|null $arrayType
+     *   Elements in this array are objects of this type.
+     * @param string|null $implodeOn
+     *   Scalar values of this array should be imploded to a string and exploded on deserialization.
+     * @param string|null $joinOn
+     *   The key and value of each element will be concatenated with this character when imploding.
+     * @param bool $trim
+     *   When exploding a string back to an array, trim() each value. Has no effect if $implodeOn is not set.
+     * @param array<string|null> $scopes
+     *   The scopes in which this attribute should apply.
+     */
     public function __construct(
-        /** Elements in this array are objects of this type. */
         public readonly ?string $arrayType = null,
-        /** Scalar values of this array should be imploded to a string and exploded on deserialization. */
         public readonly ?string $implodeOn = null,
-        /** The key and value of each element will be concatenated with this character when imploding. */
         public readonly ?string $joinOn = null,
-        /** When exploding a string back to an array, trim() each value. Has no effect if $implodeOn is not set. */
         public readonly bool $trim = true,
         protected readonly array $scopes = [null],
     ) {}
 
+    /**
+     * @return array<string|null>
+     */
     public function scopes(): array
     {
         return $this->scopes;

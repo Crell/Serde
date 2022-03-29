@@ -14,6 +14,7 @@ class StaticTypeMap implements TypeMap, SupportsScopes
     /**
      * @param string $key
      * @param array<string, class-string> $map
+     * @param array<string|null> $scopes
      */
     public function __construct(
         public readonly string $key,
@@ -21,6 +22,9 @@ class StaticTypeMap implements TypeMap, SupportsScopes
         protected readonly array $scopes = [null],
     ) {}
 
+    /**
+     * @return array<string|null>
+     */
     public function scopes(): array
     {
         return $this->scopes;

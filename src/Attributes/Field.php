@@ -140,6 +140,9 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
             ?? ($serializedName ? new LiteralName($serializedName) : null);
     }
 
+    /**
+     * @return array<string|null>
+     */
     public function scopes(): array
     {
         return $this->scopes;

@@ -14,11 +14,18 @@ use Crell\Serde\TypeMap;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
 class ClassNameTypeMap implements TypeMap, SupportsScopes
 {
+    /**
+     * @param string $key
+     * @param array<string|null> $scopes
+     */
     public function __construct(
         public readonly string $key,
         protected readonly array $scopes = [null],
     ) {}
 
+    /**
+     * @return array<string|null>
+     */
     public function scopes(): array
     {
         return $this->scopes;

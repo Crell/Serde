@@ -15,6 +15,7 @@ class Deserializer
 {
     /**
      * @param Importer[] $importers
+     * @param array<string|null> $scopes
      */
     public function __construct(
         public readonly ClassAnalyzer $analyzer,
