@@ -869,6 +869,8 @@ Note that since there is both an unscoped and a scoped version of the `Field` on
 
 If multiple attribute variants could apply for the specified scope, the lexically first in a scope will take precedence over later ones, and a scoped attribute will take precedence over an unscoped one.
 
+Note that when deserializing, specifying a scope will exclude not only out-of-scope properties but their defaults as well.  That is, they will not be set, even to a default value, and so may be "uninitialized."  That is rarely desireable, so it may be preferable to deserialize without a scope, even if a value was serialized with a scope.  That will depend on your use case.
+
 For more on scopes, see the [AttributeUtils](https://github.com/CrellAttributeUtils#Scopes) documentation.
 
 ## Extending Serde
