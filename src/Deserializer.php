@@ -21,7 +21,7 @@ class Deserializer
         protected readonly array $importers,
         public readonly Deformatter $deformatter,
         public readonly TypeMapper $typeMapper,
-        public readonly ?string $scope = null,
+        public readonly array $scopes = [],
     ) {}
 
     public function deserialize(mixed $decoded, Field $field): mixed

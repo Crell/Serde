@@ -43,18 +43,18 @@ abstract class Serde
 
     protected readonly ClassAnalyzer $analyzer;
 
-    public function serialize(object $object, string $format, mixed $init = null, ?string $scope = null): mixed
+    public function serialize(object $object, string $format, mixed $init = null, array $scopes = []): mixed
     {
         $formatter = $this->formatters[$format] ?? throw UnsupportedFormat::create($format, Direction::Serialize);
 
-        $classDef = $this->analyzer->analyze($object, ClassSettings::class, scope: $scope);
+        $classDef = $this->analyzer->analyze($object, ClassSettings::class, scopes: $scopes);
 
         $inner = new Serializer(
             analyzer: $this->analyzer,
             exporters: $this->exporters,
             formatter: $formatter,
             typeMapper: $this->typeMapper,
-            scope: $scope,
+            scopes: $scopes,
         );
 
         $rootField = $formatter->rootField($inner, $object::class);
@@ -65,7 +65,7 @@ abstract class Serde
         return $formatter->serializeFinalize($serializedValue, $classDef);
     }
 
-    public function deserialize(mixed $serialized, string $from, string $to, ?string $scope = null): object
+    public function deserialize(mixed $serialized, string $from, string $to, array $scopes = []): object
     {
         $formatter = $this->deformatters[$from] ?? throw UnsupportedFormat::create($from, Direction::Deserialize);
 
@@ -74,7 +74,7 @@ abstract class Serde
             importers: $this->importers,
             deformatter: $formatter,
             typeMapper: $this->typeMapper,
-            scope: $scope,
+            scopes: $scopes,
         );
 
         $rootField = $formatter->rootField($inner, $to);

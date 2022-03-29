@@ -34,6 +34,7 @@ use Crell\Serde\Records\MappedCollected\ThingList;
 use Crell\Serde\Records\MultiCollect\ThingOneA;
 use Crell\Serde\Records\MultiCollect\ThingTwoC;
 use Crell\Serde\Records\MultiCollect\Wrapper;
+use Crell\Serde\Records\MultipleScopesDefaultTrue;
 use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
@@ -1094,33 +1095,60 @@ abstract class SerdeTest extends TestCase
      * @test
      * @dataProvider scopes_examples()
      */
-    public function scopes(?string $scope, MultipleScopes $expected): void
+    public function scopes(object $data, array $scopes, MultipleScopes|MultipleScopesDefaultTrue $expected): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
-        $data = new MultipleScopes(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E');
+        $serialized = $s->serialize($data, $this->format, scopes: $scopes);
 
-        $serialized = $s->serialize($data, $this->format, scope: $scope);
-
-        // Note that we're deserializing into no-scope here, so that we can gete the default
+        // Note that we're deserializing into no-scope here, so that we can get the default
         // values for the missing properties.
-        $result = $s->deserialize($serialized, from: $this->format, to: MultipleScopes::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: get_class($data));
         self::assertEquals($expected, $result);
     }
 
     public function scopes_examples(): iterable
     {
-        yield 'default' => [
-            'scope' => null,
+        yield 'default false; default scope' => [
+            'data' => new MultipleScopes(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+            'scopes' => [],
             'expected' => new MultipleScopes(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
         ];
-        yield 'one' => [
-            'scope' => 'one',
+        yield 'default false; scope one' => [
+            'data' => new MultipleScopes(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+            'scopes' => ['one'],
             'expected' => new MultipleScopes(a: 'A', b: 'B', c: '', d: ''),
         ];
-        yield 'two' => [
-            'scope' => 'two',
+        yield 'default false; scope two' => [
+            'data' => new MultipleScopes(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+            'scopes' => ['two'],
             'expected' => new MultipleScopes(a: 'A', b: '', c: 'C', d: ''),
+        ];
+        yield 'default false; scope one, two' => [
+            'data' => new MultipleScopes(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+            'scopes' => ['one', 'two'],
+            'expected' => new MultipleScopes(a: 'A', b: 'B', c: 'C', d: ''),
+        ];
+
+        yield 'default true; default scope' => [
+            'data' => new MultipleScopesDefaultTrue(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+            'scopes' => [],
+            'expected' => new MultipleScopesDefaultTrue(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+        ];
+        yield 'default true; scope one' => [
+            'data' => new MultipleScopesDefaultTrue(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+            'scopes' => ['one'],
+            'expected' => new MultipleScopesDefaultTrue(a: 'A', b: 'B', c: 'C', d: '', e: 'E'),
+        ];
+        yield 'default true; scope two' => [
+            'data' => new MultipleScopesDefaultTrue(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+            'scopes' => ['two'],
+            'expected' => new MultipleScopesDefaultTrue(a: 'A', b: '', c: 'C', d: '', e: 'E'),
+        ];
+        yield 'default true; scope one, two' => [
+            'data' => new MultipleScopesDefaultTrue(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),
+            'scopes' => ['one', 'two'],
+            'expected' => new MultipleScopesDefaultTrue(a: 'A', b: 'B', c: 'C', d: '', e: 'E'),
         ];
     }
 }

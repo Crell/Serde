@@ -29,7 +29,7 @@ class Serializer
         protected readonly array $exporters,
         public readonly Formatter $formatter,
         public readonly TypeMapper $typeMapper,
-        public readonly ?string $scope = null,
+        public readonly array $scopes = [],
     ) {}
 
     public function serialize(mixed $value, mixed $runningValue, Field $field): mixed
@@ -76,6 +76,6 @@ class Serializer
      */
     public function propertiesFor(string $class): array
     {
-        return $this->analyzer->analyze($class, ClassSettings::class, $this->scope)->properties;
+        return $this->analyzer->analyze($class, ClassSettings::class, $this->scopes)->properties;
     }
 }
