@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Crell\Serde\Attributes;
 
 use Attribute;
+use Crell\AttributeUtils\SupportsScopes;
 use Crell\Serde\TypeMap;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY)]
-class StaticTypeMap implements TypeMap
+class StaticTypeMap implements TypeMap, SupportsScopes
 {
     /**
      * @param string $key
@@ -17,7 +18,13 @@ class StaticTypeMap implements TypeMap
     public function __construct(
         public readonly string $key,
         public readonly array $map,
+        protected readonly array $scopes = [null],
     ) {}
+
+    public function scopes(): array
+    {
+        return $this->scopes;
+    }
 
     public function keyField(): string
     {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde\Attributes;
 
 use Attribute;
+use Crell\AttributeUtils\SupportsScopes;
 use Crell\Serde\TypeField;
 use function Crell\fp\amapWithKeys;
 use function Crell\fp\explode;
@@ -13,7 +14,7 @@ use function Crell\fp\pipe;
 use function Crell\fp\reduce;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class DictionaryField implements TypeField
+class DictionaryField implements TypeField, SupportsScopes
 {
     public function __construct(
         /** Elements in this array are objects of this type. */
@@ -24,7 +25,13 @@ class DictionaryField implements TypeField
         public readonly ?string $joinOn = null,
         /** When exploding a string back to an array, trim() each value. Has no effect if $implodeOn is not set. */
         public readonly bool $trim = true,
+        protected readonly array $scopes = [null],
     ) {}
+
+    public function scopes(): array
+    {
+        return $this->scopes;
+    }
 
     public function shouldImplode(): bool
     {

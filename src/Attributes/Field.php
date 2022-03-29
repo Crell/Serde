@@ -129,7 +129,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         public readonly bool $exclude = false,
         public readonly array $alias = [],
         public readonly bool $strict = true,
-        public readonly array $scopes = [null],
+        protected readonly array $scopes = [null],
     ) {
         if ($default) {
             $this->defaultValue = $default;

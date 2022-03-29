@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace Crell\Serde\Attributes;
 
 use Attribute;
+use Crell\AttributeUtils\SupportsScopes;
 
 // @todo Should this maybe be called PostDeserialize?
 #[Attribute(Attribute::TARGET_METHOD)]
-class PostLoad
+class PostLoad implements SupportsScopes
 {
+    public function __construct(protected array $scopes = [null]) {}
 
+    public function scopes(): array
+    {
+        return $this->scopes;
+    }
 }
