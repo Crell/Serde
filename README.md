@@ -95,6 +95,8 @@ class Person
 
 Which you do is mostly a matter of preference, although if you are mixing Serde attributes with attributes from other libraries then the namespaced approach is advisable.
 
+There is also a `ClassSettings` attribute that may be placed on classes to be serialized.  At this time it has only one argument, `includeFieldsByDefault`, which defaults to `true`.  If set to false, a property with no `#[Field]` attribute will be ignored.  It is equivalent to setting `exclude: true` on all properties implicitly.
+
 ### `exclude` (bool, default false)
 
 If set to `true`, Serde will ignore the property entirely on both serializing and deserializing.
@@ -731,6 +733,143 @@ You may also write your own Type Maps as attributes.  The only requirements are:
 1. The class implements the `TypeMap` interface.
 2. The class is marked as an #[\Attribute].
 3. The class is legal on *both* classes and properties. That is, `#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]`
+
+### Scopes
+
+Serde supports "scopes" for having different versions of an attribute recognized in different contexts.
+
+Any attribute (`Field`, `TypeMap`, `SequenceField`, `DictionaryField`, `PostLoad`, etc.) may take a `scopes` argument, which accepts an array of strings.  If specified, that attribute is only valid if serializing or deserializing in that scope.  If no scoped attribute is specified, then the behavior will fall back to an unscoped attribute or an omitted attribute.
+
+For example, given this class:
+
+```php
+class User
+{
+    private string $username;
+
+    #[Field(exclude: true)]
+    private string $password;
+
+    #[Field(exclude: true)]
+    #[Field(scope: 'admin')]
+    private string $role;
+}
+```
+
+If you serialize it like so:
+
+```php
+$json = $serde->serialize($user, 'json');
+```
+
+It will result in this JSON response:
+
+```json
+{
+    "username": "Larry"
+}
+```
+
+That's because, in an unscoped request, the first `Field` on `$role` is used, which excludes it from the output.  However, if you specify a scope:
+
+```php
+$json = $serde->serialize($user, 'json', scopes: ['admin']);
+```
+
+Then the `admin` version of `$role`'s `Field` will be used, which is not excluded, and get this result:
+
+```json
+{
+    "username": "Larry",
+    "role": "Developer"
+}
+```
+
+When using scopes, it may be helpful to disable automatic property inclusion and require that each be specified explicitly.  For example:
+
+```php
+#[ClassSettings(includeFieldsByDefault: false)]
+class Product
+{
+    #[Field]
+    private int $id = 5;
+
+    #[Field]
+    #[Field(scopes: ['legacy'], serializedName: 'label')]
+    private string $name = 'Fancy widget';
+
+    #[Field(scopes: ['newsystem'])]
+    private float $price = '9.99';
+
+    #[Field(scopes: ['legacy'], serializedName: 'cost')]
+    private float $legacyPrice = 9.99;
+
+    #[Field(serializedName: 'desc')]
+    private string $description = 'A fancy widget';
+
+    private int $stock = 50;
+}
+```
+
+If serialized with no scope specified, it will result in this:
+
+```json
+{
+    "id": 5,
+    "name": "Fancy widget",
+    "desc": "A fancy widget"
+}
+```
+
+As those are the only fields that are "in scope" when no scope is specified.
+
+If serialized with the `legacy` scope:
+
+```json
+{
+    "id": 5,
+    "label": "Fancy widget",
+    "cost": 9.99,
+    "desc": "A fancy widget"
+}
+```
+
+The scope-specific `Field` on `$name` gets used instead, which changes the serialized name. The `$legacyPrice` property is also included now, but renamed to "cost".
+
+If serialized with the `newsystem` scope:
+
+```json
+{
+    "id": 5,
+    "label": "Fancy widget",
+    "price": "9.99",
+    "desc": "A fancy widget"
+}
+```
+
+In this case, the `$name` property uses the unscoped version of `Field`, and so is not renamed.  The string-based `$price` is now in-scope, but the float-based `$legacyPrice` is not.  Note that in none of these cases is the current `$stock` included, as it has no attribute at all.
+
+Finally, it's also possible to serialize multiple scopes simultaneously.  This is an OR operation, so any field marked for *any* specified scope will be included.
+
+```php
+$json = $serde->serialize($product, 'json', scopes: ['legacy', 'newsystem']);
+```
+
+```json
+{
+    "id": 5,
+    "name": "Fancy widget",
+    "price": "9.99",
+    "cost": 9.99,
+    "desc": "A fancy widget"
+}
+```
+
+Note that since there is both an unscoped and a scoped version of the `Field` on `$name`, the scoped one wins and the property gets renamed.
+
+If multiple attribute variants could apply for the specified scope, the lexically first in a scope will take precedence over later ones, and a scoped attribute will take precedence over an unscoped one.
+
+For more on scopes, see the [AttributeUtils](https://github.com/CrellAttributeUtils#Scopes) documentation.
 
 ## Extending Serde
 
