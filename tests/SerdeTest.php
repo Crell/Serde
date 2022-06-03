@@ -12,6 +12,7 @@ use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Callbacks\CallbackHost;
 use Crell\Serde\Records\CircularReference;
+use Crell\Serde\Records\DictionaryKeyTypes;
 use Crell\Serde\Records\Drupal\EmailItem;
 use Crell\Serde\Records\Drupal\FieldItemList;
 use Crell\Serde\Records\Drupal\LinkItem;
@@ -1089,6 +1090,33 @@ abstract class SerdeTest extends TestCase
         );
 
         self::assertEquals($expected, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function dictionary_key_string(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new DictionaryKeyTypes(
+            stringKey: ['a' => 'A', 'b' => 'B'],
+            intKey: [5 => 'C', 10 => 'D'],
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->dictionary_key_string_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: DictionaryKeyTypes::class);
+
+        self::assertEquals($data, $result);
+
+    }
+
+    public function dictionary_key_string_validate(mixed $serialized): void
+    {
+
     }
 
     /**

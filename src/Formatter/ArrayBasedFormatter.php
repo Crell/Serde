@@ -103,7 +103,7 @@ trait ArrayBasedFormatter
         $add = [];
         /** @var CollectionItem $item */
         foreach ($next->items as $item) {
-            $add = [...$add, ...$serializer->serialize($item->value, [], $item->field)];
+            $add += $serializer->serialize($item->value, [], $item->field);
         }
         $runningValue[$name] = $add;
         foreach ($field->extraProperties as $k => $v) {

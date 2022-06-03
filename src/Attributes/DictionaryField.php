@@ -6,6 +6,7 @@ namespace Crell\Serde\Attributes;
 
 use Attribute;
 use Crell\AttributeUtils\SupportsScopes;
+use Crell\Serde\KeyType;
 use Crell\Serde\TypeField;
 use function Crell\fp\amapWithKeys;
 use function Crell\fp\explode;
@@ -30,6 +31,7 @@ class DictionaryField implements TypeField, SupportsScopes
      */
     public function __construct(
         public readonly ?string $arrayType = null,
+        public readonly ?KeyType $keyType = null,
         public readonly ?string $implodeOn = null,
         public readonly ?string $joinOn = null,
         public readonly bool $trim = true,

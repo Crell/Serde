@@ -349,6 +349,16 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         }
     }
 
+    public function dictionary_key_string_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals('A', $toTest['stringKey']['a']);
+        self::assertEquals('B', $toTest['stringKey']['b']);
+        self::assertEquals('C', $toTest['intKey'][5]);
+        self::assertEquals('D', $toTest['intKey'][10]);
+    }
+
     abstract public function strict_mode_throws_examples(): iterable;
 
     public function strict_mode_throws_examples_data(): iterable

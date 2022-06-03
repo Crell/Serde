@@ -27,7 +27,7 @@ class DictionaryExporter implements Exporter, Importer
 
         $dict = new Dict();
         foreach ($value as $k => $v) {
-            $f = Field::create(serializedName: $k, phpType: \get_debug_type($v));
+            $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
             $dict->items[] = new CollectionItem(field: $f, value: $v);
         }
 
