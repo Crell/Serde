@@ -101,6 +101,13 @@ abstract class SerdeTest extends TestCase
     protected mixed $invalidDictStringKey;
 
     /**
+     * A serialized value for the DictionaryKeyTypes that has an int key where it should be a string.
+     *
+     * @see dictionary_key_int_in_string_throws_in_deserialize()
+     */
+    protected mixed $invalidDictIntKey;
+
+    /**
      * @test
      */
     public function point(): void
@@ -1154,26 +1161,16 @@ abstract class SerdeTest extends TestCase
     /**
      * @test
      */
-    public function dictionary_key_int_in_string_passes(): void
+    public function dictionary_key_int_in_string_throws_in_deserialize(): void
     {
+        $this->expectException(InvalidArrayKeyType::class);
+
         $s = new SerdeCommon(formatters: $this->formatters);
 
-        $data = new DictionaryKeyTypes(
-            // The 2 key is incorrect, but we can safely cast int to string.
-            stringKey: ['a' => 'A', 2 => 'B'],
-            intKey: [5 => 'C', 10 => 'D'],
-        );
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->dictionary_key_int_in_string_passes_validate($serialized);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: DictionaryKeyTypes::class);
-
-        self::assertEquals($data, $result);
+        $result = $s->deserialize($this->invalidDictIntKey, $this->format, DictionaryKeyTypes::class);
     }
 
-    function dictionary_key_int_in_string_passes_validate(mixed $serialized): void
+    function dictionary_key_int_in_string_throws_in_serialize_validate(mixed $serialized): void
     {
 
     }

@@ -180,18 +180,23 @@ class FieldValidationTest extends TestCase
             'typeField' => new DictionaryField(),
             'expected' => true,
         ];
-        // Numeric string keys get cast to int keys in PHP, so we have to allow this.
         yield 'numeric string keys to string-dictionary' => [
             'phpType' => 'array',
             'value' => ['0' => 1, '1' => 2, '2' => 3],
             'typeField' => new DictionaryField(keyType: KeyType::String),
-            'expected' => true,
+            'expected' => false,
         ];
         yield 'string keys to string-dictionary' => [
             'phpType' => 'array',
             'value' => ['a' => 1, 'b' => 2, 'c' => 3],
             'typeField' => new DictionaryField(keyType: KeyType::String),
             'expected' => true,
+        ];
+        yield 'mixed keys to string-dictionary' => [
+            'phpType' => 'array',
+            'value' => [0 => 1, 'b' => 2, 'c' => 3],
+            'typeField' => new DictionaryField(keyType: KeyType::String),
+            'expected' => false,
         ];
         yield 'string keys to numeric-dictionary' => [
             'phpType' => 'array',

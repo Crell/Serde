@@ -120,10 +120,19 @@ class DictionaryField implements TypeField, SupportsScopes
     public function validate(mixed $value): bool
     {
         if ($this->keyType === KeyType::Int) {
-            // Returns true if any keys are NOT integers.
+            // Returns false if any keys are NOT integers.
             return !pipe($value,
                 \array_keys(...),
                 amap(\is_int(...)),
+                afilter(static fn($v) => !$v),
+            );
+        }
+
+        if (($this->keyType === KeyType::String)) {
+            // Returns false if any keys are NOT strings.
+            return !pipe($value,
+                \array_keys(...),
+                amap(\is_string(...)),
                 afilter(static fn($v) => !$v),
             );
         }
