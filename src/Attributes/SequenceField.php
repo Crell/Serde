@@ -73,11 +73,10 @@ class SequenceField implements TypeField, SupportsScopes
 
     /**
      * @param array<mixed> $value
-     * @param bool $strict
      * @return bool
      */
-    public function validate(mixed $value, bool $strict): bool
+    public function validate(mixed $value): bool
     {
-        return array_is_list(array_keys($value));
+        return array_is_list($value);
     }
 }

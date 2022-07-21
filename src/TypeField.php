@@ -20,5 +20,5 @@ interface TypeField
      * @param mixed $value
      * @return bool
      */
-    public function validate(mixed $value, bool $strict): bool;
+    public function validate(mixed $value): bool;
 }

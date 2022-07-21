@@ -8,6 +8,8 @@ use Attribute;
 use Crell\AttributeUtils\SupportsScopes;
 use Crell\Serde\KeyType;
 use Crell\Serde\TypeField;
+use function Crell\fp\afilter;
+use function Crell\fp\amap;
 use function Crell\fp\amapWithKeys;
 use function Crell\fp\explode;
 use function Crell\fp\implode;
@@ -113,17 +115,17 @@ class DictionaryField implements TypeField, SupportsScopes
 
     /**
      * @param array<mixed> $value
-     * @param bool $strict
      * @return bool
      */
-    public function validate(mixed $value, bool $strict): bool
+    public function validate(mixed $value): bool
     {
         if ($this->keyType === KeyType::Int) {
-            foreach ($value as $k => $v) {
-                if (!is_int($k)) {
-                    return false;
-                }
-            }
+            // Returns true if any keys are NOT integers.
+            return !pipe($value,
+                \array_keys(...),
+                amap(\is_int(...)),
+                afilter(static fn($v) => !$v),
+            );
         }
         return true;
     }

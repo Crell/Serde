@@ -252,6 +252,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         string $serializedName,
         ?string $phpType = null,
         array $extraProperties = [],
+        TypeField $typeField = null,
     ): self
     {
         $new = new self();
@@ -261,7 +262,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
             $new->phpType = $phpType;
         }
         $new->typeMap = null;
-        $new->typeField = null;
+        $new->typeField = $typeField;
         $new->extraProperties = $extraProperties;
         $new->finalize();
         return $new;
@@ -308,17 +309,42 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     {
         $valueType = \get_debug_type($value);
 
-        /*
-        // @todo Come back to this. It needs way more testing.
-        if ($this->strict && $this->phpType !== $valueType) {
-            return false;
+        if ($this->phpType === $valueType) {
+            $valid = true;
+        } elseif (is_object($value) || class_exists($this->phpType) || interface_exists($this->phpType)) {
+            // For objects, do a type check and we're done.
+            $valid = $value instanceof $this->phpType;
+        } else {
+            $valid = match ([$this->phpType, $valueType]) {
+                // We don't want to allow numeric strings here,
+                // because that should be handled by the formatter
+                // and the strict mode flag, not here.
+                ['int', 'string'] => false,
+                // An int-esque float is fine; some formats auto-cast
+                // like that when deformatting.
+                ['int', 'float'] => floor($value) === $value,
+                ['int', 'array'] => false,
+                ['float', 'int'] => true,
+                ['float', 'string'] => false,
+                ['float', 'array'] => false,
+                // Because PHP arrays don't preserve ints and floats in keys,
+                // we have to allow strings to be more permissive.
+                // It sucks, but such is PHP.
+                ['string', 'int'] => true,
+                ['string', 'float'] => true,
+                ['string', 'array'] => false,
+                // Arrays take nothing else, obviously.
+                ['array', 'int'] => false,
+                ['array', 'float'] => false,
+                ['array', 'string'] => false,
+                // Default to true to allow the typeField to take over
+                // in any other case.
+                default => true,
+            };
         }
-        */
 
-        if ($this->typeField) {
-            return $this->typeField->validate($value, $this->strict);
-        }
-
-        return true;
+        // The value validates if it passes the simple check above,
+        // plus the typeField check, if any.
+        return $valid && ($this->typeField?->validate($value) ?? true);
     }
 }
