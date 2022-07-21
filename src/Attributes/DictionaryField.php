@@ -110,4 +110,21 @@ class DictionaryField implements TypeField, SupportsScopes
     {
         return $type === 'array';
     }
+
+    /**
+     * @param array<mixed> $value
+     * @param bool $strict
+     * @return bool
+     */
+    public function validate(mixed $value, bool $strict): bool
+    {
+        if ($this->keyType === KeyType::Int) {
+            foreach ($value as $k => $v) {
+                if (!is_int($k)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

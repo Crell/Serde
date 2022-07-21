@@ -349,7 +349,7 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         }
     }
 
-    public function dictionary_key_string_validate(mixed $serialized): void
+    public function dictionary_key_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
 

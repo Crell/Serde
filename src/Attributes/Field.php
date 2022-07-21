@@ -300,4 +300,25 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     {
         return $this->exclude;
     }
+
+    /**
+     * Validates that the provided value is legal according to this field definition.
+     */
+    public function validate(mixed $value): bool
+    {
+        $valueType = \get_debug_type($value);
+
+        /*
+        // @todo Come back to this. It needs way more testing.
+        if ($this->strict && $this->phpType !== $valueType) {
+            return false;
+        }
+        */
+
+        if ($this->typeField) {
+            return $this->typeField->validate($value, $this->strict);
+        }
+
+        return true;
+    }
 }

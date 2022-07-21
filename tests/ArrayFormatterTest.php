@@ -28,6 +28,12 @@ class ArrayFormatterTest extends ArrayBasedFormatterTest
                 'z' => 3,
             ]
         ];
+
+        $this->invalidDictStringKey = [
+            'stringKey' => ['a' => 'A', 2 => 'B'],
+            // The 'd' key here is invalid and won't deserialize.
+            'intKey' => [5 => 'C', 'd' => 'D'],
+        ];
     }
 
     protected function arrayify(mixed $serialized): array

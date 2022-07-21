@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
-use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;

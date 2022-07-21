@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-enum KeyType
+enum KeyType: string
 {
-    case String;
-    case Int;
+    case String = 'string';
+    case Int = 'int';
 }

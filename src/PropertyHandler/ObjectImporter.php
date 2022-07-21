@@ -8,6 +8,7 @@ use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Formatter\SupportsCollecting;
+use Crell\Serde\InvalidArrayKeyType;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 
@@ -59,6 +60,9 @@ class ObjectImporter implements Importer
                 $collectingObjects[] = $propField;
             } else {
                 $value = $dict[$propField->serializedName] ?? SerdeError::Missing;
+                if ($value !== SerdeError::Missing && !$propField->validate($value)) {
+                    throw InvalidArrayKeyType::create($propField, 'invalid');
+                }
                 if ($value === SerdeError::Missing) {
                     if ($propField->shouldUseDefault) {
                         $props[$propField->phpName] = $propField->defaultValue;

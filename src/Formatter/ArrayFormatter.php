@@ -6,7 +6,6 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
-use JetBrains\PhpStorm\ArrayShape;
 
 class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 {

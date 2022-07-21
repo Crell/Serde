@@ -35,6 +35,7 @@ use Crell\Serde\Records\MappedCollected\ThingList;
 use Crell\Serde\Records\MultiCollect\ThingOneA;
 use Crell\Serde\Records\MultiCollect\ThingTwoC;
 use Crell\Serde\Records\MultiCollect\Wrapper;
+use Crell\Serde\Records\MultipleScopes;
 use Crell\Serde\Records\MultipleScopesDefaultTrue;
 use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
@@ -50,7 +51,6 @@ use Crell\Serde\Records\Pagination\Results;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
-use Crell\Serde\Records\MultipleScopes;
 use Crell\Serde\Records\Shapes\Box;
 use Crell\Serde\Records\Shapes\Circle;
 use Crell\Serde\Records\Shapes\Rectangle;
@@ -92,6 +92,13 @@ abstract class SerdeTest extends TestCase
      * @see field_aliases_read_on_deserialize()
      */
     protected mixed $aliasedData;
+
+    /**
+     * A serialized value for the DictionaryKeyTypes that has a string key where it should be an int.
+     *
+     * @see dictionary_key_string_in_int_throws_on_deserialize()
+     */
+    protected mixed $invalidDictStringKey;
 
     /**
      * @test
@@ -1095,7 +1102,7 @@ abstract class SerdeTest extends TestCase
     /**
      * @test
      */
-    public function dictionary_key_string(): void
+    public function dictionary_key(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
@@ -1106,17 +1113,73 @@ abstract class SerdeTest extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->dictionary_key_string_validate($serialized);
+        $this->dictionary_key_validate($serialized);
 
         $result = $s->deserialize($serialized, from: $this->format, to: DictionaryKeyTypes::class);
 
         self::assertEquals($data, $result);
+    }
+
+    public function dictionary_key_validate(mixed $serialized): void
+    {
 
     }
 
-    public function dictionary_key_string_validate(mixed $serialized): void
+    /**
+     * @test
+     */
+    public function dictionary_key_int_in_string_passes(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new DictionaryKeyTypes(
+            // The 2 key is incorrect, but we can safely cast int to string.
+            stringKey: ['a' => 'A', 2 => 'B'],
+            intKey: [5 => 'C', 10 => 'D'],
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->dictionary_key_int_in_string_passes_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: DictionaryKeyTypes::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    function dictionary_key_int_in_string_passes_validate(mixed $serialized): void
     {
 
+    }
+
+    /**
+     * @test
+     */
+    public function dictionary_key_string_in_int_throws_on_serialize(): void
+    {
+        $this->expectException(InvalidArrayKeyType::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new DictionaryKeyTypes(
+            stringKey: ['a' => 'A', 2 => 'B'],
+            // The 'd' key here is invalid and won't serialize.
+            intKey: [5 => 'C', 'd' => 'D'],
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+    }
+
+    /**
+     * @test
+     */
+    public function dictionary_key_string_in_int_throws_on_deserialize(): void
+    {
+        $this->expectException(InvalidArrayKeyType::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $result = $s->deserialize($this->invalidDictStringKey, $this->format, DictionaryKeyTypes::class);
     }
 
     /**

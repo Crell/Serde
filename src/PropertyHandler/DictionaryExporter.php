@@ -9,6 +9,8 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
+use Crell\Serde\InvalidArrayKeyType;
+use Crell\Serde\KeyType;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 
@@ -16,17 +18,25 @@ class DictionaryExporter implements Exporter, Importer
 {
     public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        /** @var DictionaryField $typeField */
+        /** @var DictionaryField|null $typeField */
         $typeField = $field->typeField;
-        // $field MAY not actually be DictionaryField, in which case $typeField
-        // will still be null.  I don't know how better to explain that to PHPStan.
-        // @phpstan-ignore-next-line
+
         if ($typeField?->shouldImplode()) {
             return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
         $dict = new Dict();
         foreach ($value as $k => $v) {
+            // Most $runningValue implementations will be an array.
+            // Arrays in PHP force-cast an integer-string key to
+            // an integer.  That means we cannot guarantee the type
+            // of the key going out in the Exporter. The Formatter
+            // will have to do so, if it cares. However, we can still
+            // detect and reject string-in-int.
+            if ($typeField?->keyType === KeyType::Int && \get_debug_type($k) === 'string') {
+                // It's an int field, but the key is a string. That's a no-no.
+                throw InvalidArrayKeyType::create($field, 'string');
+            }
             $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
             $dict->items[] = new CollectionItem(field: $f, value: $v);
         }
