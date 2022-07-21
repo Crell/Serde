@@ -46,7 +46,7 @@ trait ArrayBasedDeformatter
         }
 
         if ($field->strict) {
-            if (!is_float($decoded[$field->serializedName])) {
+            if (!(is_float($decoded[$field->serializedName]) || is_int($decoded[$field->serializedName]))) {
                 throw TypeMismatch::create($field->serializedName, 'float', \get_debug_type($decoded[$field->serializedName]));
             }
             return $decoded[$field->serializedName];

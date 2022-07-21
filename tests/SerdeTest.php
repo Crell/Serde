@@ -218,6 +218,32 @@ abstract class SerdeTest extends TestCase
 
     }
 
+
+    /**
+     * @test
+     */
+    public function float_fields_take_ints(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new AllFieldTypes(
+            afloat: 5.0,
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->float_fields_take_ints_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    protected function float_fields_take_ints_validate(mixed $serialized): void
+    {
+
+    }
+
     /**
      * @test
      *
