@@ -446,6 +446,14 @@ When deserializing, the otherwise object-ignorant data will be upcast back to `P
 
 `arrayType` works the exact same way on a `DictionaryField`.
 
+#### `keyType`
+
+On `DictionaryField` only, it's possible to restrict the array to only allowing integer or string keys.  It has two legal values, `KeyType::Int` and `KeyType::String` (an enum).  If set to `KeyType::Int`, then deserialization will reject any arrays that have string keys, but will accept numeric strings.  If set to `KeyType::String`, then deserialiation will reject any arrays that have integer keys, including numeric strings.
+
+(PHP auto-casts integer string array keys to actual integers, so there is no way to allow them in string-based dictionaries.)
+
+If no value is set, then either key type will be accepted.
+
 #### `implodeOn`
 
 The `implodeOn` argument to `SequenceField`, if present, indicates that the value should be joined into a string serialization, using the provided value as glue.  For example:
