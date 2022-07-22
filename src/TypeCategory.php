@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-// @todo I dislike this name.
+/**
+ * The general cateogry of type.
+ *
+ * These do not correspond to actual types, but to the class of type that
+ * Serde needs to handle differently.
+ */
 enum TypeCategory
 {
     case Scalar;
