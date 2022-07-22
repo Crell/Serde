@@ -7,6 +7,7 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
+use Crell\Serde\InvalidFieldForFlattening;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
@@ -44,6 +45,22 @@ class ObjectExporter implements Exporter
         return $serializer->formatter->serializeObject($runningValue, $field, $dict, $serializer);
     }
 
+    /**
+     * If appropriate, flatten a compound field into discrete items.
+     *
+     * This method is called as a reducing function.
+     *
+     * @param Dict $dict
+     *   The
+     * @param Field $field
+     *   Field definition.
+     * @param callable $propReader
+     *   The value reader bound to the current property.
+     * @param Serializer $serializer
+     *   The serializer context.
+     * @return Dict
+     *   The reducing value, with whatever appropriate additional items added.
+     */
     protected function flattenValue(Dict $dict, Field $field, callable $propReader, Serializer $serializer): Dict
     {
         $value = $propReader($field->phpName);
@@ -77,8 +94,7 @@ class ObjectExporter implements Exporter
             return $dict;
         }
 
-        // @todo Better exception.
-        throw new \RuntimeException('Invalid flattening field type');
+        throw InvalidFieldForFlattening::create($field);
     }
 
     protected function reduceArrayElement(Dict $dict, mixed $val, string|int $key, ?TypeMap $map): Dict
