@@ -6,6 +6,7 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
+use Crell\Serde\FormatParseError;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMismatch;
@@ -112,9 +113,9 @@ trait ArrayBasedDeformatter
         if (!isset($decoded[$field->serializedName])) {
             return SerdeError::Missing;
         }
-        // @todo Still unsure if this should be an exception instead.
+
         if (!is_array($decoded[$field->serializedName])) {
-            return SerdeError::FormatError;
+            throw FormatParseError::create($field, $this->format(), $decoded);
         }
 
         // This line is fine, because if typeField is somehow not of a type with an
@@ -167,9 +168,8 @@ trait ArrayBasedDeformatter
             return SerdeError::Missing;
         }
 
-        // @todo Still unsure if this should be an exception instead.
         if (!is_array($decoded[$key])) {
-            return SerdeError::FormatError;
+            throw FormatParseError::create($field, $this->format(), $decoded);
         }
 
         $data = $decoded[$key];

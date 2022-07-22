@@ -14,6 +14,5 @@ class Rectangle implements Shape
     public function area(): float
     {
         return ($this->bottomRight->x - $this->topLeft->x) * ($this->bottomRight->y - $this->topLeft->y);
-        // TODO: Implement area() method.
     }
 }
