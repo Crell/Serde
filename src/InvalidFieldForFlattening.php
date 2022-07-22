@@ -16,7 +16,7 @@ class InvalidFieldForFlattening extends \InvalidArgumentException
 
         $new->field = $field;
 
-        $new->message = sprintf('Tried to flatten field %s of type %s.  Only objects and arrays may have the flatten key set.', $field->phpName, $field->phpType);
+        $new->message = sprintf('Tried to flatten field %s of type %s.  Only objects and arrays may have the flatten key set.', $field->phpName ?? $field->serializedName, $field->phpType);
 
         return $new;
     }

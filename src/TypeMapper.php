@@ -21,8 +21,7 @@ class TypeMapper
     public function typeMapForField(Field $field): ?TypeMap
     {
         if (!in_array($field->typeCategory, [TypeCategory::Object, TypeCategory::Array], true)) {
-            // @todo Better exception.
-            throw new \RuntimeException('Can only get class for a class Field.');
+            throw TypeMapOnNonObjectField::create($field);
         }
 
         return $this->getOverrideMapFor($field->phpType)
@@ -47,8 +46,7 @@ class TypeMapper
     public function getTargetClass(Field $field, array $data): ?string
     {
         if ($field->typeCategory !== TypeCategory::Object) {
-            // @todo Better exception.
-            throw new \RuntimeException('Can only get class for a class Field.');
+            throw TypeMapOnNonObjectField::create($field);
         }
 
         if (!$map = $this->typeMapForField($field)) {
