@@ -55,14 +55,10 @@ enum Cases implements RenamingStrategy
                 implode(''),
                 lcfirst(...),
             ),
-            // @todo The more interesting ones.
         };
     }
 
     /**
-     * @todo This can likely be improved.
-     *
-     * @param string $input
      * @return string[]
      */
     protected function splitString(string $input): array

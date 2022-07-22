@@ -7,7 +7,6 @@ namespace Crell\Serde\Attributes;
 use Attribute;
 use Crell\AttributeUtils\SupportsScopes;
 
-// @todo Should this maybe be called PostDeserialize?
 #[Attribute(Attribute::TARGET_METHOD)]
 class PostLoad implements SupportsScopes
 {
