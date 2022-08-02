@@ -30,7 +30,7 @@ $serde = new SerdeCommon();
 $object = new SomeClass();
 // Populate $object somehow;
 
-$jsonString = $serde->serialize($object, to: 'json');
+$jsonString = $serde->serialize($object, format: 'json');
 
 $deserializedObject = $serde->deserialize($jsonString, from: 'json', to: SomeClass::class);
 ```
