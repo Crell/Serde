@@ -24,6 +24,8 @@ interface Deformatter
 
     public function deserializeString(mixed $decoded, Field $field): string|SerdeError;
 
+    public function deserializeNull(mixed $decoded, Field $field): ?SerdeError;
+
     /**
      * @param mixed $decoded
      * @param Field $field

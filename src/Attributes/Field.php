@@ -275,6 +275,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
             $this->phpType === 'array' => TypeCategory::Array,
             \enum_exists($this->phpType) => $this->enumType($this->phpType),
             $this->phpType === 'object', \class_exists($this->phpType), \interface_exists($this->phpType) => TypeCategory::Object,
+            $this->phpType === 'null' => TypeCategory::Null,
             default => throw UnsupportedType::create($this->phpType),
         };
     }

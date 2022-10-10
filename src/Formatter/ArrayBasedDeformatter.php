@@ -91,6 +91,21 @@ trait ArrayBasedDeformatter
         return (string)($decoded[$field->serializedName]);
     }
 
+    public function deserializeNull(mixed $decoded, Field $field): ?SerdeError
+    {
+        // isset() returns false for null, so we cannot use that. Thanks, PHP.
+        if (!array_key_exists($field->serializedName, $decoded)) {
+            return SerdeError::Missing;
+        }
+
+        // Strict and weak mode are the same here; null must always be null.
+        if (!is_null($decoded[$field->serializedName])) {
+            throw TypeMismatch::create($field->serializedName, 'null', \get_debug_type($decoded[$field->serializedName]));
+        }
+
+        return $decoded[$field->serializedName];
+    }
+
     public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
     {
         if (!isset($decoded[$field->serializedName])) {

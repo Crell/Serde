@@ -18,6 +18,7 @@ enum TypeCategory
     case UnitEnum;
     case IntEnum;
     case StringEnum;
+    case Null;
 
     public function isEnum(): bool
     {

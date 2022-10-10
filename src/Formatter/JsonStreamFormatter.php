@@ -139,4 +139,13 @@ class JsonStreamFormatter implements Formatter
         return $this->serializeDictionary($runningValue, $field, $next, $serializer);
     }
 
+    /**
+     * @param FormatterStream $runningValue
+     */
+    public function serializeNull(mixed $runningValue, Field $field, mixed $next): mixed
+    {
+        $runningValue->write('null');
+        return $runningValue;
+    }
+
 }

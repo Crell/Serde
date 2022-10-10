@@ -19,6 +19,7 @@ use Crell\Serde\PropertyHandler\EnumExporter;
 use Crell\Serde\PropertyHandler\Exporter;
 use Crell\Serde\PropertyHandler\Importer;
 use Crell\Serde\PropertyHandler\NativeSerializeExporter;
+use Crell\Serde\PropertyHandler\NullExporter;
 use Crell\Serde\PropertyHandler\ObjectExporter;
 use Crell\Serde\PropertyHandler\ObjectImporter;
 use Crell\Serde\PropertyHandler\ScalarExporter;
@@ -71,6 +72,7 @@ class SerdeCommon extends Serde
         // Slot any custom handlers in before the generic object reader.
         $handlers = [
             new ScalarExporter(),
+            new NullExporter(),
             new SequenceExporter(),
             new DictionaryExporter(),
             new DateTimeExporter(),

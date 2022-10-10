@@ -33,4 +33,6 @@ interface Formatter
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): mixed;
 
     public function serializeObject(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): mixed;
+
+    public function serializeNull(mixed $runningValue, Field $field, mixed $next): mixed;
 }

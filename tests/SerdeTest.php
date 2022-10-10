@@ -40,6 +40,7 @@ use Crell\Serde\Records\MultipleScopesDefaultTrue;
 use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
+use Crell\Serde\Records\NullArrays;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Pagination\DetailedResults;
 use Crell\Serde\Records\Pagination\NestedPagination;
@@ -1203,6 +1204,29 @@ abstract class SerdeTest extends TestCase
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $result = $s->deserialize($this->invalidDictStringKey, $this->format, DictionaryKeyTypes::class);
+    }
+
+    /**
+     * @test
+     */
+    public function array_of_null_serializes_cleanly(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new NullArrays();
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->array_of_null_serializes_cleanly_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: NullArrays::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function array_of_null_serializes_cleanly_validate(mixed $serialized): void
+    {
+
     }
 
     /**

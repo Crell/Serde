@@ -14,6 +14,7 @@ use Crell\Serde\Records\MultiCollect\ThingOneA;
 use Crell\Serde\Records\MultiCollect\ThingTwoC;
 use Crell\Serde\Records\MultiCollect\Wrapper;
 use Crell\Serde\Records\NestedFlattenObject;
+use Crell\Serde\Records\NullArrays;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Pagination\DetailedResults;
 use Crell\Serde\Records\Pagination\NestedPagination;
@@ -152,6 +153,10 @@ class JsonStreamFormatterTest extends TestCase
                 implodedSeq: [1, 2, 3],
                 implodedDict: ['a' => 'A', 'b' => 'B'],
             )
+        ];
+
+        yield NullArrays::class => [
+            'data' => new NullArrays(),
         ];
     }
 }

@@ -122,4 +122,16 @@ trait ArrayBasedFormatter
     {
         return $this->serializeDictionary($runningValue, $field, $next, $serializer);
     }
+
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param int $next
+     * @return array<string, mixed>
+     */
+    public function serializeNull(mixed $runningValue, Field $field, mixed $next): mixed
+    {
+        $runningValue[$field->serializedName] = $next;
+        return $runningValue;
+    }
 }

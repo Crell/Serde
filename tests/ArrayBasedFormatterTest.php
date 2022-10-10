@@ -391,4 +391,11 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
             'foundType' => 'int',
         ];
     }
+
+    public function array_of_null_serializes_cleanly_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertNull($toTest['arr'][0]);
+    }
 }
