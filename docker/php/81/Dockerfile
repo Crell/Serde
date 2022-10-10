@@ -1,4 +1,4 @@
-FROM php:8.1.10-cli
+FROM php:8.1.11-cli
 WORKDIR /usr/src/myapp
 
 RUN apt-get update && apt-get install zip unzip git -y \
