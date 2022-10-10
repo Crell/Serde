@@ -18,6 +18,7 @@ use Crell\Serde\PropertyHandler\DictionaryExporter;
 use Crell\Serde\PropertyHandler\EnumExporter;
 use Crell\Serde\PropertyHandler\Exporter;
 use Crell\Serde\PropertyHandler\Importer;
+use Crell\Serde\PropertyHandler\MixedExporter;
 use Crell\Serde\PropertyHandler\NativeSerializeExporter;
 use Crell\Serde\PropertyHandler\NullExporter;
 use Crell\Serde\PropertyHandler\ObjectExporter;
@@ -73,6 +74,7 @@ class SerdeCommon extends Serde
         $handlers = [
             new ScalarExporter(),
             new NullExporter(),
+            new MixedExporter(),
             new SequenceExporter(),
             new DictionaryExporter(),
             new DateTimeExporter(),

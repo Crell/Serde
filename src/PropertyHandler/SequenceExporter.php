@@ -22,13 +22,22 @@ class SequenceExporter implements Exporter, Importer
             return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
+        $seq = $this->arrayToSequence($value);
+
+        return $serializer->formatter->serializeSequence($runningValue, $field, $seq, $serializer);
+    }
+
+    /**
+     * @param mixed[] $value
+     */
+    protected function arrayToSequence(array $value): Sequence
+    {
         $seq = new Sequence();
         foreach ($value as $k => $v) {
             $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
             $seq->items[] = new CollectionItem(field: $f, value: $v);
         }
-
-        return $serializer->formatter->serializeSequence($runningValue, $field, $seq, $serializer);
+        return $seq;
     }
 
     public function canExport(Field $field, mixed $value, string $format): bool

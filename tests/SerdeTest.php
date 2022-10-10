@@ -32,6 +32,7 @@ use Crell\Serde\Records\MappedCollected\ThingA;
 use Crell\Serde\Records\MappedCollected\ThingB;
 use Crell\Serde\Records\MappedCollected\ThingC;
 use Crell\Serde\Records\MappedCollected\ThingList;
+use Crell\Serde\Records\MixedVal;
 use Crell\Serde\Records\MultiCollect\ThingOneA;
 use Crell\Serde\Records\MultiCollect\ThingTwoC;
 use Crell\Serde\Records\MultiCollect\Wrapper;
@@ -1225,6 +1226,39 @@ abstract class SerdeTest extends TestCase
     }
 
     public function array_of_null_serializes_cleanly_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     * @dataProvider mixed_val_property_examples
+     */
+    public function mixed_val_property(mixed $data): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->mixed_val_property_validate($serialized, $data);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: MixedVal::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function mixed_val_property_examples(): iterable
+    {
+        yield 'string' => [new MixedVal('hello')];
+        yield 'int' => [new MixedVal(5)];
+        yield 'float' => [new MixedVal(3.14)];
+        yield 'array' => [new MixedVal(['a', 'b', 'c'])];
+        // Objects can't work, because they cannot be imported without type data.
+        // Exporting might.  Todo for later.
+        //yield 'object' => [new Point(3, 4, 5)];
+    }
+
+    public function mixed_val_property_validate(mixed $serialized, mixed $data): void
     {
 
     }

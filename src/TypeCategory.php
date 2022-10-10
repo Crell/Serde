@@ -19,6 +19,7 @@ enum TypeCategory
     case IntEnum;
     case StringEnum;
     case Null;
+    case Mixed;
 
     public function isEnum(): bool
     {

@@ -25,6 +25,19 @@ class DictionaryExporter implements Exporter, Importer
             return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
+        $dict = $this->arrayToDict($value, $field);
+
+        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
+    }
+
+    /**
+     * @param array<mixed, mixed> $value
+     */
+    protected function arrayToDict(array $value, Field $field): Dict
+    {
+        /** @var DictionaryField|null $typeField */
+        $typeField = $field->typeField;
+
         $dict = new Dict();
         foreach ($value as $k => $v) {
             // Most $runningValue implementations will be an array.
@@ -41,7 +54,7 @@ class DictionaryExporter implements Exporter, Importer
             $dict->items[] = new CollectionItem(field: $f, value: $v);
         }
 
-        return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
+        return $dict;
     }
 
     public function canExport(Field $field, mixed $value, string $format): bool
