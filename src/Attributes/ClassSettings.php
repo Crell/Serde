@@ -21,12 +21,14 @@ class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttri
      */
     public readonly ?TypeMap $typeMap;
 
-    /** @var Field[] */
+    /** @var array<string, Field> */
+    #[DictionaryField(arrayType: Field::class)]
     public readonly array $properties;
 
     public readonly string $phpType;
 
     /** @var string[] */
+    #[SequenceField]
     public readonly array $postLoadCallacks;
 
     /**
@@ -51,7 +53,7 @@ class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttri
     }
 
     /**
-     * @param Field[] $properties
+     * @param array<string, Field> $properties
      */
     public function setProperties(array $properties): void
     {
