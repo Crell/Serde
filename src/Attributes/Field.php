@@ -261,6 +261,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         ?string $phpType = null,
         array $extraProperties = [],
         TypeField $typeField = null,
+        bool $isNullable = false,
     ): self
     {
         $new = new self();
@@ -270,6 +271,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
             $new->phpType = $phpType;
         }
         $new->typeMap = null;
+        $new->isNullable = $isNullable;
         $new->typeField = $typeField;
         $new->extraProperties = $extraProperties;
         $new->finalize();

@@ -40,7 +40,9 @@ use Crell\Serde\Records\MultipleScopes;
 use Crell\Serde\Records\MultipleScopesDefaultTrue;
 use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
+use Crell\Serde\Records\NestedFlattenObject2;
 use Crell\Serde\Records\NestedObject;
+use Crell\Serde\Records\NullableTypesObject;
 use Crell\Serde\Records\NullArrays;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Pagination\DetailedResults;
@@ -603,6 +605,34 @@ abstract class SerdeTest extends TestCase
     }
 
     protected function nested_objects_with_flattening_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+    * @test
+    * @group typemap
+    */
+    public function nested_objects_with_flattening2(): void
+    {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new NestedFlattenObject2('First', null);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->nested_objects_with_flattening2_validate($serialized);
+
+        // no deserialization as flattening causes the object always to be instantiated even when there is no property
+    }
+
+    protected function nested_objects_with_flattening2_validate(mixed $serialized): void
     {
 
     }
@@ -1226,6 +1256,30 @@ abstract class SerdeTest extends TestCase
     }
 
     public function array_of_null_serializes_cleanly_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function nullable_property_set_properly(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new NullableTypesObject(null, null, null, null, null);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->nullable_property_set_properly_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: NullableTypesObject::class);
+
+        self::assertEquals($data, $result);
+
+    }
+
+    public function nullable_property_set_properly_validate(mixed $serialized): void
     {
 
     }

@@ -36,6 +36,7 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals(4, $toTest['visibility']['public']);
         self::assertEquals(5, $toTest['visibility']['protected']);
         self::assertEquals(6, $toTest['visibility']['private']);
+        self::assertNull($toTest['visibility']['visibility']);
     }
 
     protected function optional_point_validate(mixed $serialized): void
@@ -114,6 +115,7 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('Second', $toTest['child']['name']);
         self::assertEquals('Third', $toTest['child']['child']['name']);
         self::assertEquals('Fourth', $toTest['child']['child']['child']['name']);
+        self::assertNull($toTest['child']['child']['child']['child']);
     }
 
     protected function nested_objects_with_flattening_validate(mixed $serialized): void
@@ -135,6 +137,14 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         $testFlattened($toTest['child']['child']['child']);
     }
 
+    protected function nested_objects_with_flattening2_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertCount(1, $toTest);
+        self::assertEquals('First', $toTest['description']);
+    }
+
     protected function empty_values_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
@@ -142,9 +152,9 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('narf', $toTest['nonConstructorDefault']);
         self::assertEquals('beep', $toTest['required']);
         self::assertEquals('boop', $toTest['withDefault']);
+        self::assertNull($toTest['roNullable']);
         self::assertArrayNotHasKey('nullableUninitialized', $toTest);
         self::assertArrayNotHasKey('uninitialized', $toTest);
-        self::assertArrayNotHasKey('roNullable', $toTest);
     }
 
     public function exclude_values_validate(mixed $serialized): void
@@ -397,5 +407,22 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         $toTest = $this->arrayify($serialized);
 
         self::assertNull($toTest['arr'][0]);
+    }
+
+    public function nullable_property_set_properly_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertArrayHasKey('str', $toTest);
+        self::assertArrayHasKey('int', $toTest);
+        self::assertArrayHasKey('float', $toTest);
+        self::assertArrayHasKey('bool', $toTest);
+        self::assertArrayHasKey('arr', $toTest);
+
+        self::assertNull($toTest['str']);
+        self::assertNull($toTest['int']);
+        self::assertNull($toTest['float']);
+        self::assertNull($toTest['bool']);
+        self::assertNull($toTest['arr']);
     }
 }

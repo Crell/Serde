@@ -70,6 +70,8 @@ Serde also supports post-load callbacks that allow you to re-initialize derived 
 
 PHP objects can be mutated to and from a serialized format.  Nested objects can be flattened or collected, classes with common interfaces can be mapped to the appropriate object, and array values can be imploded into a string for serialization and exploded back into an array when reading.
 
+Null values are supported in both directions, but beware of the difference between `null` and uninitialized (i.e. not provided field), ensure proper default values or proper usage.
+
 ## Configuration
 
 Serde's behavior is driven almost entirely through attributes.  Any class may be serialized from or deserialized to as-is with no additional configuration, but there is a great deal of configuration that may be opted-in to.
@@ -263,11 +265,13 @@ class Person
 }
 ```
 
-if deserialized from an empty source (such as `{}` in JSON), will result in an object with `location` set to `Hidden`, `name` set to `Anonymous`, and `age` still unintialized.
+if deserialized from an empty source (such as `{}` in JSON), will result in an object with `location` set to `Hidden`, `name` set to `Anonymous`, and `age` still uninitialized.
 
 ### `default` (mixed, default null)
 
 This key only applies on deserialization.  If specified, then if a value is missing in the incoming data being deserialized this value will be used instead, regardless of what the default in the source code itself is.
+
+When this key is not set and the value is missing (not provided at all) then the value remains uninitialized and access to it will lead to error unless properly checked.
 
 ### `strict` (bool, default true)
 
@@ -411,6 +415,8 @@ When collecting, only the lexically last flattened array will get any data, and 
 ```
 
 In this case, the `$other` property has two keys, `foo` and `bar`, with values `beep` and `boop`, respectively.  The same JSON will deserialize back to the same object as before.
+
+In case of serialization of property with `flatten` set to true but having `null` value, no property will be serialized. Yet on deserialization the object of uninitialized properties will be created.
 
 ### Sequences and Dictionaries
 

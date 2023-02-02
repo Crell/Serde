@@ -45,7 +45,7 @@ class JsonFormatterTest extends ArrayBasedFormatterTest
     protected function visibility_validate(mixed $serialized): void
     {
         parent::visibility_validate($serialized);
-        self::assertEquals('{"public":1,"protected":2,"private":3,"visibility":{"public":4,"protected":5,"private":6}}', $serialized);
+        self::assertEquals('{"public":1,"protected":2,"private":3,"visibility":{"public":4,"protected":5,"private":6,"visibility":null}}', $serialized);
     }
 
     protected function optional_point_validate(mixed $serialized): void

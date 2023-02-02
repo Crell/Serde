@@ -7,5 +7,6 @@ namespace Crell\Serde;
 enum SerdeError
 {
     case Missing;
+    case Uninitialized;
     case NoDefaultValue;
 }

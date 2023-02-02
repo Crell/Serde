@@ -8,6 +8,7 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
 use Crell\Serde\InvalidFieldForFlattening;
+use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
@@ -26,8 +27,7 @@ class ObjectExporter implements Exporter
      */
     public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        // This lets us read private values without messing with the Reflection API.
-        $propReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
+        $propReader = $this->getPropertyReader($value);
 
         /** @var \Crell\Serde\Dict $dict */
         $dict = pipe(
@@ -64,7 +64,7 @@ class ObjectExporter implements Exporter
     protected function flattenValue(Dict $dict, Field $field, callable $propReader, Serializer $serializer): Dict
     {
         $value = $propReader($field->phpName);
-        if ($value === null) {
+        if ($value === SerdeError::Uninitialized) {
             return $dict;
         }
 
@@ -80,7 +80,10 @@ class ObjectExporter implements Exporter
         }
 
         if ($field->typeCategory === TypeCategory::Object) {
-            $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
+            if ($field->isNullable && $value === null) {
+                return $dict;
+            }
+            $subPropReader = self::getPropertyReader($value);
             // This really wants to be explicit partial application. :-(
             $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader, $serializer);
             $properties = $serializer->propertiesFor($value::class);
@@ -121,5 +124,18 @@ class ObjectExporter implements Exporter
     public function canExport(Field $field, mixed $value, string $format): bool
     {
         return $field->typeCategory === TypeCategory::Object;
+    }
+
+    private function getPropertyReader(object $value): callable
+    {
+        return (static function (string $prop) use ($value): mixed {
+            // get property value using reflection
+            $prop = new \ReflectionProperty($value, $prop);
+            if (!$prop->isInitialized($value)) {
+                return SerdeError::Uninitialized;
+            }
+            $prop->setAccessible(true);
+            return $prop->getValue($value);
+        });
     }
 }
