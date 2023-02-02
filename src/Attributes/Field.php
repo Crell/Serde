@@ -319,7 +319,9 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     {
         $valueType = \get_debug_type($value);
 
-        if ($this->phpType === $valueType) {
+        if ($this->isNullable && $value === null) {
+            $valid = true;
+        } elseif ($this->phpType === $valueType) {
             $valid = true;
         } elseif (is_object($value) || class_exists($this->phpType) || interface_exists($this->phpType)) {
             // For objects, do a type check and we're done.
