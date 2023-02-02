@@ -49,6 +49,13 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     public readonly string $phpType;
 
     /**
+     * Whether this type is nullable.
+     *
+     * @var bool
+     */
+    public readonly bool $isNullable;
+
+    /**
      * The property name, not to be confused with the desired serialized $name.
      */
     public readonly string $phpName;
@@ -152,6 +159,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     {
         $this->phpName = $subject->name;
         $this->phpType ??= $this->getNativeType($subject);
+        $this->isNullable = $this->getIsNullable($subject);
 
         $constructorDefault = $this->getDefaultValueFromConstructor($subject);
 
@@ -348,5 +356,11 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         // The value validates if it passes the simple check above,
         // plus the typeField check, if any.
         return $valid && ($this->typeField?->validate($value) ?? true);
+    }
+
+    private function getIsNullable(\ReflectionProperty $subject): bool
+    {
+        $rType = $subject->getType();
+        return $rType instanceof \ReflectionNamedType && $rType->allowsNull();
     }
 }
