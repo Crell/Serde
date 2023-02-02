@@ -53,6 +53,7 @@ use Crell\Serde\Records\Pagination\Results;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
+use Crell\Serde\Records\ScalarArraysObject;
 use Crell\Serde\Records\Shapes\Box;
 use Crell\Serde\Records\Shapes\Circle;
 use Crell\Serde\Records\Shapes\Rectangle;
@@ -1205,6 +1206,105 @@ abstract class SerdeTest extends TestCase
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $result = $s->deserialize($this->invalidDictStringKey, $this->format, DictionaryKeyTypes::class);
+    }
+
+    /**
+     * @test
+     */
+    public function array_of_scalar_values_serializes_cleanly(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ScalarArraysObject(
+            ints: [1, 2, 3],
+            strings: ['a', 'b', 'c'],
+            floats: [1.1, 2.2, 3.3],
+            bools: [true, false, true],
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->array_of_scalar_values_serializes_cleanly_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: ScalarArraysObject::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function array_of_scalar_values_serializes_cleanly_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function array_of_scalar_values_invalid_int_value(): void
+    {
+        $this->expectException(TypeMismatch::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ScalarArraysObject(
+            ints: [1, "2"],
+            strings: [],
+            floats: [],
+            bools: [],
+        );
+        $serialized = $s->serialize($data, $this->format);
+        $s->deserialize($serialized, $this->format, ScalarArraysObject::class);
+    }
+
+    /**
+     * @test
+     */
+    public function array_of_scalar_values_invalid_string_value(): void
+    {
+        $this->expectException(TypeMismatch::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ScalarArraysObject(
+            ints: [],
+            strings: [1, "2"],
+            floats: [],
+            bools: [],
+        );
+        $serialized = $s->serialize($data, $this->format);
+        $s->deserialize($serialized, $this->format, ScalarArraysObject::class);
+    }
+
+    public function array_of_scalar_values_invalid_float_value(): void
+    {
+        $this->expectException(TypeMismatch::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ScalarArraysObject(
+            ints: [],
+            strings: [],
+            floats: [1.1, "2.2"],
+            bools: [],
+        );
+        $serialized = $s->serialize($data, $this->format);
+        $s->deserialize($serialized, $this->format, ScalarArraysObject::class);
+    }
+
+
+    public function array_of_scalar_values_invalid_bool_value(): void
+    {
+        $this->expectException(TypeMismatch::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ScalarArraysObject(
+            ints: [],
+            strings: [],
+            floats: [],
+            bools: [true, "false"],
+        );
+        $serialized = $s->serialize($data, $this->format);
+        $s->deserialize($serialized, $this->format, ScalarArraysObject::class);
     }
 
     /**

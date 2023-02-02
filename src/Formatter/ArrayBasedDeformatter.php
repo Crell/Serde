@@ -7,6 +7,7 @@ namespace Crell\Serde\Formatter;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\FormatParseError;
+use Crell\Serde\ScalarType;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMismatch;
@@ -116,7 +117,9 @@ trait ArrayBasedDeformatter
         // arrayType property, it resolves to null anyway, which is exactly what we want.
         // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
-        if (class_exists($class) || interface_exists($class)) {
+        if ($class instanceof ScalarType) {
+            return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class->value);
+        } elseif (class_exists($class) || interface_exists($class)) {
             return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class);
         }
 
@@ -137,7 +140,9 @@ trait ArrayBasedDeformatter
         // arrayType property, it resolves to null anyway, which is exactly what we want.
         // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
-        if (class_exists($class) || interface_exists($class)) {
+        if ($class instanceof ScalarType) {
+            return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class->value);
+        } elseif (class_exists($class) || interface_exists($class)) {
             return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class);
         }
 
@@ -158,7 +163,11 @@ trait ArrayBasedDeformatter
             $map = $type ? $deserializer->typeMapper->typeMapForClass($type) : null;
             $arrayType = $map?->findClass($v[$map->keyField()]) ?? $type ?? get_debug_type($v);
             $f = Field::create(serializedName: "$k", phpType: $arrayType);
-            $ret[$k] = $deserializer->deserialize($data, $f);
+            $val = $deserializer->deserialize($data, $f);
+            if ($val === SerdeError::Missing) {
+                throw TypeMismatch::create($f->serializedName, $f->phpType, get_debug_type($v));
+            }
+            $ret[$k] = $val;
             return $ret;
         };
 

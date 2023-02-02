@@ -420,7 +420,7 @@ Sometimes that works out, but other times the distinction between the two greatl
 
 #### `arrayType`
 
-On both a `#[SequenceField]` and `#[DictionaryField]`, the `arrayType` argument lets you specify the class that all values in that structure are.  For example, a sequence of integers can easily be serialized to and deserialized from most formats without any additional help.  However, an ordered list of `Product` objects could be serialized, but there's no way to tell then how to deserialize that data back to `Product` objects rather than just a nested associative array (which would also be legal).  The `arrayType` argument solves that issue.
+On both a `#[SequenceField]` and `#[DictionaryField]`, the `arrayType` argument lets you specify the class or single scalar type (via `ScalarType`) that all values in that structure are.  For example, a sequence of integers can easily be serialized to and deserialized from most formats without any additional help, but specifying `ScalarType::Int` will ensure that upon deserialization there will be only int values in the array.  However, an ordered list of `Product` objects could be serialized, but there's no way to tell then how to deserialize that data back to `Product` objects rather than just a nested associative array (which would also be legal).  The `arrayType` argument solves that issue.
 
 If `arrayType` is specified, then all values of that array are assumed to be of that type.  On deserialization, then, Serde will look for nested object-like structures (depending on the specific format), and convert those into the specified object type.
 
@@ -445,6 +445,9 @@ In this case, the attribute tells Serde that `$products` is an indexed, sequenti
 When deserializing, the otherwise object-ignorant data will be upcast back to `Product` objects.
 
 `arrayType` works the exact same way on a `DictionaryField`.
+
+When using `ScalarType` then all values have to conform to the single type, no exceptions are allowed not even `null` values. Any divergence will cause an exception to be thrown.
+Also beware that if the property is set to not match `arrayType` then this will be also serialized out!
 
 #### `keyType`
 

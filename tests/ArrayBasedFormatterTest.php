@@ -398,4 +398,13 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
 
         self::assertNull($toTest['arr'][0]);
     }
+
+    public function array_of_scalar_values_serializes_cleanly_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+        self::assertCount(3, $toTest['ints']);
+        self::assertCount(3, $toTest['strings']);
+        self::assertCount(3, $toTest['floats']);
+        self::assertCount(3, $toTest['bools']);
+    }
 }
