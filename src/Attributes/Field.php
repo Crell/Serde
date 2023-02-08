@@ -273,6 +273,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         return match (true) {
             in_array($this->phpType, ['int', 'float', 'bool', 'string'], true) => TypeCategory::Scalar,
             $this->phpType === 'array' => TypeCategory::Array,
+            $this->phpType === 'iterable', is_a($this->phpType, \Traversable::class, true) => TypeCategory::Iterable,
             \enum_exists($this->phpType) => $this->enumType($this->phpType),
             $this->phpType === 'object', \class_exists($this->phpType), \interface_exists($this->phpType) => TypeCategory::Object,
             $this->phpType === 'null' => TypeCategory::Null,

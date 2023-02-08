@@ -11,6 +11,7 @@ use Crell\Serde\Deserializer;
 use Crell\Serde\Sequence;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
+use Crell\Serde\TypeCategory;
 
 class SequenceExporter implements Exporter, Importer
 {
@@ -22,7 +23,7 @@ class SequenceExporter implements Exporter, Importer
             return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
-        $seq = $this->arrayToSequence($value);
+        $seq = $this->iterableToSequence($value);
 
         return $serializer->formatter->serializeSequence($runningValue, $field, $seq, $serializer);
     }
@@ -30,7 +31,7 @@ class SequenceExporter implements Exporter, Importer
     /**
      * @param mixed[] $value
      */
-    protected function arrayToSequence(array $value): Sequence
+    protected function iterableToSequence(iterable $value): Sequence
     {
         $seq = new Sequence();
         foreach ($value as $k => $v) {
@@ -42,7 +43,8 @@ class SequenceExporter implements Exporter, Importer
 
     public function canExport(Field $field, mixed $value, string $format): bool
     {
-        return $field->phpType === 'array' && \array_is_list($value);
+        return ($field->phpType === 'array' && \array_is_list($value))
+            || ($field->typeCategory === TypeCategory::Iterable && $field->typeField instanceof SequenceField);
     }
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
@@ -66,7 +68,8 @@ class SequenceExporter implements Exporter, Importer
         $typeField = $field->typeField;
         // This may still catch a dictionary that is unmarked. That is unavoidable.
         // Fortunately it doesn't break in practice because PHP doesn't care.
-        return $field->phpType === 'array' && ($typeField === null || $typeField instanceof SequenceField);
+        return ($field->phpType === 'array' && ($typeField === null || $typeField instanceof SequenceField))
+            || ($field->typeCategory === TypeCategory::Iterable && $field->typeField instanceof SequenceField);
     }
 }
 

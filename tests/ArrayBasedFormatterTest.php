@@ -11,6 +11,7 @@ use Crell\Serde\Records\FlatMapNested\NestedA;
 use Crell\Serde\Records\MappedCollected\ThingA;
 use Crell\Serde\Records\MappedCollected\ThingB;
 use Crell\Serde\Records\MappedCollected\ThingC;
+use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Shapes\Circle;
 
 abstract class ArrayBasedFormatterTest extends SerdeTest
@@ -390,6 +391,18 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
             'expectedType' => 'bool',
             'foundType' => 'int',
         ];
+    }
+
+    public function iterable_property_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals([1, 2, 3], $toTest['lazyInts']);
+        self::assertEquals(['a' => 1, 'b' => 2, 'c' => 3], $toTest['lazyIntDict']);
+        self::assertCount(3, $toTest['lazyPoints']);
+        self::assertEquals(['x' => 1, 'y' => 2, 'z' => 3], $toTest['lazyPoints'][0]);
+        self::assertCount(3, $toTest['lazyPointsDict']);
+        self::assertEquals(['x' => 1, 'y' => 2, 'z' => 3], $toTest['lazyPointsDict']['A']);
     }
 
     public function array_of_null_serializes_cleanly_validate(mixed $serialized): void

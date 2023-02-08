@@ -15,6 +15,7 @@ enum TypeCategory
     case Scalar;
     case Object;
     case Array;
+    case Iterable;
     case UnitEnum;
     case IntEnum;
     case StringEnum;

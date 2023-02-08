@@ -27,6 +27,7 @@ use Crell\Serde\Records\FlatMapNested\NestedA;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\ImplodingArrays;
 use Crell\Serde\Records\InvalidFieldType;
+use Crell\Serde\Records\Iterables;
 use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\MappedCollected\ThingA;
 use Crell\Serde\Records\MappedCollected\ThingB;
@@ -1172,7 +1173,7 @@ abstract class SerdeTest extends TestCase
         $result = $s->deserialize($this->invalidDictIntKey, $this->format, DictionaryKeyTypes::class);
     }
 
-    function dictionary_key_int_in_string_throws_in_serialize_validate(mixed $serialized): void
+    public function dictionary_key_int_in_string_throws_in_serialize_validate(mixed $serialized): void
     {
 
     }
@@ -1259,6 +1260,63 @@ abstract class SerdeTest extends TestCase
     }
 
     public function mixed_val_property_validate(mixed $serialized, mixed $data): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function iterable_property(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $intSeq = static function (): iterable {
+            yield from [1, 2, 3];
+        };
+
+        $intDict = static function (): iterable {
+            yield from ['a' => 1, 'b' => 2, 'c' => 3];
+        };
+
+        $pointSeq = static function(): iterable {
+            yield new Point(1, 2, 3);
+            yield new Point(4, 5, 6);
+            yield new Point(7, 2, 9);
+        };
+
+        $pointDict = static function(): iterable {
+            yield 'A' => new Point(1, 2, 3);
+            yield 'B' => new Point(4, 5, 6);
+            yield 'C' => new Point(7, 2, 9);
+        };
+
+        $data = new Iterables(
+            lazyInts: $intSeq(),
+            lazyIntDict: $intDict(),
+            lazyPoints: $pointSeq(),
+            lazyPointsDict: $pointDict(),
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->iterable_property_validate($serialized);
+
+        // Deserialization is always to an array, so we
+        // need a separate expected object.
+        $expected = new Iterables(
+            lazyInts: iterator_to_array($intSeq()),
+            lazyIntDict: iterator_to_array($intDict()),
+            lazyPoints: iterator_to_array($pointSeq()),
+            lazyPointsDict: iterator_to_array($pointDict()),
+        );
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Iterables::class);
+
+        self::assertEquals($expected, $result);
+    }
+
+    public function iterable_property_validate(mixed $serialized): void
     {
 
     }
