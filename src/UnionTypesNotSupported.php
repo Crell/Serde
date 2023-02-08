@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-use Crell\Serde\Attributes\Field;
-
 class UnionTypesNotSupported extends \TypeError
 {
     public readonly \ReflectionProperty $property;

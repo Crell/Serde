@@ -411,4 +411,16 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
 
         self::assertNull($toTest['arr'][0]);
     }
+
+    public function datetime_fields_support_custom_output_format_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame('2022-07-04T14:22:22.000-04:00', $toTest['default']);
+        self::assertSame('2022-07-04T14:22:22.000-04:00', $toTest['immutableDefault']);
+        self::assertSame('2022-07-04', $toTest['ymd']);
+        self::assertSame('2022-07-04', $toTest['immutableYmd']);
+        self::assertSame('2022-07-04T18:22:22.000+00:00', $toTest['forceToUtc']);
+        self::assertSame('2022-07-04T13:22:22.000-05:00', $toTest['forceToChicago']);
+    }
 }

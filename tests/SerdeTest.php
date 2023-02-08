@@ -12,6 +12,7 @@ use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Callbacks\CallbackHost;
 use Crell\Serde\Records\CircularReference;
+use Crell\Serde\Records\DateTimeExample;
 use Crell\Serde\Records\DictionaryKeyTypes;
 use Crell\Serde\Records\Drupal\EmailItem;
 use Crell\Serde\Records\Drupal\FieldItemList;
@@ -1197,6 +1198,55 @@ abstract class SerdeTest extends TestCase
         );
 
         $serialized = $s->serialize($data, $this->format);
+    }
+
+    /**
+     * @test
+     */
+    public function datetime_fields_support_custom_output_format(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $timeString = '4 July 2022 14:22:22';
+        $zone = new \DateTimeZone('America/New_York');
+
+        $stamp = new \DateTime($timeString, $zone);
+        $stampImmutable = new \DateTimeImmutable($timeString, $zone);
+        $data = new DateTimeExample(
+            default: $stamp,
+            immutableDefault: $stampImmutable,
+            ymd: $stamp,
+            immutableYmd: $stampImmutable,
+            forceToUtc: $stamp,
+            forceToChicago: $stampImmutable,
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->datetime_fields_support_custom_output_format_validate($serialized);
+
+        // Because some of the exported formats involve data loss,
+        // we don't actually expect the exact same thing back.
+        $expected = new DateTimeExample(
+            default: $stamp,
+            immutableDefault: $stampImmutable,
+            // Because the timezone information is not serialized, it comes back
+            // with none, and thus becomes UTC. This is expected.
+            ymd: new \DateTime('4 July 2022 0:0:0', new \DateTimeZone('UTC')),
+            immutableYmd: new \DateTimeImmutable('4 July 2022 0:0:0', new \DateTimeZone('UTC')),
+            forceToUtc: $stamp,
+            forceToChicago: $stampImmutable,
+        );
+
+        $result = $s->deserialize($serialized, from: $this->format, to: DateTimeExample::class);
+
+        self::assertEquals($expected, $result);
+
+    }
+
+    public function datetime_fields_support_custom_output_format_validate(mixed $serialized): void
+    {
+
     }
 
     /**
