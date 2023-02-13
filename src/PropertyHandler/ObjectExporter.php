@@ -126,7 +126,7 @@ class ObjectExporter implements Exporter
         return $field->typeCategory === TypeCategory::Object;
     }
 
-    private function getPropertyReader(object $value): callable
+    private static function getPropertyReader(object $value): callable
     {
         return (function (string $prop): mixed {
             if (isset($this->$prop)) {
