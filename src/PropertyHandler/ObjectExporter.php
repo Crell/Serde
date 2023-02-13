@@ -128,14 +128,14 @@ class ObjectExporter implements Exporter
 
     private function getPropertyReader(object $value): callable
     {
-        return (static function (string $prop) use ($value): mixed {
-            // get property value using reflection
-            $prop = new \ReflectionProperty($value, $prop);
-            if (!$prop->isInitialized($value)) {
-                return SerdeError::Uninitialized;
+        return (function (string $prop): mixed {
+            if (isset($this->$prop)) {
+                return $this->$prop;
             }
-            $prop->setAccessible(true);
-            return $prop->getValue($value);
-        });
+            if (\array_key_exists($prop, \get_object_vars($this))) {
+                return $this->$prop;
+            }
+            return SerdeError::Uninitialized;
+        })->bindTo($value, $value);
     }
 }
