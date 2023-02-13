@@ -13,7 +13,7 @@ class ScalarExporter implements Exporter, Importer
 {
     public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        if ($field->isNullable && $value === null) {
+        if ($value === null) {
             return $serializer->formatter->serializeNull($runningValue, $field, $value);
         }
         return match ($field->phpType) {
