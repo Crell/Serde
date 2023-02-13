@@ -104,9 +104,6 @@ trait ArrayBasedFormatter
         $add = [];
         /** @var CollectionItem $item */
         foreach ($next->items as $item) {
-            if ($item->value === SerdeSpecialValue::Uninitialized) {
-                continue;
-            }
             $add += $serializer->serialize($item->value, [], $item->field);
         }
         $runningValue[$name] = $add;
