@@ -40,6 +40,7 @@ use Crell\Serde\Records\MultipleScopes;
 use Crell\Serde\Records\MultipleScopesDefaultTrue;
 use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
+use Crell\Serde\Records\NullableDictionaryObject;
 use Crell\Serde\Records\ObjectWithFlattenedNestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
 use Crell\Serde\Records\NullableTypesObject;
@@ -68,8 +69,6 @@ use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
 use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\TestCase;
-use function array_key_exists;
-use function property_exists;
 
 /**
  * Testing base class.
@@ -1294,6 +1293,27 @@ abstract class SerdeTest extends TestCase
 
     }
 
+    public function nullable_dictionary_set_properly(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new NullableDictionaryObject(null);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->nullable_dictionary_set_properly_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: NullableTypesObject::class);
+
+        self::assertEquals($data, $result);
+
+    }
+
+    public function nullable_dictionary_set_properly_validate(mixed $serialized): void
+    {
+
+    }
+
     /**
      * @test
      * @dataProvider mixed_val_property_examples
@@ -1392,10 +1412,10 @@ abstract class SerdeTest extends TestCase
 
     private function assertUninitializedProperty(object $object, string $propertyName): void
     {
-        if(!property_exists($object, $propertyName)) {
+        if(!\property_exists($object, $propertyName)) {
             self::fail("Property $propertyName does not exist on object at all");
         }
-        $isInitialized = (fn (string $propertyName): bool => array_key_exists($propertyName, get_object_vars($object)))->bindTo($object, $object);
+        $isInitialized = (fn (string $propertyName): bool => \array_key_exists($propertyName, \get_object_vars($object)))->bindTo($object, $object);
         if ($isInitialized($propertyName)) {
             self::fail("Property $propertyName is already initialized which is unexpected");
         }

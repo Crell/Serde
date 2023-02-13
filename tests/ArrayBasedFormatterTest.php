@@ -425,4 +425,13 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertNull($toTest['bool']);
         self::assertNull($toTest['arr']);
     }
+
+    public function nullable_dictionary_set_properly_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertArrayHasKey('arr', $toTest);
+
+        self::assertNull($toTest['arr']);
+    }
 }

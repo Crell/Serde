@@ -106,10 +106,13 @@ trait ArrayBasedDeformatter
         return $decoded[$field->serializedName];
     }
 
-    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
+    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): null|array|SerdeError
     {
-        if (!isset($decoded[$field->serializedName])) {
+        if (!\array_key_exists($field->serializedName, $decoded)) {
             return SerdeError::Missing;
+        }
+        if (\array_key_exists($field->serializedName, $decoded) && $decoded[$field->serializedName] === null) {
+            return null;
         }
 
         // This line is fine, because if typeField is somehow not of a type with an
@@ -123,10 +126,13 @@ trait ArrayBasedDeformatter
         return $this->upcastArray($decoded[$field->serializedName], $deserializer);
     }
 
-    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
+    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): null|array|SerdeError
     {
-        if (!isset($decoded[$field->serializedName])) {
+        if (!\array_key_exists($field->serializedName, $decoded)) {
             return SerdeError::Missing;
+        }
+        if (\array_key_exists($field->serializedName, $decoded) && $decoded[$field->serializedName] === null) {
+            return null;
         }
 
         if (!is_array($decoded[$field->serializedName])) {
@@ -207,10 +213,8 @@ trait ArrayBasedDeformatter
                 $collectingArray = $propField;
             } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
                 $collectingObjects[] = $propField;
-            } elseif (isset($data[$propField->serializedName])) {
-                $ret[$propField->serializedName] = $deserializer->deserialize($data, $propField) ?? SerdeError::Missing;
-            } elseif (\array_key_exists($propField->serializedName, $data) && $data[$propField->serializedName] === null && $propField->isNullable) {
-                $ret[$propField->serializedName] = null;
+            } elseif (\array_key_exists($propField->serializedName, $data)) {
+                $ret[$propField->serializedName] = $deserializer->deserialize($data, $propField);
             } else {
                 $key = pipe(
                     $propField->alias,
