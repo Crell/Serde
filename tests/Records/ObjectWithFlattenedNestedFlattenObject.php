@@ -6,7 +6,7 @@ namespace Crell\Serde\Records;
 
 use Crell\Serde\Attributes\Field;
 
-class NestedFlattenObject2
+class ObjectWithFlattenedNestedFlattenObject
 {
     public function __construct(
         public string $description,

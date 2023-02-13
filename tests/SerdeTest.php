@@ -40,7 +40,7 @@ use Crell\Serde\Records\MultipleScopes;
 use Crell\Serde\Records\MultipleScopesDefaultTrue;
 use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
-use Crell\Serde\Records\NestedFlattenObject2;
+use Crell\Serde\Records\ObjectWithFlattenedNestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
 use Crell\Serde\Records\NullableTypesObject;
 use Crell\Serde\Records\NullArrays;
@@ -623,7 +623,7 @@ abstract class SerdeTest extends TestCase
 
         $s = new SerdeCommon(formatters: $this->formatters);
 
-        $data = new NestedFlattenObject2('First', null);
+        $data = new ObjectWithFlattenedNestedFlattenObject('First', null);
 
         $serialized = $s->serialize($data, $this->format);
 
