@@ -50,8 +50,6 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
     /**
      * Whether this type is nullable.
-     *
-     * @var bool
      */
     public readonly bool $isNullable;
 
