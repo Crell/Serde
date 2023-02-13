@@ -52,6 +52,10 @@ class NativeSerializeExporter implements Exporter, Importer
             return null;
         }
 
+        if ($dict === null) {
+            return null;
+        }
+
         $class = $deserializer->typeMapper->getTargetClass($field, $dict);
 
         if (is_null($class)) {

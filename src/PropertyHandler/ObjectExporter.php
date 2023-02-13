@@ -83,7 +83,7 @@ class ObjectExporter implements Exporter
             if ($field->isNullable && $value === null) {
                 return $dict;
             }
-            $subPropReader = self::getPropertyReader($value);
+            $subPropReader = $this->getPropertyReader($value);
             // This really wants to be explicit partial application. :-(
             $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader, $serializer);
             $properties = $serializer->propertiesFor($value::class);
@@ -126,7 +126,7 @@ class ObjectExporter implements Exporter
         return $field->typeCategory === TypeCategory::Object;
     }
 
-    private static function getPropertyReader(object $value): callable
+    private function getPropertyReader(object $value): callable
     {
         return (function (string $prop): mixed {
             if (isset($this->$prop)) {
