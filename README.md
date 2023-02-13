@@ -70,7 +70,9 @@ Serde also supports post-load callbacks that allow you to re-initialize derived 
 
 PHP objects can be mutated to and from a serialized format.  Nested objects can be flattened or collected, classes with common interfaces can be mapped to the appropriate object, and array values can be imploded into a string for serialization and exploded back into an array when reading.
 
-Null values are supported in both directions, but beware of the difference between `null` and uninitialized (i.e. not provided field), ensure proper default values or proper usage.
+Null values are supported in in deserialization as well as serialization.
+
+Beware of the uninitialized properties, if you do not provide a default value for a property in PHP declaration nor in `Field` attribute, then the value will be uninitialized if the payload does not contain the property.  This is not the same as `null` value, and you may get an error if you try to use it. Serialization will skip uninitialized properties.
 
 ## Configuration
 
@@ -416,7 +418,52 @@ When collecting, only the lexically last flattened array will get any data, and 
 
 In this case, the `$other` property has two keys, `foo` and `bar`, with values `beep` and `boop`, respectively.  The same JSON will deserialize back to the same object as before.
 
-In case of serialization of property with `flatten` set to true but having `null` value, no property will be serialized. Yet on deserialization the object of uninitialized properties will be created.
+With flattened object the serialization and deserialization is asymmetrical, consider this example:
+```php
+class Page
+{
+    public function __construct(
+        public int $total,
+        public int $limit,
+        #[Serde\Field(flatten: true)]
+        public null|PaginationState $state,
+    ) {}
+}
+
+class PaginationState
+{
+    public function __construct(
+        public int $offset,
+    ) {
+    }
+}
+$page = new Page(100, 10, null);
+```
+
+Will serialized with omitted the flattened object into this JSON payload
+
+```json
+{
+    "total":100,
+    "limit":10
+}
+```
+
+However, this payload will be deserialized intot the following object, especially notice the uninitialized DTO:
+
+```
+class Page#33 (3) {
+  public int $total =>
+  int(100)
+  public int $limit =>
+  int(10)
+  public ?PaginationState $state =>
+  class PaginationState#30 (1) {
+    public int $offset =>
+    *uninitialized*
+  }
+}
+```
 
 ### Sequences and Dictionaries
 
