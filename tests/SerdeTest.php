@@ -68,6 +68,8 @@ use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
 use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\TestCase;
+use function array_key_exists;
+use function property_exists;
 
 /**
  * Testing base class.
@@ -629,7 +631,15 @@ abstract class SerdeTest extends TestCase
 
         $this->nested_objects_with_flattening2_validate($serialized);
 
-        // no deserialization as flattening causes the object always to be instantiated even when there is no property
+        $result = $s->deserialize($serialized, from: $this->format, to: ObjectWithFlattenedNestedFlattenObject::class);
+
+        // deserialization is asymmetric for now (the nested object is created even in cases when it is nullable and null in deserialized data)
+        self::assertInstanceOf(ObjectWithFlattenedNestedFlattenObject::class, $result);
+        self::assertEquals('First', $result->description);
+        self::assertInstanceOf(NestedFlattenObject::class, $result->nested);
+        self::assertEquals(null, $result->nested->child);
+        self::assertEquals([], $result->nested->other);
+        $this->assertUninitializedProperty($result->nested, 'name');
     }
 
     protected function nested_objects_with_flattening2_validate(mixed $serialized): void
@@ -1378,5 +1388,17 @@ abstract class SerdeTest extends TestCase
             'scopes' => ['one', 'two'],
             'expected' => new MultipleScopesDefaultTrue(a: 'A', b: 'B', c: 'C', d: '', e: 'E'),
         ];
+    }
+
+    private function assertUninitializedProperty(object $object, string $propertyName): void
+    {
+        if(!property_exists($object, $propertyName)) {
+            self::fail("Property $propertyName does not exist on object at all");
+        }
+        $isInitialized = (fn (string $propertyName): bool => array_key_exists($propertyName, get_object_vars($object)))->bindTo($object, $object);
+        if ($isInitialized($propertyName)) {
+            self::fail("Property $propertyName is already initialized which is unexpected");
+        }
+        $this->addToAssertionCount(1);
     }
 }
