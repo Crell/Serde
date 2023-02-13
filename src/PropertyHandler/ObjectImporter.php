@@ -11,7 +11,6 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\InvalidArrayKeyType;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
-use function array_key_exists;
 
 class ObjectImporter implements Importer
 {
@@ -60,7 +59,7 @@ class ObjectImporter implements Importer
             } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
                 $collectingObjects[] = $propField;
             } else {
-                if (array_key_exists($propField->serializedName, $dict)) {
+                if (\array_key_exists($propField->serializedName, $dict)) {
                     $value = $dict[$propField->serializedName];
                 } else {
                     $value = SerdeError::Missing;

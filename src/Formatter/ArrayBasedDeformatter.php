@@ -10,7 +10,6 @@ use Crell\Serde\FormatParseError;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMismatch;
-use function array_key_exists;
 use function Crell\fp\first;
 use function Crell\fp\pipe;
 use function Crell\fp\reduceWithKeys;
@@ -95,7 +94,7 @@ trait ArrayBasedDeformatter
     public function deserializeNull(mixed $decoded, Field $field): ?SerdeError
     {
         // isset() returns false for null, so we cannot use that. Thanks, PHP.
-        if (!array_key_exists($field->serializedName, $decoded)) {
+        if (!\array_key_exists($field->serializedName, $decoded)) {
             return SerdeError::Missing;
         }
 
@@ -210,7 +209,7 @@ trait ArrayBasedDeformatter
                 $collectingObjects[] = $propField;
             } elseif (isset($data[$propField->serializedName])) {
                 $ret[$propField->serializedName] = $deserializer->deserialize($data, $propField) ?? SerdeError::Missing;
-            } elseif (array_key_exists($propField->serializedName, $data) && $data[$propField->serializedName] === null && $propField->isNullable) {
+            } elseif (\array_key_exists($propField->serializedName, $data) && $data[$propField->serializedName] === null && $propField->isNullable) {
                 $ret[$propField->serializedName] = null;
             } else {
                 $key = pipe(

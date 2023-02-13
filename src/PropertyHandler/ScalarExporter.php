@@ -6,10 +6,8 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
-use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
-use function array_key_exists;
 
 class ScalarExporter implements Exporter, Importer
 {
@@ -28,7 +26,7 @@ class ScalarExporter implements Exporter, Importer
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
-        if ($field->isNullable && array_key_exists($field->serializedName, $source) && $source[$field->serializedName] === null) {
+        if ($field->isNullable && \array_key_exists($field->serializedName, $source) && $source[$field->serializedName] === null) {
             return $deserializer->deformatter->deserializeNull($source, $field);
         }
         return match ($field->phpType) {
