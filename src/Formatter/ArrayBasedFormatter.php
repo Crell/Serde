@@ -9,7 +9,7 @@ use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
 use Crell\Serde\Sequence;
-use Crell\Serde\SerdeError;
+use Crell\Serde\SerdeSpecialValue;
 use Crell\Serde\Serializer;
 
 /**
@@ -104,7 +104,7 @@ trait ArrayBasedFormatter
         $add = [];
         /** @var CollectionItem $item */
         foreach ($next->items as $item) {
-            if ($item->value === SerdeError::Uninitialized) {
+            if ($item->value === SerdeSpecialValue::Uninitialized) {
                 continue;
             }
             $add += $serializer->serialize($item->value, [], $item->field);

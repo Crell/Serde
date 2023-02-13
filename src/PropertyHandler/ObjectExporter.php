@@ -8,7 +8,7 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
 use Crell\Serde\InvalidFieldForFlattening;
-use Crell\Serde\SerdeError;
+use Crell\Serde\SerdeSpecialValue;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
@@ -64,7 +64,7 @@ class ObjectExporter implements Exporter
     protected function flattenValue(Dict $dict, Field $field, callable $propReader, Serializer $serializer): Dict
     {
         $value = $propReader($field->phpName);
-        if ($value === SerdeError::Uninitialized) {
+        if ($value === SerdeSpecialValue::Uninitialized) {
             return $dict;
         }
 
@@ -135,7 +135,7 @@ class ObjectExporter implements Exporter
             if (\array_key_exists($prop, \get_object_vars($this))) {
                 return $this->$prop;
             }
-            return SerdeError::Uninitialized;
+            return SerdeSpecialValue::Uninitialized;
         })->bindTo($value, $value);
     }
 }

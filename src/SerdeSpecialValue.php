@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-enum SerdeError
+enum SerdeSpecialValue
 {
-    case Missing;
-    case NoDefaultValue;
+    case Uninitialized;
 }
