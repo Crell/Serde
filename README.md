@@ -509,6 +509,20 @@ Will serialize/deserialize to this JSON:
 
 As with `SequenceField`, values will automatically be `trim()`ed unless `trim: false` is specified in the attribute's argument list.
 
+### Generators, Iterables, and Traversables
+
+PHP has a number of "lazy list" options.  Generally, they are all objects that implement the `\Traversable` interface.  However, there are several syntax options available with their own subtleties.  Serde supports them in different ways.
+
+If a property is defined to be an `iterable`, then regardless of whether it's a `Traversable` object or a Generator the iterable will be "run out" and converted to an array by the serialization process.  Note that if the iterable is an infinite iterator, the process will continue forever and your program will freeze.  Don't do that.
+
+Also, when using an `iterable` property the property MUST be marked with either `#[SequenceField]` or `#[DictionaryField]` as appropriate.  Serde cannot deduce which it is on its own the way it (usually) can with arrays.
+
+On deserializing, the incoming values will always be assigned to an array.  As an array is an `iterable`, that is still type safe.  While in theory it would be possible to build a dynamic generator on the fly to materialize the values lazily, that would not actually save any memory.
+
+Note this does mean that serializing and deserializing an object will not be fully symmetric.  The initial object may have properties that are generators, but the deserialized object will have arrays instead.
+
+If a property is typed to be some other `Traversable` object (usually because it implements either `\Iterator` or `\IteratorAggregate`), then it will be serialized and deserialized as a normal object.  Its `iterable`-ness is ignored.  In this case, the `#[SequenceField]` and `#[DictionaryField]` attributes are forbidden.
+
 ### TypeMaps
 
 Type maps are a powerful feature of Serde that allows precise control over how objects with inheritance are serialized and deserialized.  Type Maps translate between the class of an object and some unique identifier that is included in the serialized data.
