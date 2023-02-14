@@ -65,6 +65,9 @@ use Crell\Serde\Records\Tasks\BigTask;
 use Crell\Serde\Records\Tasks\SmallTask;
 use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
+use Crell\Serde\Records\TraversableInts;
+use Crell\Serde\Records\TraversablePoints;
+use Crell\Serde\Records\Traversables;
 use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\TestCase;
 
@@ -1267,7 +1270,7 @@ abstract class SerdeTest extends TestCase
     /**
      * @test
      */
-    public function iterable_property(): void
+    public function generator_property_is_run_out(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
@@ -1300,7 +1303,7 @@ abstract class SerdeTest extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->iterable_property_validate($serialized);
+        $this->generator_property_is_run_out_validate($serialized);
 
         // Deserialization is always to an array, so we
         // need a separate expected object.
@@ -1316,7 +1319,37 @@ abstract class SerdeTest extends TestCase
         self::assertEquals($expected, $result);
     }
 
-    public function iterable_property_validate(mixed $serialized): void
+    public function generator_property_is_run_out_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function traversable_object_not_iterated(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $intSeq = new TraversableInts(4);
+
+        $pointSeq = new TraversablePoints(3, new Point(1, 1, 1));
+
+        $data = new Traversables(
+            lazyInts: $intSeq,
+            lazyPoints: $pointSeq,
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->traversable_object_not_iterated_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Traversables::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function traversable_object_not_iterated_validate(mixed $serialized): void
     {
 
     }

@@ -393,7 +393,7 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         ];
     }
 
-    public function iterable_property_validate(mixed $serialized): void
+    public function generator_property_is_run_out_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
 

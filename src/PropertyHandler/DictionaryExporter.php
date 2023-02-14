@@ -61,7 +61,7 @@ class DictionaryExporter implements Exporter, Importer
     public function canExport(Field $field, mixed $value, string $format): bool
     {
         return ($field->phpType === 'array' && !\array_is_list($value))
-            || ($field->typeCategory === TypeCategory::Iterable && $field->typeField instanceof DictionaryField);
+            || ($field->typeCategory === TypeCategory::Generator && $field->typeField instanceof DictionaryField);
     }
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
@@ -85,8 +85,6 @@ class DictionaryExporter implements Exporter, Importer
         $typeField = $field->typeField;
 
         return ($field->phpType === 'array' && ($typeField === null || $typeField instanceof DictionaryField))
-            || ($field->typeCategory === TypeCategory::Iterable && $field->typeField instanceof DictionaryField);
+            || ($field->typeCategory === TypeCategory::Generator && $field->typeField instanceof DictionaryField);
     }
-
-
 }

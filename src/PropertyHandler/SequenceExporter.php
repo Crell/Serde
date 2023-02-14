@@ -44,7 +44,7 @@ class SequenceExporter implements Exporter, Importer
     public function canExport(Field $field, mixed $value, string $format): bool
     {
         return ($field->phpType === 'array' && \array_is_list($value))
-            || ($field->typeCategory === TypeCategory::Iterable && $field->typeField instanceof SequenceField);
+            || ($field->typeCategory === TypeCategory::Generator && $field->typeField instanceof SequenceField);
     }
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
@@ -69,7 +69,7 @@ class SequenceExporter implements Exporter, Importer
         // This may still catch a dictionary that is unmarked. That is unavoidable.
         // Fortunately it doesn't break in practice because PHP doesn't care.
         return ($field->phpType === 'array' && ($typeField === null || $typeField instanceof SequenceField))
-            || ($field->typeCategory === TypeCategory::Iterable && $field->typeField instanceof SequenceField);
+            || ($field->typeCategory === TypeCategory::Generator && $field->typeField instanceof SequenceField);
     }
 }
 
