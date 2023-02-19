@@ -34,9 +34,7 @@ class DateField implements TypeField, SupportsScopes
 
     public function acceptsType(string $type): bool
     {
-        $ret = is_a($type, \DateTimeInterface::class, true);
-
-        return $ret;
+        return is_a($type, \DateTimeInterface::class, true);
     }
 
     public function validate(mixed $value): bool
@@ -44,5 +42,4 @@ class DateField implements TypeField, SupportsScopes
         // Nothing much to do here beyond the type.
         return true;
     }
-
 }
