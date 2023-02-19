@@ -544,7 +544,6 @@ class CsvTable
         #[SequenceField(arrayType: CsvRow::class)]
         public array $people,
     ) {}
-
 }
 
 class CsvRow
@@ -560,6 +559,8 @@ class CsvRow
 This combination will result in a three-column CSV file, and also deserialize from a three-column CSV file.
 
 The CSV formatter uses PHP's native CSV parsing and writing tools.  If you want to control the delimiters used, pass those as constructor arguments to a `CsvFormatter` instance and inject that into the `Serde` class instead of the default.
+
+Note that the lone property may be a generator.  That allows a CSV to be generated on the fly off of arbitrary data.  When deserialized, it will still deserialize to an array.
 
 ### TypeMaps
 
