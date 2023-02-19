@@ -49,12 +49,14 @@ Serde can serialize to:
 * JSON (`json`)
 * Streaming JSON (`json-stream`)
 * YAML (`yaml`)
+* CSV (`csv`)
 
 Serde can deserialize from:
 
 * PHP arrays (`array`)
 * JSON (`json`)
 * YAML (`yaml`)
+* CSV (`csv`)
 
 (YAML support requires the [`Symfony/Yaml`](https://github.com/symfony/yaml) library.)  XML support is in progress.
 
@@ -522,6 +524,42 @@ On deserializing, the incoming values will always be assigned to an array.  As a
 Note this does mean that serializing and deserializing an object will not be fully symmetric.  The initial object may have properties that are generators, but the deserialized object will have arrays instead.
 
 If a property is typed to be some other `Traversable` object (usually because it implements either `\Iterator` or `\IteratorAggregate`), then it will be serialized and deserialized as a normal object.  Its `iterable`-ness is ignored.  In this case, the `#[SequenceField]` and `#[DictionaryField]` attributes are forbidden.
+
+### CSV Formatter
+
+Serde includes support for serializing/deserializing CSV files.  However, because CSV is a more limited type of format only certain object structures are supported.
+
+Specifically, the object in question must have a single property that is marked `#[SequenceField]`, and it must have an explicit `arrayType` that is a class.  That class, in turn, may contain only `int`, `float`, or `string` properties.  Anything else will throw an error.
+
+For example:
+
+```php
+namespace Crell\Serde\Records;
+
+use Crell\Serde\Attributes\SequenceField;
+
+class CsvTable
+{
+    public function __construct(
+        #[SequenceField(arrayType: CsvRow::class)]
+        public array $people,
+    ) {}
+
+}
+
+class CsvRow
+{
+    public function __construct(
+        public string $name,
+        public int $age,
+        public float $balance,
+    ) {}
+}
+```
+
+This combination will result in a three-column CSV file, and also deserialize from a three-column CSV file.
+
+The CSV formatter uses PHP's native CSV parsing and writing tools.  If you want to control the delimiters used, pass those as constructor arguments to a `CsvFormatter` instance and inject that into the `Serde` class instead of the default.
 
 ### TypeMaps
 
