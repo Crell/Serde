@@ -1,12 +1,12 @@
 ---
-name: Quality Assurance
+name: PHPStan analysis
 on:
     push: ~
     pull_request: ~
 
 jobs:
-    phpunit:
-        name: PHPUnit tests on ${{ matrix.php }} ${{ matrix.composer-flags }}
+    phpstan:
+        name: PHPStan analysis tests on ${{ matrix.php }} ${{ matrix.composer-flags }}
         runs-on: ubuntu-latest
         strategy:
             matrix:
