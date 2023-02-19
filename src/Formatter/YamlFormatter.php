@@ -6,6 +6,7 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
+use Crell\Serde\Deserializer;
 use Symfony\Component\Yaml\Yaml;
 
 class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
@@ -57,10 +58,17 @@ class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
 
     /**
      * @param mixed $serialized
+     * @param ClassSettings $classDef
      * @param Field $rootField
+     * @param Deserializer $deserializer
      * @return array<string, mixed>
      */
-    public function deserializeInitialize(mixed $serialized, Field $rootField): array
+    public function deserializeInitialize(
+        mixed $serialized,
+        ClassSettings $classDef,
+        Field $rootField,
+        Deserializer $deserializer
+    ): array
     {
         return ['root' => Yaml::parse($serialized ?: '{}', $this->parseFlags)];
     }

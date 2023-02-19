@@ -6,6 +6,7 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
+use Crell\Serde\Deserializer;
 
 class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
 {
@@ -46,7 +47,12 @@ class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
     /**
      * @return array<string, mixed>
      */
-    public function deserializeInitialize(mixed $serialized, Field $rootField): array
+    public function deserializeInitialize(
+        mixed $serialized,
+        ClassSettings $classDef,
+        Field $rootField,
+        Deserializer $deserializer
+    ): array
     {
         return ['root' => $serialized ?: []];
     }
