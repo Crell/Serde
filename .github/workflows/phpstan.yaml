@@ -17,7 +17,6 @@ jobs:
             - uses: shivammathur/setup-php@v2
               with:
                   php-version: ${{ matrix.php }}
-                  coverage: xdebug
                   tools: composer:v2
             - run: composer update --no-progress ${{ matrix.composer-flags }}
             - run: vendor/bin/phpstan
