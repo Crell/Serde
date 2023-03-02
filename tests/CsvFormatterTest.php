@@ -18,15 +18,17 @@ class CsvFormatterTest extends TestCase
      * @test
      * @dataProvider csvExamples()
      */
-    public function csv_serialize(object $data): void
+    public function csv_serialize(object $data, ?object $expected = null): void
     {
         $s = new SerdeCommon(formatters: [new CsvFormatter()]);
 
         $result = $s->serialize($data, format: 'csv');
 
+        $expected ??= $data;
+
         $deserialized = $s->deserialize($result, from: 'csv', to: $data::class);
 
-        self::assertEquals($data, $deserialized);
+        self::assertEquals($expected, $deserialized);
     }
 
     public static function csvExamples(): iterable
@@ -46,15 +48,6 @@ class CsvFormatterTest extends TestCase
                 new CsvRow('Moe', 31, 99.9999),
             ]),
         ];
-    }
-
-    /**
-     * @test
-     * @dataProvider csvExamples()
-     */
-    public function lazy_csv_serialize(): void
-    {
-        $s = new SerdeCommon(formatters: [new CsvFormatter()]);
 
         $rows = static function() {
             yield new CsvRow('Larry', 100, 500);
@@ -62,21 +55,13 @@ class CsvFormatterTest extends TestCase
             yield new CsvRow('Moe', 31, 99.9999);
         };
 
-        $data = new CsvTableLazy($rows());
-
-        $result = $s->serialize($data, format: 'csv');
-
-        // The deserialized version will use an array, not a generator.
-        $expected = new CsvTableLazy([
-            new CsvRow('Larry', 100, 500),
-            new CsvRow('Curly', 25, 25.25),
-            new CsvRow('Moe', 31, 99.9999),
-        ]);
-
-        $deserialized = $s->deserialize($result, from: 'csv', to: CsvTableLazy::class);
-
-        self::assertEquals($expected, $deserialized);
+        yield [
+            'data' => new CsvTableLazy($rows()),
+            'expected' => new CsvTableLazy([
+                new CsvRow('Larry', 100, 500),
+                new CsvRow('Curly', 25, 25.25),
+                new CsvRow('Moe', 31, 99.9999),
+            ]),
+        ];
     }
-
-
 }
