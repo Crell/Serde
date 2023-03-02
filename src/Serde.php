@@ -105,8 +105,10 @@ abstract class Serde
             scopes: $scopes,
         );
 
+        $classDef = $this->analyzer->analyze($to, ClassSettings::class, scopes: $scopes);
+
         $rootField = $formatter->rootField($inner, $to);
-        $decoded = $formatter->deserializeInitialize($serialized, $rootField);
+        $decoded = $formatter->deserializeInitialize($serialized, $classDef, $rootField, $inner);
 
         $new = $inner->deserialize($decoded, $rootField);
 

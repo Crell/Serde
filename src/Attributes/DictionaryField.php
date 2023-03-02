@@ -110,7 +110,9 @@ class DictionaryField implements TypeField, SupportsScopes
 
     public function acceptsType(string $type): bool
     {
-        return $type === 'array';
+        return $type === 'array'
+            || $type === 'iterable'
+            || is_a($type, \Traversable::class, true);
     }
 
     /**

@@ -13,6 +13,7 @@ use Crell\Serde\InvalidArrayKeyType;
 use Crell\Serde\KeyType;
 use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
+use Crell\Serde\TypeCategory;
 
 class DictionaryExporter implements Exporter, Importer
 {
@@ -25,15 +26,15 @@ class DictionaryExporter implements Exporter, Importer
             return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
-        $dict = $this->arrayToDict($value, $field);
+        $dict = $this->iteratorToDict($value, $field);
 
         return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
     }
 
     /**
-     * @param array<mixed, mixed> $value
+     * @param iterable<mixed, mixed> $value
      */
-    protected function arrayToDict(array $value, Field $field): Dict
+    protected function iteratorToDict(iterable $value, Field $field): Dict
     {
         /** @var DictionaryField|null $typeField */
         $typeField = $field->typeField;
@@ -59,7 +60,8 @@ class DictionaryExporter implements Exporter, Importer
 
     public function canExport(Field $field, mixed $value, string $format): bool
     {
-        return $field->phpType === 'array' && !\array_is_list($value);
+        return ($field->phpType === 'array' && !\array_is_list($value))
+            || ($field->typeCategory === TypeCategory::Generator && $field->typeField instanceof DictionaryField);
     }
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
@@ -82,8 +84,7 @@ class DictionaryExporter implements Exporter, Importer
     {
         $typeField = $field->typeField;
 
-        return $field->phpType === 'array' && ($typeField === null || $typeField instanceof DictionaryField);
+        return ($field->phpType === 'array' && ($typeField === null || $typeField instanceof DictionaryField))
+            || ($field->typeCategory === TypeCategory::Generator && $field->typeField instanceof DictionaryField);
     }
-
-
 }

@@ -15,63 +15,11 @@ use function Crell\fp\reduceWithKeys;
 
 class JsonStreamFormatter implements Formatter
 {
+    use StreamFormatter;
+
     public function format(): string
     {
         return 'json-stream';
-    }
-
-    public function rootField(Serializer $serializer, string $type): Field
-    {
-        return Field::create('root', $type);
-    }
-
-    public function serializeInitialize(ClassSettings $classDef, Field $rootField): FormatterStream
-    {
-        return FormatterStream::new(fopen('php://temp/', 'wb'));
-    }
-
-    /**
-     * @param FormatterStream $runningValue
-     */
-    public function serializeFinalize(mixed $runningValue, ClassSettings $classDef): FormatterStream
-    {
-        return $runningValue;
-    }
-
-    /**
-     * @param FormatterStream $runningValue
-     */
-    public function serializeInt(mixed $runningValue, Field $field, int $next): FormatterStream
-    {
-        $runningValue->write((string)$next);
-        return $runningValue;
-    }
-
-    /**
-     * @param FormatterStream $runningValue
-     */
-    public function serializeFloat(mixed $runningValue, Field $field, float $next): FormatterStream
-    {
-        $runningValue->write((string)$next);
-        return $runningValue;
-    }
-
-    /**
-     * @param FormatterStream $runningValue
-     */
-    public function serializeString(mixed $runningValue, Field $field, string $next): FormatterStream
-    {
-        $runningValue->printf('"%s"', $next);
-        return $runningValue;
-    }
-
-    /**
-     * @param FormatterStream $runningValue
-     */
-    public function serializeBool(mixed $runningValue, Field $field, bool $next): FormatterStream
-    {
-        $runningValue->write($next ? 'true' : 'false');
-        return $runningValue;
     }
 
     /**

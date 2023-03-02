@@ -27,6 +27,7 @@ use Crell\Serde\Records\FlatMapNested\NestedA;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\ImplodingArrays;
 use Crell\Serde\Records\InvalidFieldType;
+use Crell\Serde\Records\Iterables;
 use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\MappedCollected\ThingA;
 use Crell\Serde\Records\MappedCollected\ThingB;
@@ -64,6 +65,9 @@ use Crell\Serde\Records\Tasks\BigTask;
 use Crell\Serde\Records\Tasks\SmallTask;
 use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
+use Crell\Serde\Records\TraversableInts;
+use Crell\Serde\Records\TraversablePoints;
+use Crell\Serde\Records\Traversables;
 use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\TestCase;
 
@@ -1172,7 +1176,7 @@ abstract class SerdeTest extends TestCase
         $result = $s->deserialize($this->invalidDictIntKey, $this->format, DictionaryKeyTypes::class);
     }
 
-    function dictionary_key_int_in_string_throws_in_serialize_validate(mixed $serialized): void
+    public function dictionary_key_int_in_string_throws_in_serialize_validate(mixed $serialized): void
     {
 
     }
@@ -1259,6 +1263,93 @@ abstract class SerdeTest extends TestCase
     }
 
     public function mixed_val_property_validate(mixed $serialized, mixed $data): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function generator_property_is_run_out(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $intSeq = static function (): iterable {
+            yield from [1, 2, 3];
+        };
+
+        $intDict = static function (): iterable {
+            yield from ['a' => 1, 'b' => 2, 'c' => 3];
+        };
+
+        $pointSeq = static function(): iterable {
+            yield new Point(1, 2, 3);
+            yield new Point(4, 5, 6);
+            yield new Point(7, 2, 9);
+        };
+
+        $pointDict = static function(): iterable {
+            yield 'A' => new Point(1, 2, 3);
+            yield 'B' => new Point(4, 5, 6);
+            yield 'C' => new Point(7, 2, 9);
+        };
+
+        $data = new Iterables(
+            lazyInts: $intSeq(),
+            lazyIntDict: $intDict(),
+            lazyPoints: $pointSeq(),
+            lazyPointsDict: $pointDict(),
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->generator_property_is_run_out_validate($serialized);
+
+        // Deserialization is always to an array, so we
+        // need a separate expected object.
+        $expected = new Iterables(
+            lazyInts: iterator_to_array($intSeq()),
+            lazyIntDict: iterator_to_array($intDict()),
+            lazyPoints: iterator_to_array($pointSeq()),
+            lazyPointsDict: iterator_to_array($pointDict()),
+        );
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Iterables::class);
+
+        self::assertEquals($expected, $result);
+    }
+
+    public function generator_property_is_run_out_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function traversable_object_not_iterated(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $intSeq = new TraversableInts(4);
+
+        $pointSeq = new TraversablePoints(3, new Point(1, 1, 1));
+
+        $data = new Traversables(
+            lazyInts: $intSeq,
+            lazyPoints: $pointSeq,
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->traversable_object_not_iterated_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: Traversables::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function traversable_object_not_iterated_validate(mixed $serialized): void
     {
 
     }

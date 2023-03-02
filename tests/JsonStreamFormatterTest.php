@@ -8,6 +8,8 @@ use Crell\Serde\Formatter\FormatterStream;
 use Crell\Serde\Formatter\JsonStreamFormatter;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
+use Crell\Serde\Records\CsvRow;
+use Crell\Serde\Records\CsvTableLazy;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\MangleNames;
 use Crell\Serde\Records\MultiCollect\ThingOneA;
@@ -43,8 +45,6 @@ class JsonStreamFormatterTest extends TestCase
 
         fseek($result->stream, 0);
         $json = stream_get_contents($result->stream);
-
-        //var_dump($json);
 
         $deserialized = $s->deserialize($json, from: 'json', to: $data::class);
 
@@ -159,4 +159,40 @@ class JsonStreamFormatterTest extends TestCase
             'data' => new NullArrays(),
         ];
     }
+
+    /**
+     * @test
+     */
+    public function object_with_generator_streams_cleanly(): void
+    {
+        $s = new SerdeCommon(formatters: [new JsonStreamFormatter()]);
+
+        // Use a temp stream as a placeholder.
+        $init = FormatterStream::new(fopen('php://temp/', 'wb'));
+
+        $rows = static function() {
+            yield new CsvRow('Larry', 100, 500);
+            yield new CsvRow('Curly', 25, 25.25);
+            yield new CsvRow('Moe', 31, 99.9999);
+        };
+
+        $data = new CsvTableLazy($rows());
+
+        $result = $s->serialize($data, format: 'json-stream', init: $init);
+
+        fseek($result->stream, 0);
+        $json = stream_get_contents($result->stream);
+
+        // The deserialized version will use an array, not a generator.
+        $expected = new CsvTableLazy([
+            new CsvRow('Larry', 100, 500),
+            new CsvRow('Curly', 25, 25.25),
+            new CsvRow('Moe', 31, 99.9999),
+        ]);
+
+        $deserialized = $s->deserialize($json, from: 'json', to: $data::class);
+
+        self::assertEquals($expected, $deserialized);
+    }
+
 }

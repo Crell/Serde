@@ -6,6 +6,7 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
+use Crell\Serde\Deserializer;
 
 class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
 {
@@ -31,7 +32,12 @@ class JsonFormatter implements Formatter, Deformatter, SupportsCollecting
         return json_encode($runningValue['root'], JSON_THROW_ON_ERROR);
     }
 
-    public function deserializeInitialize(mixed $serialized, Field $rootField): mixed
+    public function deserializeInitialize(
+        mixed $serialized,
+        ClassSettings $classDef,
+        Field $rootField,
+        Deserializer $deserializer
+    ): mixed
     {
         return ['root' => json_decode($serialized ?: '{}', true, 512, JSON_THROW_ON_ERROR)];
     }

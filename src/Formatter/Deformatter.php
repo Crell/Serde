@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Formatter;
 
+use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\SerdeError;
@@ -14,7 +15,12 @@ interface Deformatter
 
     public function rootField(Deserializer $deserializer, string $targetType): Field;
 
-    public function deserializeInitialize(mixed $serialized, Field $rootField): mixed;
+    public function deserializeInitialize(
+        mixed $serialized,
+        ClassSettings $classDef,
+        Field $rootField,
+        Deserializer $deserializer
+    ): mixed;
 
     public function deserializeInt(mixed $decoded, Field $field): int|SerdeError;
 
