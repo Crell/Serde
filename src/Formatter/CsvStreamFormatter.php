@@ -14,6 +14,13 @@ use function Crell\fp\headtail;
 use function Crell\fp\reduce;
 use function Crell\fp\reduceWithKeys;
 
+/**
+ * Writes CSV data to a stream handle.
+ *
+ * This class currently makes no optimizations for the fact
+ * that the possible structure is so simple, and the existence
+ * of PHP's csv functions.  That should be considered for optimization.
+ */
 class CsvStreamFormatter implements Formatter
 {
     use StreamFormatter;
