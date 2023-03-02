@@ -10,6 +10,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Support for iterable properties, including generators.
 - Support for serializing/deserializing from CSV files.
 - Support for stream-serializing to a CSV format.
+- Support for specifying a custom format and timezone when serializing DateTime fields.
 
 ### Deprecated
 - Nothing
