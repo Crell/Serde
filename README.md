@@ -6,7 +6,7 @@
 
 Serde (pronounced "seer-dee") is a fast, flexible, powerful, and easy to use serialization and deserialization library for PHP that supports a number of standard formats.  It draws inspiration from both Rust's Serde crate and Symfony Serializer, although it is not directly based on either.
 
-At this time, Serde supports serializing PHP objects to and from PHP arrays, JSON, and YAML.  It also supports serializing to JSON via a stream.  Further support is planned, but by design can also be extended by anyone.
+At this time, Serde supports serializing PHP objects to and from PHP arrays, JSON, YAML, and CSV files.  It also supports serializing to JSON or CSV via a stream.  Further support is planned, but by design can also be extended by anyone.
 
 Serde is currently in late-beta.  It's possible there will be some small API changes still, but it should be mostly-stable and safe to use.
 
@@ -50,6 +50,7 @@ Serde can serialize to:
 * Streaming JSON (`json-stream`)
 * YAML (`yaml`)
 * CSV (`csv`)
+* Streaming CSV (`csv-stream`)
 
 Serde can deserialize from:
 
@@ -561,6 +562,83 @@ This combination will result in a three-column CSV file, and also deserialize fr
 The CSV formatter uses PHP's native CSV parsing and writing tools.  If you want to control the delimiters used, pass those as constructor arguments to a `CsvFormatter` instance and inject that into the `Serde` class instead of the default.
 
 Note that the lone property may be a generator.  That allows a CSV to be generated on the fly off of arbitrary data.  When deserialized, it will still deserialize to an array.
+
+### Streams
+
+Serde includes two stream-based formatters (but not deformatters, yet), one for JSON and one for CSV.  They work nearly the same way as any other formatter, but when calling `$serde->serialize()` you may (and should) pass an extra `init` argument.  `$init` should be an instance of `Serde\Formatter\FormatterStream`, which wraps a writeable PHP stream handle.
+
+The value returned will then be that same stream handle, after the object to be serialized has been written to it.
+
+For example:
+
+```php
+// The JsonStreamFormatter and CsvStreamFormatter are not included by default.
+$s = new SerdeCommon(formatters: [new JsonStreamFormatter()]);
+
+// You may use any PHP supported stream here, including files, network sockets,
+// stdout, an in-memory temp stream, etc.
+$init = FormatterStream::new(fopen('/tmp/output.json', 'wb'));
+
+$result = $serde->serialize($data, format: 'json-stream', init: $init);
+
+// $result is a FormatterStream object that wraps the same handle as before.
+// What you can now do with the stream depends on what kind of stream it is.
+```
+
+In this example, the `$data` object (whatever it is) gets serialized to JSON piecemeal and streamed out to the specified file handle.
+
+The `CsvStreamFormatter` works in the exact same way, but outputs CSV data and has the same restrictions as the `CsvFormatter` in terms of the objects it accepts.
+
+In many cases that won't actually offer much benefit, as the whole object must be in memory anyway.  However, it may be combined with the support for lazy iterators to have a property that produces objects lazily, say from a database query or read from some other source.
+
+Consider this example:
+
+```php
+use Crell\Serde\Attributes\SequenceField;
+
+class ProductList
+{
+    public function __construct(
+        #[SequenceField(arrayType: Product::class)]
+        private iterable $products,
+    ) {}
+}
+
+class Product
+{
+    public function __construct(
+        public readonly string $name,
+        public readonly string $color,
+        public readonly float $price,
+    ) {}
+}
+
+$databaseConn = ...;
+
+$callback = function() use ($databaseConn) {
+    $result = $databaseConn->query("SELECT name, color, price FROM products ORDER BY name");
+
+    // Assuming $record is an associative array.
+    foreach ($result as $record) {
+        yield new Product(...$record);
+    }
+};
+
+// This is a lazy list of products, which will be pulled from the database.
+$products = new ProductList($callback());
+
+// Use the CSV formatter this time, but JsonStream works just as well.
+$s = new SerdeCommon(formatters: [new CsvStreamFormatter()]);
+
+// Write to stdout, aka, back to the browser.
+$init = FormatterStream::new(fopen('php://output', 'wb'));
+
+$result = $serde->serialize($products, format: 'csv-stream', init: $init);
+```
+
+This setup will lazily pull records out of the database and instantiate an object from them, then lazily stream that data out to stdout.  No matter how many product records are in the database, the memory usage remains roughly constant.  (Note the database driver may do its own buffering of the entire result set, which could cause memory issues.  That's a separate matter, however.)
+
+While likely overkill for CSV, it can work very well for more involved objects being serialized to JSON.
 
 ### TypeMaps
 
