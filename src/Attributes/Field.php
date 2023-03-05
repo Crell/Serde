@@ -172,16 +172,21 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
     protected function getDefaultValueFromConstructor(\ReflectionProperty $subject): mixed
     {
+        // A static value, so it's cached but not included in the Field object when serializing.
+        static $params = [];
+
+        $declaringClass = $subject->getDeclaringClass();
         /** @var array<string, \ReflectionParameter> $params */
-        $params = pipe($subject->getDeclaringClass()->getConstructor()?->getParameters() ?? [],
+        $params[$declaringClass->getName()] ??= pipe($declaringClass->getConstructor()?->getParameters() ?? [],
             indexBy(method('getName')),
         );
 
-        $param = $params[$subject->getName()] ?? null;
+        $param = $params[$declaringClass->getName()][$subject->getName()] ?? null;
 
         return $param?->isDefaultValueAvailable()
             ? $param->getDefaultValue()
             : SerdeError::NoDefaultValue;
+
     }
 
     protected function finalize(): void
