@@ -126,8 +126,7 @@ class CsvFormatter implements Formatter, Deformatter, SupportsCollecting
         // It's either a float or an int, but floor() wants a float.
         $val = (float) $val;
 
-        // Deliberately not a strict comparison.
-        if (floor($val) == $val) {
+        if (floor($val) === $val) {
             return (int) $val;
         }
         return (float) $val;
