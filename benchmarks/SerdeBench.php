@@ -16,6 +16,7 @@ use PhpBench\Benchmark\Metadata\Annotations\AfterMethods;
 use PhpBench\Benchmark\Metadata\Annotations\BeforeMethods;
 use PhpBench\Benchmark\Metadata\Annotations\Iterations;
 use PhpBench\Benchmark\Metadata\Annotations\OutputTimeUnit;
+use PhpBench\Benchmark\Metadata\Annotations\RetryThreshold;
 use PhpBench\Benchmark\Metadata\Annotations\Revs;
 use PhpBench\Benchmark\Metadata\Annotations\Warmup;
 
@@ -26,6 +27,7 @@ use PhpBench\Benchmark\Metadata\Annotations\Warmup;
  * @BeforeMethods({"setUp"})
  * @AfterMethods({"tearDown"})
  * @OutputTimeUnit("milliseconds", precision=3)
+ * @RetryThreshold(10.0)
  */
 class SerdeBench
 {
