@@ -17,7 +17,7 @@ class MissingRequiredValueWhenDeserializing extends \InvalidArgumentException
         $new->class = $class;
         $new->format = $format;
 
-        $new->message = sprintf('No data found for required field "%s" on class %s, deserializing from %s', $name, $class, $format);
+        $new->message = sprintf('No data found for required field "%s" on class %s when deserializing from %s.', $name, $class, $format);
 
         return $new;
     }
