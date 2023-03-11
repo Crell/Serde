@@ -114,6 +114,13 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      *   On deserialization, set to true to require incoming data to be of the
      *   correct type. If false, the system will attempt to cast values to
      *   the correct type.
+     * @param bool $requireValue
+     *   On deserialization, set to true to require incoming data to have a value.
+     *   If it does not, and incoming data is missing a value for this field, and
+     *   no default is set for the property, then an exception will be thrown.  Set
+     *   to false to disable this check, in which case the value may be uninitialized
+     *   after deserialization.  If a property has a default value, this directive
+     *   has no effect.
      * @param array<string|null> $scopes
      *   If specified, this Field entry will be included only when operating in
      *   the specified scopes.  To also be included in the default "unscoped" case,
@@ -129,6 +136,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         public readonly bool $exclude = false,
         public readonly array $alias = [],
         public readonly bool $strict = true,
+        public readonly bool $requireValue = false,
         protected readonly array $scopes = [null],
     ) {
         if ($default) {

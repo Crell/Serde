@@ -9,6 +9,7 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\InvalidArrayKeyType;
+use Crell\Serde\MissingRequiredValueWhenDeserializing;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 
@@ -52,6 +53,7 @@ class ObjectImporter implements Importer
         /** @var Field[] $collectingObjects */
         $collectingObjects = [];
 
+        /** @var Field $propField */
         foreach ($classDef->properties as $propField) {
             $usedNames[] = $propField->serializedName;
             if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
@@ -66,6 +68,12 @@ class ObjectImporter implements Importer
                 if ($value === SerdeError::Missing) {
                     if ($propField->shouldUseDefault) {
                         $props[$propField->phpName] = $propField->defaultValue;
+                    } elseif ($propField->requireValue) {
+                        throw MissingRequiredValueWhenDeserializing::create(
+                            $propField->phpName,
+                            $classDef->phpType,
+                            $deserializer->deformatter->format(),
+                        );
                     }
                 } else {
                     $props[$propField->phpName] = $value;

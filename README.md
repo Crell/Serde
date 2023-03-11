@@ -278,6 +278,10 @@ This key only applies on deserialization.  If set to `true`, a type mismatch in 
 
 The exact handling of this setting may vary slightly depending on the incoming format, as some formats handle their own types differently.  (For instance, everything is a string in XML.)
 
+### `requireValue` (bool, default false)
+
+This key only applies on serialization.  If set to `true`, if the incoming data does not include a value for this field and there is no default specified, a `MissingRequiredValueWhenDeserializing` exception will be thrown.  If not set, and there is no default value, then the property will be left uninitialized.
+
 ### `flatten` (bool, default false)
 
 The `flatten` keyword can only be applied on an array or object property.  A property that is "flattened" will have all of its properties injected into the parent directly on serialization, and will have values from the parent "collected" into it on deserialization.
