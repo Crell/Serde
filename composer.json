@@ -18,7 +18,7 @@
     ],
     "require": {
         "php": "~8.1",
-        "crell/attributeutils": "~0.8.0",
+        "crell/attributeutils": "~0.8.2",
         "crell/fp": ">= 0.3.3"
     },
     "require-dev": {
