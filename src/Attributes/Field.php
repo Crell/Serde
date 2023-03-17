@@ -8,6 +8,7 @@ use Attribute;
 use Crell\AttributeUtils\Excludable;
 use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
+use Crell\AttributeUtils\ReadsClass;
 use Crell\AttributeUtils\SupportsScopes;
 use Crell\fp\Evolvable;
 use Crell\Serde\FieldTypeIncompatible;
@@ -25,7 +26,7 @@ use function Crell\fp\method;
 use function Crell\fp\pipe;
 
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
-class Field implements FromReflectionProperty, HasSubAttributes, Excludable, SupportsScopes
+class Field implements FromReflectionProperty, HasSubAttributes, Excludable, SupportsScopes, ReadsClass
 {
     use Evolvable;
 
@@ -72,6 +73,11 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      * Whether or not to use the code-defined default on deserialization if a value is not provided.
      */
     public readonly bool $shouldUseDefault;
+
+    /**
+     * Whether or not to require a value when deserializaing into this field.
+     */
+    public readonly bool $requireValue;
 
     /**
      * The renaming mechanism used for this field.
@@ -136,11 +142,15 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         public readonly bool $exclude = false,
         public readonly array $alias = [],
         public readonly bool $strict = true,
-        public readonly bool $requireValue = false,
+        ?bool $requireValue = null,
         protected readonly array $scopes = [null],
     ) {
         if ($default) {
             $this->defaultValue = $default;
+        }
+        // Null means we want to accept a default value later from the class.
+        if ($requireValue !== null) {
+            $this->requireValue = $requireValue;
         }
         // Upcast the literal serialized name to a converter if appropriate.
         $this->rename ??=
@@ -176,6 +186,15 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         }
 
         $this->finalize();
+    }
+
+    /**
+     * @param ClassSettings $class
+     */
+    public function fromClassAttribute(object $class): void
+    {
+        // If there is no requireValue flag set, inherit it from the class attribute.
+        $this->requireValue ??= $class->requireValues;
     }
 
     protected function getDefaultValueFromConstructor(\ReflectionProperty $subject): mixed

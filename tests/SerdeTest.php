@@ -54,6 +54,7 @@ use Crell\Serde\Records\Pagination\ProductType;
 use Crell\Serde\Records\Pagination\Results;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\RequiresFieldValues;
+use Crell\Serde\Records\RequiresFieldValuesClass;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
 use Crell\Serde\Records\Shapes\Box;
@@ -1433,6 +1434,33 @@ abstract class SerdeTest extends TestCase
 
         /** @var RequiresFieldValues $result */
         $result = $s->deserialize($this->missingOptionalData, $this->format, RequiresFieldValues::class);
+
+        self::assertEquals('A', $result->a);
+        // This isn't in the incoming data, and is required, but has a default so it's fine.
+        self::assertEquals('B', $result->b);
+    }
+
+    /**
+     * @test
+     */
+    public function missing_required_value_for_class_throws(): void
+    {
+        $this->expectException(MissingRequiredValueWhenDeserializing::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $result = $s->deserialize($this->emptyData, $this->format, RequiresFieldValuesClass::class);
+    }
+
+    /**
+     * @test
+     */
+    public function missing_required_value_for_class_with_default_does_not_throw(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        /** @var RequiresFieldValuesClass $result */
+        $result = $s->deserialize($this->missingOptionalData, $this->format, RequiresFieldValuesClass::class);
 
         self::assertEquals('A', $result->a);
         // This isn't in the incoming data, and is required, but has a default so it's fine.

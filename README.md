@@ -98,7 +98,11 @@ class Person
 
 Which you do is mostly a matter of preference, although if you are mixing Serde attributes with attributes from other libraries then the namespaced approach is advisable.
 
-There is also a `ClassSettings` attribute that may be placed on classes to be serialized.  At this time it has only one argument, `includeFieldsByDefault`, which defaults to `true`.  If set to false, a property with no `#[Field]` attribute will be ignored.  It is equivalent to setting `exclude: true` on all properties implicitly.
+There is also a `ClassSettings` attribute that may be placed on classes to be serialized.  At this time it has three arguments:
+
+* `includeFieldsByDefault`, which defaults to `true`.  If set to false, a property with no `#[Field]` attribute will be ignored.  It is equivalent to setting `exclude: true` on all properties implicitly.
+* `requireValues`, which defaults to `false`.  If set to true, then when deserializing any field that is not provided in the incoming data will result in an exception.  This may also be turned on or off on a per-field level.  (See `requireValue` below.)  The class-level setting applies to any field that does not specify its behavior.
+* `scopes`, which sets the scope of a given class definition attribute.  See the section on Scopes below.
 
 ### `exclude` (bool, default false)
 
@@ -281,6 +285,8 @@ The exact handling of this setting may vary slightly depending on the incoming f
 ### `requireValue` (bool, default false)
 
 This key only applies on deserialization.  If set to `true`, if the incoming data does not include a value for this field and there is no default specified, a `MissingRequiredValueWhenDeserializing` exception will be thrown.  If not set, and there is no default value, then the property will be left uninitialized.
+
+If a field has a default value, then the default value will always be used for missing data and this setting has no effect.
 
 ### `flatten` (bool, default false)
 
