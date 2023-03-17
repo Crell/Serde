@@ -280,7 +280,7 @@ The exact handling of this setting may vary slightly depending on the incoming f
 
 ### `requireValue` (bool, default false)
 
-This key only applies on serialization.  If set to `true`, if the incoming data does not include a value for this field and there is no default specified, a `MissingRequiredValueWhenDeserializing` exception will be thrown.  If not set, and there is no default value, then the property will be left uninitialized.
+This key only applies on deserialization.  If set to `true`, if the incoming data does not include a value for this field and there is no default specified, a `MissingRequiredValueWhenDeserializing` exception will be thrown.  If not set, and there is no default value, then the property will be left uninitialized.
 
 ### `flatten` (bool, default false)
 
