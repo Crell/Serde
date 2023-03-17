@@ -6,6 +6,7 @@ namespace Crell\Serde\Attributes;
 
 use Attribute;
 use Crell\AttributeUtils\Excludable;
+use Crell\AttributeUtils\Finalizable;
 use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\ReadsClass;
@@ -26,7 +27,7 @@ use function Crell\fp\method;
 use function Crell\fp\pipe;
 
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
-class Field implements FromReflectionProperty, HasSubAttributes, Excludable, SupportsScopes, ReadsClass
+class Field implements FromReflectionProperty, HasSubAttributes, Excludable, SupportsScopes, ReadsClass, Finalizable
 {
     use Evolvable;
 
@@ -184,8 +185,6 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
                 ?? $constructorDefault
             ;
         }
-
-        $this->finalize();
     }
 
     /**
@@ -216,7 +215,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
     }
 
-    protected function finalize(): void
+    public function finalize(): void
     {
         // We cannot compute these until we have the PHP type,
         // but they can still be determined entirely at analysis time
