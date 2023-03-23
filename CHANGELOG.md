@@ -11,6 +11,8 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Support for serializing/deserializing from CSV files.
 - Support for stream-serializing to a CSV format.
 - Support for specifying a custom format and timezone when serializing DateTime fields.
+- Support for making individual fields required when deserializing.
+- Support for specifying at the class level that fields are required unless otherwise specified.
 
 ### Deprecated
 - Nothing

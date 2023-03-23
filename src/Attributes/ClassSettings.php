@@ -10,6 +10,7 @@ use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\ParseMethods;
 use Crell\AttributeUtils\ParseProperties;
 use Crell\AttributeUtils\SupportsScopes;
+use Crell\Serde\Renaming\RenamingStrategy;
 use Crell\Serde\TypeMap;
 use function Crell\fp\prop;
 
@@ -50,6 +51,7 @@ class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttri
         public readonly bool $includeFieldsByDefault = true,
         public readonly array $scopes = [null],
         public readonly bool $requireValues = false,
+        public readonly ?RenamingStrategy $renameWith = null,
     ) {}
 
     public function fromReflection(\ReflectionClass $subject): void

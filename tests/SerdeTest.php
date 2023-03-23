@@ -12,6 +12,7 @@ use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Callbacks\CallbackHost;
 use Crell\Serde\Records\CircularReference;
+use Crell\Serde\Records\ClassWithDefaultRenaming;
 use Crell\Serde\Records\DateTimeExample;
 use Crell\Serde\Records\DictionaryKeyTypes;
 use Crell\Serde\Records\Drupal\EmailItem;
@@ -1465,6 +1466,29 @@ abstract class SerdeTest extends TestCase
         self::assertEquals('A', $result->a);
         // This isn't in the incoming data, and is required, but has a default so it's fine.
         self::assertEquals('B', $result->b);
+    }
+
+    /**
+     * @test
+     */
+    public function class_level_renaming_applies(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ClassWithDefaultRenaming(string: 'B', int: 12);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->class_level_renaming_applies_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function class_level_renaming_applies_validate(mixed $serialized): void
+    {
+
     }
 
     /**
