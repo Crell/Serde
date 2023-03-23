@@ -9,6 +9,7 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\Attributes\SequenceField;
 use Crell\Serde\CsvFormatRequiresExplicitRowType;
 use Crell\Serde\Deserializer;
+use Crell\Serde\TypeMismatch;
 use function Crell\fp\amap;
 use function Crell\fp\explode;
 use function Crell\fp\pipe;
@@ -94,11 +95,23 @@ class CsvFormatter implements Formatter, Deformatter, SupportsCollecting
         $rowDef = $deserializer->analyzer->analyze($rowType, ClassSettings::class);
 
         $fieldNames = array_keys($rowDef->properties);
+        $fields = array_values($rowDef->properties);
+
+        // We need to do this a bit manually because we need to line up the
+        // data with the corresponding Field for safer type folding.
+        $normalize = function (array $row) use ($fields): array {
+            $count = count($fields);
+            $ret = [];
+            for ($i = 0; $i < $count; ++$i) {
+                $ret[] = $this->typeNormalize($row[$i], $fields[$i]);
+            }
+            return $ret;
+        };
 
         $rows = pipe(trim($serialized),
             explode($this->eol),
             amap(fn(string $line): array => str_getcsv($line, $this->separator, $this->enclosure, $this->escape)),
-            amap(fn(array $vals): array => amap($this->typeNormalize(...))($vals)),
+            amap(fn(array $vals): array => $normalize($vals)),
             amap(fn(array $vals): array => array_combine($fieldNames, $vals)),
         );
 
@@ -109,27 +122,27 @@ class CsvFormatter implements Formatter, Deformatter, SupportsCollecting
      * Normalizes a scalar value to its most-restrictive type.
      *
      * CSV values are always imported as strings, but if we want to
-     * push them into well-typed numeric fields we need to cast them
+     * push them into well-typed fields we need to cast them
      * appropriately.
      *
-     * @param mixed $val
+     * @param string $val
      *   The value to normalize.
-     * @return int|float|string
+     * @return int|float|string|bool
      *   The passed value, but now with the correct type.
      */
-    private function typeNormalize(mixed $val): int|float|string
+    private function typeNormalize(string $val, Field $field): int|float|string|bool
     {
-        if (!is_numeric($val)) {
-            return $val;
-        }
-
-        // It's either a float or an int, but floor() wants a float.
-        $val = (float) $val;
-
-        if (floor($val) === $val) {
-            return (int) $val;
-        }
-        return (float) $val;
+        return match ($field->phpType) {
+            'string' => $val,
+            'float' => is_numeric($val)
+                ? (float) $val
+                : throw TypeMismatch::create($field->serializedName, $field->phpType, get_debug_type($val)),
+            'int' => (is_numeric($val) && floor((float) $val) === (float) $val)
+                ? (int) $val
+                : throw TypeMismatch::create($field->serializedName, $field->phpType, get_debug_type($val)),
+            'bool' => in_array(strtolower($val), [1, '1', 'true', 'yes', 'on'], false),
+            default => throw TypeMismatch::create($field->serializedName, $field->phpType, get_debug_type($val)),
+        };
     }
 
     public function deserializeFinalize(mixed $decoded): void
