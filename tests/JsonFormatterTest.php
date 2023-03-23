@@ -28,6 +28,8 @@ class JsonFormatterTest extends ArrayBasedFormatterTest
         $this->invalidDictStringKey = '{"stringKey": {"a": "A", "2": "B"}, "intKey": {"5": "C", "d": "D"}}';
 
         $this->invalidDictIntKey = '{"stringKey": {"a": "A", "2": "B"}, "intKey": {"5": "C", "10": "D"}}';
+
+        $this->missingOptionalData = '{"a": "A"}';
     }
 
     protected function arrayify(mixed $serialized): array

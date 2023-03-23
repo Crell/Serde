@@ -6,8 +6,10 @@ namespace Crell\Serde\Attributes;
 
 use Attribute;
 use Crell\AttributeUtils\Excludable;
+use Crell\AttributeUtils\Finalizable;
 use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
+use Crell\AttributeUtils\ReadsClass;
 use Crell\AttributeUtils\SupportsScopes;
 use Crell\fp\Evolvable;
 use Crell\Serde\FieldTypeIncompatible;
@@ -25,7 +27,7 @@ use function Crell\fp\method;
 use function Crell\fp\pipe;
 
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
-class Field implements FromReflectionProperty, HasSubAttributes, Excludable, SupportsScopes
+class Field implements FromReflectionProperty, HasSubAttributes, Excludable, SupportsScopes, ReadsClass, Finalizable
 {
     use Evolvable;
 
@@ -74,6 +76,11 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     public readonly bool $shouldUseDefault;
 
     /**
+     * Whether or not to require a value when deserializaing into this field.
+     */
+    public readonly bool $requireValue;
+
+    /**
      * The renaming mechanism used for this field.
      *
      * This property is unset after the analysis phase to minimize
@@ -114,6 +121,13 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      *   On deserialization, set to true to require incoming data to be of the
      *   correct type. If false, the system will attempt to cast values to
      *   the correct type.
+     * @param bool $requireValue
+     *   On deserialization, set to true to require incoming data to have a value.
+     *   If it does not, and incoming data is missing a value for this field, and
+     *   no default is set for the property, then an exception will be thrown.  Set
+     *   to false to disable this check, in which case the value may be uninitialized
+     *   after deserialization.  If a property has a default value, this directive
+     *   has no effect.
      * @param array<string|null> $scopes
      *   If specified, this Field entry will be included only when operating in
      *   the specified scopes.  To also be included in the default "unscoped" case,
@@ -129,10 +143,15 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         public readonly bool $exclude = false,
         public readonly array $alias = [],
         public readonly bool $strict = true,
+        ?bool $requireValue = null,
         protected readonly array $scopes = [null],
     ) {
         if ($default) {
             $this->defaultValue = $default;
+        }
+        // Null means we want to accept a default value later from the class.
+        if ($requireValue !== null) {
+            $this->requireValue = $requireValue;
         }
         // Upcast the literal serialized name to a converter if appropriate.
         $this->rename ??=
@@ -166,8 +185,15 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
                 ?? $constructorDefault
             ;
         }
+    }
 
-        $this->finalize();
+    /**
+     * @param ClassSettings $class
+     */
+    public function fromClassAttribute(object $class): void
+    {
+        // If there is no requireValue flag set, inherit it from the class attribute.
+        $this->requireValue ??= $class->requireValues;
     }
 
     protected function getDefaultValueFromConstructor(\ReflectionProperty $subject): mixed
@@ -189,7 +215,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
     }
 
-    protected function finalize(): void
+    public function finalize(): void
     {
         // We cannot compute these until we have the PHP type,
         // but they can still be determined entirely at analysis time
