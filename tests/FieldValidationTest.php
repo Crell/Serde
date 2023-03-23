@@ -15,7 +15,7 @@ class FieldValidationTest extends TestCase
      * @test
      * @dataProvider fieldValidationExamples()
      */
-    public function stuff(string $phpType, mixed $value, ?TypeField $typeField, bool $expected): void
+    public function fields_validate_their_types(string $phpType, mixed $value, ?TypeField $typeField, bool $expected): void
     {
         $f = Field::create('fake', phpType: $phpType, typeField: $typeField);
 
