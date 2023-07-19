@@ -261,7 +261,7 @@ class Person
     #[Field(default: 'Hidden')]
     public string $location;
 
-    #Field[(useDefault: false)]
+    #[Field[(useDefault: false)]
     public int $age;
 
     public function __construct(
