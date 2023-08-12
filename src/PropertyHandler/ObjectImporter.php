@@ -61,7 +61,7 @@ class ObjectImporter implements Importer
             } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
                 $collectingObjects[] = $propField;
             } else {
-                $value = $dict[$propField->serializedName] ?? SerdeError::Missing;
+                $value = $dict[$propField->serializedName];
                 if ($value !== SerdeError::Missing && !$propField->validate($value)) {
                     throw InvalidArrayKeyType::create($propField, 'invalid');
                 }

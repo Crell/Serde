@@ -106,10 +106,15 @@ trait ArrayBasedDeformatter
         return $decoded[$field->serializedName];
     }
 
-    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
+    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null
     {
-        if (!isset($decoded[$field->serializedName])) {
+        // isset() returns false for null, so we cannot use that. Thanks, PHP.
+        if (!array_key_exists($field->serializedName, $decoded)) {
             return SerdeError::Missing;
+        }
+
+        if ($decoded[$field->serializedName] === null) {
+            return null;
         }
 
         // This line is fine, because if typeField is somehow not of a type with an
@@ -123,9 +128,10 @@ trait ArrayBasedDeformatter
         return $this->upcastArray($decoded[$field->serializedName], $deserializer);
     }
 
-    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
+    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null
     {
-        if (!isset($decoded[$field->serializedName])) {
+        // isset() returns false for null, so we cannot use that. Thanks, PHP.
+        if (!array_key_exists($field->serializedName, $decoded)) {
             return SerdeError::Missing;
         }
 
@@ -207,8 +213,8 @@ trait ArrayBasedDeformatter
                 $collectingArray = $propField;
             } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
                 $collectingObjects[] = $propField;
-            } elseif (isset($data[$propField->serializedName])) {
-                $ret[$propField->serializedName] = $deserializer->deserialize($data, $propField) ?? SerdeError::Missing;
+            } elseif (array_key_exists($propField->serializedName, $data)) {
+                $ret[$propField->serializedName] = $deserializer->deserialize($data, $propField);
             } else {
                 $key = pipe(
                     $propField->alias,

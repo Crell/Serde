@@ -36,17 +36,17 @@ interface Deformatter
      * @param mixed $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return mixed[]|SerdeError
+     * @return mixed[]|SerdeError|null
      */
-    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError;
+    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null;
 
     /**
      * @param mixed $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return array<int|string, mixed>|SerdeError
+     * @return array|SerdeError|null
      */
-    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError;
+    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null;
 
     /**
      * @param mixed $decoded
