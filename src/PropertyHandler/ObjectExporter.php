@@ -8,6 +8,7 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
 use Crell\Serde\InvalidFieldForFlattening;
+use Crell\Serde\SerdeError;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
@@ -27,7 +28,11 @@ class ObjectExporter implements Exporter
     public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         // This lets us read private values without messing with the Reflection API.
-        $propReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
+        // The object_vars business is to let us differentiate between a value set to null
+        // and an uninitialized value, which in this rare case are meaningfully different.
+        // @todo This may benefit from caching get_object_vars(), but that will be tricky.
+        $propReader = (fn (string $prop): mixed
+            => array_key_exists($prop, get_object_vars($this)) ? $this->$prop : SerdeError::Missing)->bindTo($value, $value);
 
         /** @var \Crell\Serde\Dict $dict */
         $dict = pipe(
@@ -64,7 +69,7 @@ class ObjectExporter implements Exporter
     protected function flattenValue(Dict $dict, Field $field, callable $propReader, Serializer $serializer): Dict
     {
         $value = $propReader($field->phpName);
-        if ($value === null) {
+        if ($value === SerdeError::Missing) {
             return $dict;
         }
 

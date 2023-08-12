@@ -45,6 +45,7 @@ use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
 use Crell\Serde\Records\NullArrays;
+use Crell\Serde\Records\NullProp;
 use Crell\Serde\Records\OptionalPoint;
 use Crell\Serde\Records\Pagination\DetailedResults;
 use Crell\Serde\Records\Pagination\NestedPagination;
@@ -1552,5 +1553,31 @@ abstract class SerdeTest extends TestCase
             'scopes' => ['one', 'two'],
             'expected' => new MultipleScopesDefaultTrue(a: 'A', b: 'B', c: 'C', d: '', e: 'E'),
         ];
+    }
+
+    /**
+     * @test
+     */
+    public function null_stuff(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new NullProp(null);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->null_stuff_validate($serialized);
+
+        /** @var NullProp $result */
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertNull($result->examples);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function null_stuff_validate(mixed $serialized): void
+    {
+
     }
 }

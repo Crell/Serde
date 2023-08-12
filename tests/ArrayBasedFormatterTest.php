@@ -431,4 +431,11 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertArrayHasKey('foo_string', $toTest);
         self::assertArrayHasKey('the_number', $toTest);
     }
+
+    public function null_stuff_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertNull($toTest['examples']);
+    }
 }
