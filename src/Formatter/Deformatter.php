@@ -44,7 +44,7 @@ interface Deformatter
      * @param mixed $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return array|SerdeError|null
+     * @return array<string|int, mixed>|SerdeError|null
      */
     public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null;
 

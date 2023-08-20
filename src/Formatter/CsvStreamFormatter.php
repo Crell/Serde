@@ -55,7 +55,7 @@ class CsvStreamFormatter implements Formatter
      */
     public function serializeString(mixed $runningValue, Field $field, ?string $next): mixed
     {
-        $next = str_replace($this->enclosure, $this->escape . $this->enclosure, $next);
+        $next = str_replace($this->enclosure, $this->escape . $this->enclosure, $next ?? '');
         $runningValue->write($this->enclosure . $next . $this->enclosure);
         return $runningValue;
     }
