@@ -24,7 +24,7 @@ interface Formatter
 
     public function serializeFloat(mixed $runningValue, Field $field, float $next): mixed;
 
-    public function serializeString(mixed $runningValue, Field $field, string $next): mixed;
+    public function serializeString(mixed $runningValue, Field $field, ?string $next): mixed;
 
     public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed;
 

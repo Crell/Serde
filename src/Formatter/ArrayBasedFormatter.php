@@ -52,10 +52,10 @@ trait ArrayBasedFormatter
     /**
      * @param array<string, mixed> $runningValue
      * @param Field $field
-     * @param string $next
+     * @param string|null $next
      * @return array<string, mixed>
      */
-    public function serializeString(mixed $runningValue, Field $field, string $next): array
+    public function serializeString(mixed $runningValue, Field $field, ?string $next): array
     {
         $runningValue[$field->serializedName] = $next;
         return $runningValue;

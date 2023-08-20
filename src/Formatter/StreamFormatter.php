@@ -38,7 +38,7 @@ trait StreamFormatter
         return $runningValue;
     }
 
-    public function serializeString(mixed $runningValue, Field $field, string $next): mixed
+    public function serializeString(mixed $runningValue, Field $field, ?string $next): mixed
     {
         $runningValue->printf('"%s"', $next);
         return $runningValue;
