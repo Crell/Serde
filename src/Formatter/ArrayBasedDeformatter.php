@@ -251,7 +251,7 @@ trait ArrayBasedDeformatter
                 $class = $map->findClass($v[$map->keyField()]);
                 $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: "$k", phpType: $class));
             }
-        } else {
+        } elseif ($remaining) {
             // Otherwise, just tack on whatever is left to the processed data.
             $ret = [...$ret, ...$remaining];
         }
