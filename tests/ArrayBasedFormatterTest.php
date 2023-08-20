@@ -436,6 +436,10 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
     {
         $toTest = $this->arrayify($serialized);
 
-        self::assertNull($toTest['examples']);
+        self::assertNull($toTest['int']);
+        self::assertNull($toTest['float']);
+        self::assertNull($toTest['string']);
+        self::assertNull($toTest['array']);
+        self::assertNull($toTest['object']);
     }
 }

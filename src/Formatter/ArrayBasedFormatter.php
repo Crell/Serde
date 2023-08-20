@@ -28,10 +28,10 @@ trait ArrayBasedFormatter
     /**
      * @param array<string, mixed> $runningValue
      * @param Field $field
-     * @param int $next
+     * @param int|null $next
      * @return array<string, mixed>
      */
-    public function serializeInt(mixed $runningValue, Field $field, int $next): array
+    public function serializeInt(mixed $runningValue, Field $field, ?int $next): array
     {
         $runningValue[$field->serializedName] = $next;
         return $runningValue;
@@ -40,10 +40,10 @@ trait ArrayBasedFormatter
     /**
      * @param array<string, mixed> $runningValue
      * @param Field $field
-     * @param float $next
+     * @param float|null $next
      * @return array<string, mixed>
      */
-    public function serializeFloat(mixed $runningValue, Field $field, float $next): array
+    public function serializeFloat(mixed $runningValue, Field $field, ?float $next): array
     {
         $runningValue[$field->serializedName] = $next;
         return $runningValue;
@@ -64,10 +64,10 @@ trait ArrayBasedFormatter
     /**
      * @param array<string, mixed> $runningValue
      * @param Field $field
-     * @param bool $next
+     * @param bool|null $next
      * @return array<string, mixed>
      */
-    public function serializeBool(mixed $runningValue, Field $field, bool $next): array
+    public function serializeBool(mixed $runningValue, Field $field, ?bool $next): array
     {
         $runningValue[$field->serializedName] = $next;
         return $runningValue;
