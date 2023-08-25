@@ -20,13 +20,13 @@ interface Formatter
 
     public function serializeFinalize(mixed $runningValue, ClassSettings $classDef): mixed;
 
-    public function serializeInt(mixed $runningValue, Field $field, int $next): mixed;
+    public function serializeInt(mixed $runningValue, Field $field, ?int $next): mixed;
 
-    public function serializeFloat(mixed $runningValue, Field $field, float $next): mixed;
+    public function serializeFloat(mixed $runningValue, Field $field, ?float $next): mixed;
 
-    public function serializeString(mixed $runningValue, Field $field, string $next): mixed;
+    public function serializeString(mixed $runningValue, Field $field, ?string $next): mixed;
 
-    public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed;
+    public function serializeBool(mixed $runningValue, Field $field, ?bool $next): mixed;
 
     public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): mixed;
 

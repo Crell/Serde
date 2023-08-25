@@ -26,25 +26,25 @@ trait StreamFormatter
         return $runningValue;
     }
 
-    public function serializeInt(mixed $runningValue, Field $field, int $next): mixed
+    public function serializeInt(mixed $runningValue, Field $field, ?int $next): mixed
     {
         $runningValue->write((string)$next);
         return $runningValue;
     }
 
-    public function serializeFloat(mixed $runningValue, Field $field, float $next): mixed
+    public function serializeFloat(mixed $runningValue, Field $field, ?float $next): mixed
     {
         $runningValue->write((string)$next);
         return $runningValue;
     }
 
-    public function serializeString(mixed $runningValue, Field $field, string $next): mixed
+    public function serializeString(mixed $runningValue, Field $field, ?string $next): mixed
     {
         $runningValue->printf('"%s"', $next);
         return $runningValue;
     }
 
-    public function serializeBool(mixed $runningValue, Field $field, bool $next): mixed
+    public function serializeBool(mixed $runningValue, Field $field, ?bool $next): mixed
     {
         $runningValue->write($next ? 'true' : 'false');
         return $runningValue;

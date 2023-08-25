@@ -51,6 +51,13 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     public readonly string $phpType;
 
     /**
+     * Whether null is an acceptable value or not.
+     *
+     * At the moment, this is the only union-type that is supported.
+     */
+    public readonly bool $nullable;
+
+    /**
      * The property name, not to be confused with the desired serialized $name.
      */
     public readonly string $phpName;
@@ -171,6 +178,10 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     {
         $this->phpName = $subject->name;
         $this->phpType ??= $this->getNativeType($subject);
+
+        // An untyped property is equivalent to mixed, which is nullable.
+        // Damnit, PHP.
+        $this->nullable = $subject->getType()?->allowsNull() ?? true;
 
         $constructorDefault = $this->getDefaultValueFromConstructor($subject);
 
@@ -296,6 +307,8 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         $new->typeMap = null;
         $new->typeField = $typeField;
         $new->extraProperties = $extraProperties;
+        // @todo Is there a case where we would want to make this configurable? I don't think so.
+        $new->nullable = false;
         $new->finalize();
         return $new;
     }
@@ -345,6 +358,8 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         $valueType = \get_debug_type($value);
 
         if ($this->phpType === $valueType) {
+            $valid = true;
+        } elseif ($this->nullable && $valueType === 'null') {
             $valid = true;
         } elseif (is_object($value) || class_exists($this->phpType) || interface_exists($this->phpType)) {
             // For objects, do a type check and we're done.

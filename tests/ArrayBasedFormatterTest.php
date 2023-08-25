@@ -145,7 +145,7 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('boop', $toTest['withDefault']);
         self::assertArrayNotHasKey('nullableUninitialized', $toTest);
         self::assertArrayNotHasKey('uninitialized', $toTest);
-        self::assertArrayNotHasKey('roNullable', $toTest);
+        self::assertNull($toTest['roNullable']);
     }
 
     public function exclude_values_validate(mixed $serialized): void
@@ -430,5 +430,16 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
 
         self::assertArrayHasKey('foo_string', $toTest);
         self::assertArrayHasKey('the_number', $toTest);
+    }
+
+    public function null_stuff_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertNull($toTest['int']);
+        self::assertNull($toTest['float']);
+        self::assertNull($toTest['string']);
+        self::assertNull($toTest['array']);
+        self::assertNull($toTest['object']);
     }
 }
