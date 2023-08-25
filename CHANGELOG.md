@@ -4,6 +4,14 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## 0.7.0 - DATE
+
+### Added
+- Null is now a legal value for a property to deserialize to.
+- Null values will now be serialized as null, rather than omitted.
+- BC BREAK: The return type of formatter methods have changed to support null as a legal value.
+
+
 ## 0.6.0 - 2023-03-23
 
 ### Added
