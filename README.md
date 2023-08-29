@@ -544,6 +544,12 @@ Will serialize to this JSON:
 }
 ```
 
+#### `timezone`
+
+The `timezone` argument may be any timezone string legal in PHP, such as `America/Chicago` or `UTC`.  If specified, the value will be cast to this timezone first before it is serialized.  If not specified, the value will be left in whatever timezone it is in before being serialized.  Whether that makes a difference to the output depends on the `format`.
+
+On deserializing, the `timezone` has no effect.  If the incoming value has a timezone specified, the resulting `DateTime[Immutable]` object will use that timezone.  If not, the system default timezone will be used.
+
 #### `format`
 
 This argument lets you specify the format that will be used when serializing.  It may be any string accepted by PHP's [date_format syntax](https://www.php.net/manual/en/datetimeimmutable.createfromformat.php), including one of the various constants defined on `DateTimeInterface`.  If not specified, the default format is `RFC3339_EXTENDED`, or `Y-m-d\TH:i:s.vP`.  While not the most human-friendly, it is the default format used by Javascript/JSON so makes for reasonable compatibility.
@@ -677,13 +683,6 @@ $result = $serde->serialize($products, format: 'csv-stream', init: $init);
 This setup will lazily pull records out of the database and instantiate an object from them, then lazily stream that data out to stdout.  No matter how many product records are in the database, the memory usage remains roughly constant.  (Note the database driver may do its own buffering of the entire result set, which could cause memory issues.  That's a separate matter, however.)
 
 While likely overkill for CSV, it can work very well for more involved objects being serialized to JSON.
-
-#### `timezone`
-
-The `timezone` argument may be any timezone string legal in PHP, such as `America/Chicago` or `UTC`.  If specified, the value will be cast to this timezone first before it is serialized.  If not specified, the value will be left in whatever timezone it is in before being serialized.  Whether that makes a difference to the output depends on the `format`.
-
-On deserializing, the `timezone` has no effect.  If the incoming value has a timezone specified, the resulting `DateTime[Immutable]` object will use that timezone.  If not, the system default timezone will be used.
->>>>>>> e771892 (Support custom serialization formats for DateTime fields.)
 
 ### TypeMaps
 
