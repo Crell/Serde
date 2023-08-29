@@ -526,6 +526,24 @@ As with `SequenceField`, values will automatically be `trim()`ed unless `trim: f
 
 `DateTime` and `DateTimeImmutable` fields can also be serialized, and you can control how they are serialized using the `DateField` attribute.  It has two arguments, which may be used individually or together.  Specifying neither is the same as not specifying the `DateField` attribute at all.
 
+```php
+use Crell\Serde\Attributes\DateField;
+
+class Settings
+{
+    #[DateField(format: 'Y-m-d')]
+    protected DateTimeImmutable $date = new DateTimeImmutable('4 July 2022-07-04 14:22);
+}
+```
+
+Will serialize to this JSON:
+
+```json
+{
+    "date": "2022-07-04"
+}
+```
+
 #### `format`
 
 This argument lets you specify the format that will be used when serializing.  It may be any string accepted by PHP's [date_format syntax](https://www.php.net/manual/en/datetimeimmutable.createfromformat.php), including one of the various constants defined on `DateTimeInterface`.  If not specified, the default format is `RFC3339_EXTENDED`, or `Y-m-d\TH:i:s.vP`.  While not the most human-friendly, it is the default format used by Javascript/JSON so makes for reasonable compatibility.
@@ -659,23 +677,6 @@ $result = $serde->serialize($products, format: 'csv-stream', init: $init);
 This setup will lazily pull records out of the database and instantiate an object from them, then lazily stream that data out to stdout.  No matter how many product records are in the database, the memory usage remains roughly constant.  (Note the database driver may do its own buffering of the entire result set, which could cause memory issues.  That's a separate matter, however.)
 
 While likely overkill for CSV, it can work very well for more involved objects being serialized to JSON.
-=======
-use Crell\Serde\Attributes\DateField;
-
-class Settings
-{
-    #[DateField(format: 'Y-m-d')]
-    protected DateTimeImmutable $date = new DateTimeImmutable('4 July 2022-07-04 14:22);
-}
-```
-
-Will serialize to this JSON:
-
-```json
-{
-    "date": "2022-07-04"
-}
-```
 
 #### `timezone`
 
