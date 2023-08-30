@@ -183,18 +183,16 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         // Damnit, PHP.
         $this->nullable = $subject->getType()?->allowsNull() ?? true;
 
+        // We only care about defaults from the constructor; if a non-readonly property
+        // has a default value, then newInstanceWithoutConstructor() will use it for us
+        // and we don't need to do anything.
         $constructorDefault = $this->getDefaultValueFromConstructor($subject);
 
         $this->shouldUseDefault
-            ??= $this->useDefault
-            && ($subject->hasDefaultValue() || $constructorDefault !== SerdeError::NoDefaultValue)
-        ;
+            ??= $this->useDefault && $constructorDefault !== SerdeError::NoDefaultValue;
 
         if ($this->shouldUseDefault) {
-            $this->defaultValue
-                ??= $subject->getDefaultValue()
-                ?? $constructorDefault
-            ;
+            $this->defaultValue ??= $constructorDefault;
         }
     }
 
