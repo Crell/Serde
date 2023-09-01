@@ -63,7 +63,7 @@ abstract class Serde
 
         $classDef = $this->analyzer->analyze($object, ClassSettings::class, scopes: $scopes);
 
-        $inner = new Serializer(
+        $runner = new Serializer(
             analyzer: $this->analyzer,
             exporters: $this->exporters,
             formatter: $formatter,
@@ -71,10 +71,10 @@ abstract class Serde
             scopes: $scopes,
         );
 
-        $rootField = $formatter->rootField($inner, $object::class);
+        $rootField = $formatter->rootField($runner, $object::class);
         $init ??= $formatter->serializeInitialize($classDef, $rootField);
 
-        $serializedValue = $inner->serialize($object, $init, $rootField);
+        $serializedValue = $runner->serialize($object, $init, $rootField);
 
         return $formatter->serializeFinalize($serializedValue, $classDef);
     }
@@ -98,7 +98,7 @@ abstract class Serde
     {
         $formatter = $this->deformatters[$from] ?? throw UnsupportedFormat::create($from, Direction::Deserialize);
 
-        $inner = new Deserializer(
+        $runner = new Deserializer(
             analyzer: $this->analyzer,
             importers: $this->importers,
             deformatter: $formatter,
@@ -108,10 +108,10 @@ abstract class Serde
 
         $classDef = $this->analyzer->analyze($to, ClassSettings::class, scopes: $scopes);
 
-        $rootField = $formatter->rootField($inner, $to);
-        $decoded = $formatter->deserializeInitialize($serialized, $classDef, $rootField, $inner);
+        $rootField = $formatter->rootField($runner, $to);
+        $decoded = $formatter->deserializeInitialize($serialized, $classDef, $rootField, $runner);
 
-        $new = $inner->deserialize($decoded, $rootField);
+        $new = $runner->deserialize($decoded, $rootField);
 
         $formatter->deserializeFinalize($decoded);
 
