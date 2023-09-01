@@ -98,10 +98,11 @@ class Person
 
 Which you do is mostly a matter of preference, although if you are mixing Serde attributes with attributes from other libraries then the namespaced approach is advisable.
 
-There is also a `ClassSettings` attribute that may be placed on classes to be serialized.  At this time it has three arguments:
+There is also a `ClassSettings` attribute that may be placed on classes to be serialized.  At this time it has four arguments:
 
 * `includeFieldsByDefault`, which defaults to `true`.  If set to false, a property with no `#[Field]` attribute will be ignored.  It is equivalent to setting `exclude: true` on all properties implicitly.
 * `requireValues`, which defaults to `false`.  If set to true, then when deserializing any field that is not provided in the incoming data will result in an exception.  This may also be turned on or off on a per-field level.  (See `requireValue` below.)  The class-level setting applies to any field that does not specify its behavior.
+* `renameWith`.  If set, the specified renaming strategy will be used for all properties of the class, unless a property specifies its own.  (See `renameWith` below.)  The class-level setting applies to any field that does not specify its behavior.
 * `scopes`, which sets the scope of a given class definition attribute.  See the section on Scopes below.
 
 ### `exclude` (bool, default false)
