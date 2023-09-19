@@ -1566,7 +1566,7 @@ abstract class SerdeTest extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->null_stuff_validate($serialized);
+        $this->null_properties_are_allowed_validate($serialized);
 
         /** @var NullProps $result */
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
@@ -1580,7 +1580,7 @@ abstract class SerdeTest extends TestCase
         self::assertEquals($data, $result);
     }
 
-    public function null_stuff_validate(mixed $serialized): void
+    public function null_properties_are_allowed_validate(mixed $serialized): void
     {
 
     }
