@@ -85,7 +85,11 @@ class ObjectExporter implements Exporter
         }
 
         if ($field->typeCategory === TypeCategory::Object) {
-            $subPropReader = (fn (string $prop): mixed => $this->$prop ?? null)->bindTo($value, $value);
+            if ($value === null) {
+                return $dict;
+            }
+            $subPropReader = (fn (string $prop): mixed
+                => array_key_exists($prop, get_object_vars($this)) ? $this->$prop : SerdeError::Missing)->bindTo($value, $value);
             // This really wants to be explicit partial application. :-(
             $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader, $serializer);
             $properties = $serializer->propertiesFor($value::class);

@@ -66,15 +66,7 @@ class ObjectImporter implements Importer
                     throw InvalidArrayKeyType::create($propField, 'invalid');
                 }
                 if ($value === SerdeError::Missing) {
-                    if ($propField->shouldUseDefault) {
-                        $props[$propField->phpName] = $propField->defaultValue;
-                    } elseif ($propField->requireValue) {
-                        throw MissingRequiredValueWhenDeserializing::create(
-                            $propField->phpName,
-                            $classDef->phpType,
-                            $deserializer->deformatter->format(),
-                        );
-                    }
+                    $this->handleDefault($props, $propField, $classDef, $deserializer);
                 } else {
                     $props[$propField->phpName] = $value;
                 }
@@ -88,9 +80,15 @@ class ObjectImporter implements Importer
             return [$this->createObject($class, $props, $classDef->postLoadCallacks), []];
         }
 
-        $remaining = $dict;
+        $remaining = array_filter($dict, static fn(mixed $v) => ! $v instanceof SerdeError);
         foreach ($collectingObjects as $collectingField) {
             $remaining = $deserializer->deformatter->getRemainingData($remaining, $usedNames);
+            // If we've run out of remaining properties, fill in the remaining collecting
+            // objects with their default.
+            if (empty($remaining)) {
+                $this->handleDefault($props, $collectingField, $classDef, $deserializer);
+                continue;
+            }
             // It's possible there will be a class map but no mapping field in
             // the data. In that case, either set a default or just ignore the field.
             if ($targetClass = $deserializer->typeMapper->getTargetClass($collectingField, $dict)) {
@@ -104,6 +102,7 @@ class ObjectImporter implements Importer
             }
         }
 
+        // Any remaining data gets passed to a collecting array, if defined.
         $remaining = $deserializer->deformatter->getRemainingData($remaining, $usedNames);
         if ($collectingArray) {
             $props[$collectingArray->phpName] = $remaining;
@@ -114,6 +113,31 @@ class ObjectImporter implements Importer
         // this is where that logic would live.
 
         return [$this->createObject($class, $props, $classDef->postLoadCallacks), $remaining];
+    }
+
+    /**
+     * Handles default values on the specified field.
+     *
+     * The by-ref argument here is utterly gross, but since "do nothing" is a valid
+     * option, we cannot return a value, and moving that logic higher results in
+     * lots of duplication.
+     *
+     * @param array<string, mixed> $props
+     */
+    protected function handleDefault(array &$props, Field $field, ClassSettings $classDef, Deserializer $deserializer): void
+    {
+        if (array_key_exists($field->phpName, $props)) {
+            return;
+        }
+        if ($field->shouldUseDefault) {
+            $props[$field->phpName] = $field->defaultValue;
+        } elseif ($field->requireValue) {
+            throw MissingRequiredValueWhenDeserializing::create(
+                $field->phpName,
+                $classDef->phpType,
+                $deserializer->deformatter->format(),
+            );
+        }
     }
 
     /**

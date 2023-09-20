@@ -26,6 +26,7 @@ use Crell\Serde\Records\Exclusions;
 use Crell\Serde\Records\FlatMapNested\HostObject;
 use Crell\Serde\Records\FlatMapNested\Item;
 use Crell\Serde\Records\FlatMapNested\NestedA;
+use Crell\Serde\Records\FlattenedNullableMain;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\ImplodingArrays;
 use Crell\Serde\Records\InvalidFieldType;
@@ -1581,6 +1582,30 @@ abstract class SerdeTest extends TestCase
     }
 
     public function null_properties_are_allowed_validate(mixed $serialized): void
+    {
+
+    }
+
+    /**
+     * @test
+     */
+    public function nullable_properties_flattened(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new FlattenedNullableMain();
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->nullable_properties_flattened_validate($serialized);
+
+        /** @var FlattenedNullableMain $result */
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function nullable_properties_flattened_validate(mixed $serialized): void
     {
 
     }
