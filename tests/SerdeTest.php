@@ -23,6 +23,7 @@ use Crell\Serde\Records\Drupal\StringItem;
 use Crell\Serde\Records\Drupal\TextItem;
 use Crell\Serde\Records\EmptyData;
 use Crell\Serde\Records\Exclusions;
+use Crell\Serde\Records\ExplicitDefaults;
 use Crell\Serde\Records\FlatMapNested\HostObject;
 use Crell\Serde\Records\FlatMapNested\Item;
 use Crell\Serde\Records\FlatMapNested\NestedA;
@@ -1468,6 +1469,21 @@ abstract class SerdeTest extends TestCase
         self::assertEquals('A', $result->a);
         // This isn't in the incoming data, and is required, but has a default so it's fine.
         self::assertEquals('B', $result->b);
+    }
+
+    /**
+     * @test
+     */
+    public function missing_required_value_with_attribute_default_uses_default(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        /** @var ExplicitDefaults $result */
+        $result = $s->deserialize($this->emptyData, $this->format, ExplicitDefaults::class);
+
+        self::assertEquals(42, $result->bar);
+        // This isn't in the incoming data, and is required, but has a default so it's fine.
+        self::assertEquals(null, $result->name);
     }
 
     /**
