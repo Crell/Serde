@@ -144,7 +144,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     public function __construct(
         ?string $serializedName = null,
         ?RenamingStrategy $renameWith = null,
-        mixed $default = null,
+        mixed $default = SerdeError::Missing,
         protected readonly bool $useDefault = true,
         public readonly bool $flatten = false,
         public readonly bool $exclude = false,
@@ -153,8 +153,9 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         ?bool $requireValue = null,
         protected readonly array $scopes = [null],
     ) {
-        if ($default) {
+        if ($default !== SerdeError::Missing) {
             $this->defaultValue = $default;
+            $this->shouldUseDefault = true;
         }
         // Null means we want to accept a default value later from the class.
         if ($requireValue !== null) {
@@ -183,16 +184,19 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         // Damnit, PHP.
         $this->nullable = $subject->getType()?->allowsNull() ?? true;
 
-        // We only care about defaults from the constructor; if a non-readonly property
-        // has a default value, then newInstanceWithoutConstructor() will use it for us
-        // and we don't need to do anything.
-        $constructorDefault = $this->getDefaultValueFromConstructor($subject);
+        // This abomination is the only way to differentiate uninitialized from "set to null".
+        if (!array_key_exists('defaultValue', get_object_vars($this))) {
+            // We only care about defaults from the constructor; if a non-readonly property
+            // has a default value, then newInstanceWithoutConstructor() will use it for us
+            // and we don't need to do anything.
+            $constructorDefault = $this->getDefaultValueFromConstructor($subject);
 
-        $this->shouldUseDefault
-            ??= $this->useDefault && $constructorDefault !== SerdeError::NoDefaultValue;
+            $this->shouldUseDefault
+                ??= $this->useDefault && $constructorDefault !== SerdeError::NoDefaultValue;
 
-        if ($this->shouldUseDefault) {
-            $this->defaultValue ??= $constructorDefault;
+            if ($this->shouldUseDefault) {
+                $this->defaultValue ??= $constructorDefault;
+            }
         }
     }
 
