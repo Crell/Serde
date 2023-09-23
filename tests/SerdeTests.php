@@ -76,6 +76,9 @@ use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
 use Crell\Serde\Records\Visibility;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -127,9 +130,7 @@ abstract class SerdeTests extends TestCase
      */
     protected mixed $missingOptionalData;
 
-    /**
-     * @test
-     */
+    #[Test]
     public function point(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -150,9 +151,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function visibility(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -173,9 +172,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function optional_point(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -196,9 +193,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function all_fields(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -246,9 +241,7 @@ abstract class SerdeTests extends TestCase
     }
 
 
-    /**
-     * @test
-     */
+    #[Test]
     public function float_fields_take_ints(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -272,10 +265,9 @@ abstract class SerdeTests extends TestCase
     }
 
     /**
-     * @test
-     *
      * This tests an empty object value, which means something different in different formats.
      */
+    #[Test]
     public function empty_input(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -288,10 +280,9 @@ abstract class SerdeTests extends TestCase
     }
 
     /**
-     * @test
-     *
      * This tests an empty string of input.
      */
+    #[Test]
     public function empty_string(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -303,9 +294,7 @@ abstract class SerdeTests extends TestCase
         self::assertEquals(new AllFieldTypes(), $result);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function name_mangling(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -331,10 +320,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group flattening
-     */
+    #[Test, Group('flattening')]
     public function flattening(): void
     {
         foreach ($this->formatters as $formatter) {
@@ -365,10 +351,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function static_typemap(): void
     {
         $typeMap = new StaticTypeMap(key: 'size', map: [
@@ -399,10 +382,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function dynamic_type_map(): void
     {
         $typeMap = new class implements TypeMap {
@@ -451,10 +431,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function typemap_on_parent_class(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -475,10 +452,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function classname_typemap(): void
     {
         $typeMap = new ClassNameTypeMap(key: 'class');
@@ -503,9 +477,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function circular_detection(): void
     {
         $this->expectException(CircularReferenceDetected::class);
@@ -523,10 +495,7 @@ abstract class SerdeTests extends TestCase
         $serialized = $s->serialize($a, $this->format);
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function root_type_map(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -547,10 +516,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function bad_type_map(): void
     {
         $this->expectException(NoTypeMapDefinedForKey::class);
@@ -566,9 +532,7 @@ abstract class SerdeTests extends TestCase
         $s->deserialize($array, from: 'array', to: Type::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function nested_objects(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -592,10 +556,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function nested_objects_with_flattening(): void
     {
         foreach ($this->formatters as $formatter) {
@@ -625,9 +586,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function empty_values(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -647,9 +606,7 @@ abstract class SerdeTests extends TestCase
     {
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function exclude_values(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -672,10 +629,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function drupal_example(): void
     {
         $typeMap = new class implements TypeMap {
@@ -742,10 +696,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group flattening
-     */
+    #[Test, Group('flattening')]
     public function mapped_collected_dictionary(): void
     {
         foreach ($this->formatters as $formatter) {
@@ -776,10 +727,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group flattening
-     */
+    #[Test, Group('flattening')]
     public function mapped_collected_sequence(): void
     {
         foreach ($this->formatters as $formatter) {
@@ -810,10 +758,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group flattening
-     */
+    #[Test, Group('flattening')]
     public function pagination_flatten_object(): void
     {
         foreach ($this->formatters as $formatter) {
@@ -851,10 +796,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group flattening
-     */
+    #[Test, Group('flattening')]
     public function pagination_flatten_multiple_object(): void
     {
         foreach ($this->formatters as $formatter) {
@@ -897,9 +839,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function native_object_serialization(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -920,11 +860,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     * @group flattening
-     */
+    #[Test, Group('flattening'), Group('typemap')]
     public function flatten_and_map_objects(): void
     {
         foreach ($this->formatters as $formatter) {
@@ -964,9 +900,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function invalid_type_field(): void
     {
         $this->expectException(FieldTypeIncompatible::class);
@@ -979,9 +913,7 @@ abstract class SerdeTests extends TestCase
         $serialized = $s->serialize($a, $this->format);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function array_imploding(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1005,11 +937,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     * @group flattening
-     */
+    #[Test, Group('flattening'), Group('typemap')]
     public function flat_map_nested(): void
     {
         foreach ($this->formatters as $formatter) {
@@ -1049,9 +977,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function post_deserialize_callback(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1075,10 +1001,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function mapped_arrays(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1108,10 +1031,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @group typemap
-     */
+    #[Test, Group('typemap')]
     public function root_typemap(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1132,9 +1052,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function field_aliases(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1152,9 +1070,7 @@ abstract class SerdeTests extends TestCase
         self::assertEquals($expected, $result);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function dictionary_key(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1178,9 +1094,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function dictionary_key_int_in_string_throws_in_deserialize(): void
     {
         $this->expectException(InvalidArrayKeyType::class);
@@ -1195,9 +1109,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function dictionary_key_string_in_int_throws_on_serialize(): void
     {
         $this->expectException(InvalidArrayKeyType::class);
@@ -1213,9 +1125,7 @@ abstract class SerdeTests extends TestCase
         $serialized = $s->serialize($data, $this->format);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function datetime_fields_support_custom_output_format(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1262,9 +1172,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function dictionary_key_string_in_int_throws_on_deserialize(): void
     {
         $this->expectException(InvalidArrayKeyType::class);
@@ -1274,9 +1182,7 @@ abstract class SerdeTests extends TestCase
         $result = $s->deserialize($this->invalidDictStringKey, $this->format, DictionaryKeyTypes::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function array_of_null_serializes_cleanly(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1297,10 +1203,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     * @dataProvider mixed_val_property_examples
-     */
+    #[Test, DataProvider('mixed_val_property_examples')]
     public function mixed_val_property(mixed $data): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1330,9 +1233,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function generator_property_is_run_out(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1387,9 +1288,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function traversable_object_not_iterated(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1417,9 +1316,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function missing_required_value_throws(): void
     {
         $this->expectException(MissingRequiredValueWhenDeserializing::class);
@@ -1429,9 +1326,7 @@ abstract class SerdeTests extends TestCase
         $result = $s->deserialize($this->emptyData, $this->format, RequiresFieldValues::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function missing_required_value_with_default_does_not_throw(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1444,9 +1339,7 @@ abstract class SerdeTests extends TestCase
         self::assertEquals('B', $result->b);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function missing_required_value_for_class_throws(): void
     {
         $this->expectException(MissingRequiredValueWhenDeserializing::class);
@@ -1456,9 +1349,7 @@ abstract class SerdeTests extends TestCase
         $result = $s->deserialize($this->emptyData, $this->format, RequiresFieldValuesClass::class);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function missing_required_value_for_class_with_default_does_not_throw(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1471,9 +1362,7 @@ abstract class SerdeTests extends TestCase
         self::assertEquals('B', $result->b);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function missing_required_value_with_attribute_default_uses_default(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1486,9 +1375,7 @@ abstract class SerdeTests extends TestCase
         self::assertEquals(null, $result->name);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function class_level_renaming_applies(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1510,11 +1397,9 @@ abstract class SerdeTests extends TestCase
     }
 
     /**
-     * @test
-     * @dataProvider scopes_examples()
-     *
      * @param array<string|null> $scopes
      */
+    #[Test, DataProvider('scopes_examples')]
     public function scopes(object $data, array $scopes, MultipleScopes|MultipleScopesDefaultTrue $expected): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1572,9 +1457,7 @@ abstract class SerdeTests extends TestCase
         ];
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function nullable_null_properties_are_allowed(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1602,9 +1485,7 @@ abstract class SerdeTests extends TestCase
 
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function nullable_properties_flattened(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);

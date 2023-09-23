@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Attributes\DictionaryField;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class DictionaryFieldTest extends TestCase
 {
     /**
-     * @test
-     * @dataProvider implosionExamples
-     *
      * @param array<string, string> $in
      */
+    #[Test, DataProvider('implosionExamples')]
     public function implosion(string $implodeOn, string $joinOn, array $in, string $expected): void
     {
         $d = new DictionaryField(
@@ -50,11 +50,9 @@ class DictionaryFieldTest extends TestCase
     }
 
     /**
-     * @test
-     * @dataProvider explosionExamples
-     *
      * @param array<string, string> $expected
      */
+    #[Test, DataProvider('explosionExamples')]
     public function explosion(string $implodeOn, string $joinOn, string $in, array $expected): void
     {
         $d = new DictionaryField(

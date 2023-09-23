@@ -49,9 +49,7 @@ class ArrayFormatterTest extends ArrayBasedFormatterTests
         return $serialized;
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function literal_enums(): void
     {
         $s = new SerdeCommon(handlers: [new EnumOnArrayImporter()], formatters: $this->formatters);

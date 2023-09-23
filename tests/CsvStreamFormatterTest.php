@@ -12,14 +12,13 @@ use Crell\Serde\Records\CsvTable;
 use Crell\Serde\Records\CsvTableLazy;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\PointList;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class CsvStreamFormatterTest extends TestCase
 {
-    /**
-     * @test
-     * @dataProvider csvExamples()
-     */
+    #[Test, DataProvider('csvExamples')]
     public function csv_serialize(object $data, ?object $expected = null): void
     {
         $s = new SerdeCommon(formatters: [new CsvStreamFormatter(), new CsvFormatter()]);

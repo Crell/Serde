@@ -13,6 +13,8 @@ use Crell\Serde\Records\MappedCollected\ThingB;
 use Crell\Serde\Records\MappedCollected\ThingC;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Shapes\Circle;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 abstract class ArrayBasedFormatterTests extends SerdeTests
 {
@@ -283,10 +285,7 @@ abstract class ArrayBasedFormatterTests extends SerdeTests
         self::assertEquals(4, $toTest['bottomRight']['y']);
     }
 
-    /**
-     * @test
-     * @dataProvider non_strict_properties_examples()
-     */
+    #[Test, DataProvider('non_strict_properties_examples')]
     public function non_strict_mode_casts_values(mixed $serialized, object $expected): void
     {
         $s = new SerdeCommon();
@@ -331,11 +330,7 @@ abstract class ArrayBasedFormatterTests extends SerdeTests
         ];
     }
 
-
-    /**
-     * @test
-     * @dataProvider strict_mode_throws_examples
-     */
+    #[Test, DataProvider('strict_mode_throws_examples')]
     public function strict_mode_throws_correct_exception(mixed $serialized, string $errorField, string $expectedType, string $foundType): void
     {
         $s = new SerdeCommon();

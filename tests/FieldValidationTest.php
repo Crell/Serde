@@ -7,14 +7,13 @@ namespace Crell\Serde;
 use Crell\Serde\Attributes\DictionaryField;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Attributes\SequenceField;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class FieldValidationTest extends TestCase
 {
-    /**
-     * @test
-     * @dataProvider fieldValidationExamples()
-     */
+    #[Test, DataProvider('fieldValidationExamples')]
     public function fields_validate_their_types(string $phpType, mixed $value, ?TypeField $typeField, bool $expected): void
     {
         $f = Field::create('fake', phpType: $phpType, typeField: $typeField);
