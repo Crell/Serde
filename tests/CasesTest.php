@@ -22,7 +22,7 @@ class CasesTest extends TestCase
         self::assertEquals($expected, $case->convert($in));
     }
 
-    public function caseExamples(): iterable
+    public static function caseExamples(): iterable
     {
         yield [
             'case' => Cases::lowercase,

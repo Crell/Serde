@@ -10,7 +10,7 @@ use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\LiteralEnums;
 use Crell\Serde\Records\Size;
 
-class ArrayFormatterTest extends ArrayBasedFormatterTest
+class ArrayFormatterTest extends ArrayBasedFormatterTests
 {
     public function setUp(): void
     {
@@ -68,16 +68,16 @@ class ArrayFormatterTest extends ArrayBasedFormatterTest
         self::assertEquals($expected, $result);
     }
 
-    public function non_strict_properties_examples(): iterable
+    public static function non_strict_properties_examples(): iterable
     {
-        foreach ($this->non_strict_properties_examples_data() as $k => $v) {
+        foreach (self::non_strict_properties_examples_data() as $k => $v) {
             yield $k => $v;
         }
     }
 
-    public function strict_mode_throws_examples(): iterable
+    public static function strict_mode_throws_examples(): iterable
     {
-        foreach ($this->strict_mode_throws_examples_data() as $k => $v) {
+        foreach (self::strict_mode_throws_examples_data() as $k => $v) {
             yield $k => $v;
         }
     }

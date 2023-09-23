@@ -88,7 +88,7 @@ use PHPUnit\Framework\TestCase;
  * - Override any of the *_validate() methods desired to introspect
  *   the serialized data for that test in a format-specific way.
  */
-abstract class SerdeTest extends TestCase
+abstract class SerdeTests extends TestCase
 {
     protected array $formatters;
 
@@ -1314,7 +1314,7 @@ abstract class SerdeTest extends TestCase
         self::assertEquals($data, $result);
     }
 
-    public function mixed_val_property_examples(): iterable
+    public static function mixed_val_property_examples(): iterable
     {
         yield 'string' => [new MixedVal('hello')];
         yield 'int' => [new MixedVal(5)];
@@ -1527,7 +1527,7 @@ abstract class SerdeTest extends TestCase
         self::assertEquals($expected, $result);
     }
 
-    public function scopes_examples(): iterable
+    public static function scopes_examples(): iterable
     {
         yield 'default false; default scope' => [
             'data' => new MultipleScopes(a: 'A', b: 'B', c: 'C', d: 'D', e: 'E'),

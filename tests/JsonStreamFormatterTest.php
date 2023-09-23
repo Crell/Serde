@@ -54,7 +54,7 @@ class JsonStreamFormatterTest extends TestCase
     /**
      * @see stream_serialize()
      */
-    public function streamExamples(): iterable
+    public static function streamExamples(): iterable
     {
         yield Point::class => [
             'data' => new Point(1, 2, 3),

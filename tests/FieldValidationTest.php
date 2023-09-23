@@ -22,7 +22,7 @@ class FieldValidationTest extends TestCase
         self::assertSame($expected, $f->validate($value));
     }
 
-    public function fieldValidationExamples(): iterable
+    public static function fieldValidationExamples(): iterable
     {
         // Integers.
         yield 'int to int' => [

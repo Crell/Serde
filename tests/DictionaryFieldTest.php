@@ -27,7 +27,7 @@ class DictionaryFieldTest extends TestCase
         self::assertEquals($expected, $result);
     }
 
-    public function implosionExamples(): iterable
+    public static function implosionExamples(): iterable
     {
         yield [
             'implodeOn' => ',',
@@ -67,7 +67,7 @@ class DictionaryFieldTest extends TestCase
         self::assertEquals($expected, $result);
     }
 
-    public function explosionExamples(): iterable
+    public static function explosionExamples(): iterable
     {
         yield 'A single pair gets parsed' => [
             'implodeOn' => ',',

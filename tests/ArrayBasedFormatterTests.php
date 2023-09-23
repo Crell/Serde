@@ -14,7 +14,7 @@ use Crell\Serde\Records\MappedCollected\ThingC;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Shapes\Circle;
 
-abstract class ArrayBasedFormatterTest extends SerdeTest
+abstract class ArrayBasedFormatterTests extends SerdeTests
 {
     abstract protected function arrayify(mixed $serialized): array;
 
@@ -296,9 +296,9 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals($expected, $result);
     }
 
-    abstract public function non_strict_properties_examples(): iterable;
+    abstract public static function non_strict_properties_examples(): iterable;
 
-    public function non_strict_properties_examples_data(): iterable
+    public static function non_strict_properties_examples_data(): iterable
     {
         yield 'clean cast' => [
             'serialized' => [
@@ -360,9 +360,9 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('D', $toTest['intKey'][10]);
     }
 
-    abstract public function strict_mode_throws_examples(): iterable;
+    abstract public static function strict_mode_throws_examples(): iterable;
 
-    public function strict_mode_throws_examples_data(): iterable
+    public static function strict_mode_throws_examples_data(): iterable
     {
         yield [
             'serialized' => ['anint' => '5'],

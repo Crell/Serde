@@ -25,7 +25,7 @@ class SequenceFieldTest extends TestCase
         self::assertEquals($expected, $result);
     }
 
-    public function explodeExamples(): iterable
+    public static function explodeExamples(): iterable
     {
         yield [
             'implodeOn' => ',',

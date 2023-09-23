@@ -6,7 +6,7 @@ namespace Crell\Serde;
 
 use Crell\Serde\Formatter\JsonFormatter;
 
-class JsonFormatterTest extends ArrayBasedFormatterTest
+class JsonFormatterTest extends ArrayBasedFormatterTests
 {
     public function setUp(): void
     {
@@ -56,17 +56,17 @@ class JsonFormatterTest extends ArrayBasedFormatterTest
         self::assertEquals('{"x":1,"y":2,"z":0}', $serialized);
     }
 
-    public function non_strict_properties_examples(): iterable
+    public static function non_strict_properties_examples(): iterable
     {
-        foreach ($this->non_strict_properties_examples_data() as $k => $v) {
+        foreach (self::non_strict_properties_examples_data() as $k => $v) {
             $v['serialized'] = json_encode($v['serialized'], JSON_THROW_ON_ERROR);
             yield $k => $v;
         }
     }
 
-    public function strict_mode_throws_examples(): iterable
+    public static function strict_mode_throws_examples(): iterable
     {
-        foreach ($this->strict_mode_throws_examples_data() as $k => $v) {
+        foreach (self::strict_mode_throws_examples_data() as $k => $v) {
             $v['serialized'] = json_encode($v['serialized'], JSON_THROW_ON_ERROR);
             yield $k => $v;
         }
