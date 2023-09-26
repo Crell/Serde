@@ -9,6 +9,7 @@ use Crell\Serde\PropertyHandler\EnumOnArrayImporter;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\LiteralEnums;
 use Crell\Serde\Records\Size;
+use PHPUnit\Framework\Attributes\Test;
 
 class ArrayFormatterTest extends ArrayBasedFormatterTests
 {
