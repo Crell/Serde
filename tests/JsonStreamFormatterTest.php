@@ -26,14 +26,13 @@ use Crell\Serde\Records\Pagination\ProductType;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Size;
 use Crell\Serde\Records\Visibility;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class JsonStreamFormatterTest extends TestCase
 {
-    /**
-     * @test
-     * @dataProvider streamExamples()
-     */
+    #[Test, DataProvider('streamExamples')]
     public function stream_serialize(object $data): void
     {
         $s = new SerdeCommon(formatters: [new JsonStreamFormatter()]);
@@ -54,7 +53,7 @@ class JsonStreamFormatterTest extends TestCase
     /**
      * @see stream_serialize()
      */
-    public function streamExamples(): iterable
+    public static function streamExamples(): iterable
     {
         yield Point::class => [
             'data' => new Point(1, 2, 3),
@@ -160,9 +159,7 @@ class JsonStreamFormatterTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function object_with_generator_streams_cleanly(): void
     {
         $s = new SerdeCommon(formatters: [new JsonStreamFormatter()]);

@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Attributes\SequenceField;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class SequenceFieldTest extends TestCase
 {
 
     /**
-     * @test
-     * @dataProvider explodeExamples
-     *
      * @param string[] $expected
      */
+    #[Test, DataProvider('explodeExamples')]
     public function explode(string $implodeOn, string $in, array $expected): void
     {
         $s = new SequenceField(implodeOn: $implodeOn);
@@ -25,7 +25,7 @@ class SequenceFieldTest extends TestCase
         self::assertEquals($expected, $result);
     }
 
-    public function explodeExamples(): iterable
+    public static function explodeExamples(): iterable
     {
         yield [
             'implodeOn' => ',',

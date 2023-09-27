@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Renaming\Cases;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class CasesTest extends TestCase
 {
     /**
-     * @test
-     * @dataProvider caseExamples
-     *
      * @param Cases $case
      * @param string $in
      * @param string $expected
      */
+    #[Test, DataProvider('caseExamples')]
     public function caseFold(Cases $case, string $in, string $expected): void
     {
         self::assertEquals($expected, $case->convert($in));
     }
 
-    public function caseExamples(): iterable
+    public static function caseExamples(): iterable
     {
         yield [
             'case' => Cases::lowercase,

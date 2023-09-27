@@ -1,4 +1,4 @@
-FROM php:8.1.11-cli
+FROM php:8.1-cli
 WORKDIR /usr/src/myapp
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

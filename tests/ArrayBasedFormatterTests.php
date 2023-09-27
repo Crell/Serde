@@ -13,8 +13,10 @@ use Crell\Serde\Records\MappedCollected\ThingB;
 use Crell\Serde\Records\MappedCollected\ThingC;
 use Crell\Serde\Records\Point;
 use Crell\Serde\Records\Shapes\Circle;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
-abstract class ArrayBasedFormatterTest extends SerdeTest
+abstract class ArrayBasedFormatterTests extends SerdeTests
 {
     abstract protected function arrayify(mixed $serialized): array;
 
@@ -283,10 +285,7 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals(4, $toTest['bottomRight']['y']);
     }
 
-    /**
-     * @test
-     * @dataProvider non_strict_properties_examples()
-     */
+    #[Test, DataProvider('non_strict_properties_examples')]
     public function non_strict_mode_casts_values(mixed $serialized, object $expected): void
     {
         $s = new SerdeCommon();
@@ -296,9 +295,9 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals($expected, $result);
     }
 
-    abstract public function non_strict_properties_examples(): iterable;
+    abstract public static function non_strict_properties_examples(): iterable;
 
-    public function non_strict_properties_examples_data(): iterable
+    public static function non_strict_properties_examples_data(): iterable
     {
         yield 'clean cast' => [
             'serialized' => [
@@ -331,11 +330,7 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         ];
     }
 
-
-    /**
-     * @test
-     * @dataProvider strict_mode_throws_examples
-     */
+    #[Test, DataProvider('strict_mode_throws_examples')]
     public function strict_mode_throws_correct_exception(mixed $serialized, string $errorField, string $expectedType, string $foundType): void
     {
         $s = new SerdeCommon();
@@ -360,9 +355,9 @@ abstract class ArrayBasedFormatterTest extends SerdeTest
         self::assertEquals('D', $toTest['intKey'][10]);
     }
 
-    abstract public function strict_mode_throws_examples(): iterable;
+    abstract public static function strict_mode_throws_examples(): iterable;
 
-    public function strict_mode_throws_examples_data(): iterable
+    public static function strict_mode_throws_examples_data(): iterable
     {
         yield [
             'serialized' => ['anint' => '5'],

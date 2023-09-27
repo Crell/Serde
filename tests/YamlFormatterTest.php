@@ -7,7 +7,7 @@ namespace Crell\Serde;
 use Crell\Serde\Formatter\YamlFormatter;
 use Symfony\Component\Yaml\Yaml;
 
-class YamlFormatterTest extends ArrayBasedFormatterTest
+class YamlFormatterTest extends ArrayBasedFormatterTests
 {
     public function setUp(): void
     {
@@ -46,17 +46,17 @@ class YamlFormatterTest extends ArrayBasedFormatterTest
         return Yaml::parse($serialized);
     }
 
-    public function non_strict_properties_examples(): iterable
+    public static function non_strict_properties_examples(): iterable
     {
-        foreach ($this->non_strict_properties_examples_data() as $k => $v) {
+        foreach (self::non_strict_properties_examples_data() as $k => $v) {
             $v['serialized'] = Yaml::dump($v['serialized']);
             yield $k => $v;
         }
     }
 
-    public function strict_mode_throws_examples(): iterable
+    public static function strict_mode_throws_examples(): iterable
     {
-        foreach ($this->strict_mode_throws_examples_data() as $k => $v) {
+        foreach (self::strict_mode_throws_examples_data() as $k => $v) {
             $v['serialized'] = Yaml::dump($v['serialized']);
             yield $k => $v;
         }
