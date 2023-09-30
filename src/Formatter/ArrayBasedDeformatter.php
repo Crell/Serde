@@ -135,6 +135,10 @@ trait ArrayBasedDeformatter
             return SerdeError::Missing;
         }
 
+        if ($decoded[$field->serializedName] === null) {
+            return null;
+        }
+
         if (!is_array($decoded[$field->serializedName])) {
             throw FormatParseError::create($field, $this->format(), $decoded);
         }
