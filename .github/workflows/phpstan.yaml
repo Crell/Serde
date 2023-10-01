@@ -1,7 +1,8 @@
 ---
 name: PHPStan analysis
 on:
-    push: ~
+    push:
+        branches: ['master']
     pull_request: ~
 
 jobs:

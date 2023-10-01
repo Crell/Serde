@@ -1,7 +1,8 @@
 ---
 name: PHPUnit tests
 on:
-    push: ~
+    push:
+        branches: ['master']
     pull_request: ~
 
 jobs:
