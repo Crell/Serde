@@ -39,6 +39,16 @@ class YamlFormatterTest extends ArrayBasedFormatterTests
         ]);
 
         $this->missingOptionalData = YAML::dump(['a' => 'A']);
+
+        $this->dictsInSequenceShouldFail = YAML::dump([
+            'strict' => ['a' => 'A', 'b' => 'B'],
+            'nonstrict' => ['a' => 'A', 'b' => 'B'],
+        ]);
+
+        $this->dictsInSequenceShouldPass = YAML::dump([
+            'strict' => ['A', 'B'],
+            'nonstrict' => ['a' => 'A', 'b' => 'B'],
+        ]);
     }
 
     protected function arrayify(mixed $serialized): array

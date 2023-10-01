@@ -61,6 +61,7 @@ use Crell\Serde\Records\RequiresFieldValues;
 use Crell\Serde\Records\RequiresFieldValuesClass;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
+use Crell\Serde\Records\SequenceOfStrings;
 use Crell\Serde\Records\Shapes\Box;
 use Crell\Serde\Records\Shapes\Circle;
 use Crell\Serde\Records\Shapes\Rectangle;
@@ -129,6 +130,18 @@ abstract class SerdeTests extends TestCase
      * @see missing_required_value_with_default_does_not_throw()
      */
     protected mixed $missingOptionalData;
+
+    /**
+     * Data to deserialize that should fail in strict mode, because a strict sequence cannot take a dict.
+     * @see non_sequence_arrays_in_strict_mode_throw()
+     */
+    protected mixed $dictsInSequenceShouldFail;
+
+    /**
+     * Data to deserialize that should pass, because the strict is valid and non-strict gets coerced to a list.
+     * @see non_sequence_arrays_in_weak_mode_are_coerced
+     */
+    protected mixed $dictsInSequenceShouldPass;
 
     #[Test]
     public function point(): void
@@ -1505,5 +1518,56 @@ abstract class SerdeTests extends TestCase
     public function nullable_properties_flattened_validate(mixed $serialized): void
     {
 
+    }
+
+    #[Test]
+    public function non_sequence_arrays_are_normalized_to_sequences(): void
+    {
+        // This test is wrong, because serializing is going to force both values to sequences.
+        // So we need to test deserialization separately.  Maybe go deeper for class-specific
+        // unit tests.
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new SequenceOfStrings(['a' => 'A', 'b' => 'B'], ['a' => 'A', 'b' => 'B']);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        // This will do the actual validation.
+        $this->non_sequence_arrays_are_normalized_to_sequences_validate($serialized);
+//
+//        /** @var SequenceOfStrings $result */
+//        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+//
+
+    }
+
+    public function non_sequence_arrays_are_normalized_to_sequences_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function non_sequence_arrays_in_strict_mode_throw(): void
+    {
+        $this->expectException(TypeMismatch::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $result = $s->deserialize($this->dictsInSequenceShouldFail, from: $this->format, to: SequenceOfStrings::class);
+    }
+
+    #[Test]
+    public function non_sequence_arrays_in_weak_mode_are_coerced(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $result = $s->deserialize($this->dictsInSequenceShouldPass, from: $this->format, to: SequenceOfStrings::class);
+
+        self::assertTrue(array_is_list($result->strict), 'The strict array is not a proper sequence');
+        self::assertTrue(array_is_list($result->nonstrict), 'The nonstrict array is not a proper sequence');
+        self::assertEquals('A', $result->strict[0]);
+        self::assertEquals('B', $result->strict[1]);
+        self::assertEquals('A', $result->nonstrict[0]);
+        self::assertEquals('B', $result->nonstrict[1]);
     }
 }

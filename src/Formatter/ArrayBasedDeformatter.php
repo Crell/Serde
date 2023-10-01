@@ -117,15 +117,28 @@ trait ArrayBasedDeformatter
             return null;
         }
 
+        $data = $decoded[$field->serializedName];
+
+        if (!is_array($data)) {
+            throw TypeMismatch::create($field->serializedName, 'array (sequence)', \get_debug_type($decoded[$field->serializedName]));
+        }
+
+        if (!array_is_list($data)) {
+            if ($field->strict) {
+                throw TypeMismatch::create($field->serializedName, 'array (sequence)', 'associative array');
+            }
+            $data = array_values($data);
+        }
+
         // This line is fine, because if typeField is somehow not of a type with an
         // arrayType property, it resolves to null anyway, which is exactly what we want.
         // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
         if (class_exists($class) || interface_exists($class)) {
-            return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class);
+            return $this->upcastArray($data, $deserializer, $class);
         }
 
-        return $this->upcastArray($decoded[$field->serializedName], $deserializer);
+        return $this->upcastArray($data, $deserializer);
     }
 
     public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null
