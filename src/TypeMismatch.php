@@ -18,7 +18,7 @@ class TypeMismatch extends \InvalidArgumentException
         $new->expectedType = $expectedType;
         $new->foundType = $foundType;
 
-        $new->message = sprintf('Expected value of type %s when writing to property %s, but found type %s.', $expectedType, $name, $foundType);
+        $new->message = sprintf('Expected value of type %s when writing to property %s, but found type %s.  Either your incoming data is invalid, or perhaps the field needs to be in non-strict mode.', $expectedType, $name, $foundType);
 
         return $new;
     }
