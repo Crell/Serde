@@ -16,7 +16,7 @@ use Crell\Serde\Records\Shapes\Circle;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 
-abstract class ArrayBasedFormatterTests extends SerdeTests
+abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
 {
     abstract protected function arrayify(mixed $serialized): array;
 

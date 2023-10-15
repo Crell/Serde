@@ -6,7 +6,7 @@ namespace Crell\Serde;
 
 use Crell\Serde\Formatter\JsonFormatter;
 
-class JsonFormatterTest extends ArrayBasedFormatterTests
+class JsonFormatterTest extends ArrayBasedFormatterTestCases
 {
     public function setUp(): void
     {

@@ -11,7 +11,7 @@ use Crell\Serde\Records\LiteralEnums;
 use Crell\Serde\Records\Size;
 use PHPUnit\Framework\Attributes\Test;
 
-class ArrayFormatterTest extends ArrayBasedFormatterTests
+class ArrayFormatterTest extends ArrayBasedFormatterTestCases
 {
     public function setUp(): void
     {

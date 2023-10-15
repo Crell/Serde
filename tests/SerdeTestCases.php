@@ -92,7 +92,7 @@ use PHPUnit\Framework\TestCase;
  * - Override any of the *_validate() methods desired to introspect
  *   the serialized data for that test in a format-specific way.
  */
-abstract class SerdeTests extends TestCase
+abstract class SerdeTestCases extends TestCase
 {
     protected array $formatters;
 

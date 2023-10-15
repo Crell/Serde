@@ -7,7 +7,7 @@ namespace Crell\Serde;
 use Crell\Serde\Formatter\YamlFormatter;
 use Symfony\Component\Yaml\Yaml;
 
-class YamlFormatterTest extends ArrayBasedFormatterTests
+class YamlFormatterTest extends ArrayBasedFormatterTestCases
 {
     public function setUp(): void
     {
