@@ -1117,7 +1117,7 @@ If you discover any security related issues, please email larry at garfieldtech 
 - [Larry Garfield][link-author]
 - [All Contributors][link-contributors]
 
-Development of this library is sponsored by [TYPO3 GmbH](https://typo3.com/).
+Initial development of this library was sponsored by [TYPO3 GmbH](https://typo3.com/).
 
 ## License
 
