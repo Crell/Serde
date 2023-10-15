@@ -279,7 +279,9 @@ This key only applies on deserialization.  If specified, then if a value is miss
 
 ### `strict` (bool, default true)
 
-This key only applies on deserialization.  If set to `true`, a type mismatch in the incoming data will be rejected and an exception thrown.  If `false`, a deformatter will attempt to cast an incoming value according to PHP's normal casting rules.  That means, for example, `"1"` is a valid value for an integer property if `strict` is false, but will throw an exception if set to `true`.
+This key only applies on deserialization.  If set to `true`, a type mismatch in the incoming data will be rejected and an exception thrown.  If `false`, a deformatter will attempt to cast an incoming value according to PHP's normal casting rules.  That means, for example, `"1"` is a valid value for an integer property if `strict` is `false`, but will throw an exception if set to `true`.
+
+For sequence fields, `strict` set to `true` will reject a non-sequence value.  (It must pass an `array_is_list()` check.)  If `strict` is `false`, any array-ish value will be accepted but passed through `array_values()` to discard any keys and reindex it.
 
 The exact handling of this setting may vary slightly depending on the incoming format, as some formats handle their own types differently.  (For instance, everything is a string in XML.)
 
