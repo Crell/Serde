@@ -10,7 +10,16 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Null is now a legal value for a property to deserialize to.
 - Null values will now be serialized as null, rather than omitted.
 - BC BREAK: The return type of formatter methods have changed to support null as a legal value.
+- Serde now uses PHPUnit 10.
 
+### Deprecated
+- Nothing
+
+### Fixed
+- There was a bug that prevented default values in attributes to be ignored in some cases.  That has been corrected.
+- Flattened nullable objects previously got deserialized into empty objects.  Now they are left as null.
+- Array-based sequences now support non-strict mode, in which they will accept non-sequence arrays but discard the keys.
+- In the default SerdeCommon configuration, dictionaries are now checked first, meaning an un-attributed array will get interpreted as a dictionary, not a sequence.  This is to minimize data loss.  Explicitly specifying a sequence or dictionary attribute is strongly recommended in all cases.
 
 ## 0.6.0 - 2023-03-23
 
@@ -46,23 +55,6 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Fixed
 - Dictionary fields now support integer keys by default.
-
-### Removed
-- Nothing
-
-### Security
-- Nothing
-
-## NEXT - YYYY-MM-DD
-
-### Added
-- Nothing
-
-### Deprecated
-- Nothing
-
-### Fixed
-- Nothing
 
 ### Removed
 - Nothing
