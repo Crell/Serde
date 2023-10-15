@@ -9,6 +9,15 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\SerdeError;
 
+/**
+ * Decode data from a given format when called by an Importer.
+ *
+ * It is this class's responsibility to enforce "strict mode" on each field
+ * type.  That may vary slightly depending on the format. (eg, in XML, everything
+ * is a string by default so just checking the variable type is not viable.) In
+ * strict mode, invalid values should throw a TypeMismatch.  In weak mode, a
+ * good faith effort should be made to convert the data to the expected type.
+ */
 interface Deformatter
 {
     public function format(): string;

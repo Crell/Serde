@@ -43,6 +43,16 @@ class ArrayFormatterTest extends ArrayBasedFormatterTests
         ];
 
         $this->missingOptionalData = ['a' => 'A'];
+
+        $this->dictsInSequenceShouldFail = [
+            'strict' => ['a' => 'A', 'b' => 'B'],
+            'nonstrict' => ['a' => 'A', 'b' => 'B'],
+        ];
+
+        $this->dictsInSequenceShouldPass = [
+            'strict' => ['A', 'B'],
+            'nonstrict' => ['a' => 'A', 'b' => 'B'],
+        ];
     }
 
     protected function arrayify(mixed $serialized): array

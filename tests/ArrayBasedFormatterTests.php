@@ -437,4 +437,13 @@ abstract class ArrayBasedFormatterTests extends SerdeTests
         self::assertNull($toTest['array']);
         self::assertNull($toTest['object']);
     }
+
+    public function non_sequence_arrays_are_normalized_to_sequences_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertIsList($toTest['strict']);
+        self::assertIsList($toTest['nonstrict']);
+
+    }
 }

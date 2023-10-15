@@ -30,6 +30,16 @@ class JsonFormatterTest extends ArrayBasedFormatterTests
         $this->invalidDictIntKey = '{"stringKey": {"a": "A", "2": "B"}, "intKey": {"5": "C", "10": "D"}}';
 
         $this->missingOptionalData = '{"a": "A"}';
+
+        $this->dictsInSequenceShouldFail = json_encode([
+            'strict' => ['a' => 'A', 'b' => 'B'],
+            'nonstrict' => ['a' => 'A', 'b' => 'B'],
+        ]);
+
+        $this->dictsInSequenceShouldPass = json_encode([
+            'strict' => ['A', 'B'],
+            'nonstrict' => ['a' => 'A', 'b' => 'B'],
+        ]);
     }
 
     protected function arrayify(mixed $serialized): array

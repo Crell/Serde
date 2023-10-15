@@ -6,6 +6,7 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Attributes\DictionaryField;
 use Crell\Serde\Attributes\Field;
+use Crell\Serde\Attributes\SequenceField;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
@@ -60,8 +61,12 @@ class DictionaryExporter implements Exporter, Importer
 
     public function canExport(Field $field, mixed $value, string $format): bool
     {
-        return ($field->phpType === 'array' && !\array_is_list($value))
-            || ($field->typeCategory === TypeCategory::Generator && $field->typeField instanceof DictionaryField);
+        return match (true) {
+            $field->typeField instanceof DictionaryField => true,
+            $field->typeField instanceof SequenceField => false,
+            $field->phpType === 'array' && !array_is_list($value) => true,
+            default => false,
+        };
     }
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
