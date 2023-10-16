@@ -19,6 +19,7 @@ class NativeSerializeExporter implements Exporter, Importer
         $propValues = $value->__serialize();
 
         $dict = new Dict();
+        $dict->items = [];
 
         foreach ($propValues as $k => $v) {
             $dict->items[] = new CollectionItem(

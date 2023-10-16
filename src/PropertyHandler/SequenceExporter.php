@@ -24,7 +24,7 @@ class SequenceExporter implements Exporter, Importer
             return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
-        $seq = $this->iterableToSequence($value);
+        $seq = is_array($value) ? $this->arrayToSequence($value) : $this->iterableToSequence($value);
 
         return $serializer->formatter->serializeSequence($runningValue, $field, $seq, $serializer);
     }
@@ -35,11 +35,27 @@ class SequenceExporter implements Exporter, Importer
     protected function iterableToSequence(iterable $value): Sequence
     {
         $seq = new Sequence();
+
+        $seq->items = (static function () use ($value) {
+            foreach ($value as $k => $v) {
+                $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
+                yield new CollectionItem(field: $f, value: $v);
+            }
+        })();
+        return $seq;
+    }
+
+    /**
+     * @param array<mixed> $value
+     */
+    protected function arrayToSequence(array $value): Sequence
+    {
+        $items = [];
         foreach ($value as $k => $v) {
             $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
-            $seq->items[] = new CollectionItem(field: $f, value: $v);
+            $items[] = new CollectionItem(field: $f, value: $v);
         }
-        return $seq;
+        return new Sequence($items);
     }
 
     public function canExport(Field $field, mixed $value, string $format): bool

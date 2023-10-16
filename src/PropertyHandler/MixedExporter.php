@@ -39,16 +39,16 @@ class MixedExporter implements Importer, Exporter
     }
 
     /**
-     * @param mixed[] $value
+     * @param array<mixed> $value
      */
     protected function arrayToSequence(array $value): Sequence
     {
-        $seq = new Sequence();
+        $items = [];
         foreach ($value as $k => $v) {
             $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
-            $seq->items[] = new CollectionItem(field: $f, value: $v);
+            $items[] = new CollectionItem(field: $f, value: $v);
         }
-        return $seq;
+        return new Sequence($items);
     }
 
     /**
@@ -59,7 +59,7 @@ class MixedExporter implements Importer, Exporter
         /** @var DictionaryField|null $typeField */
         $typeField = $field->typeField;
 
-        $dict = new Dict();
+        $items = [];
         foreach ($value as $k => $v) {
             // Most $runningValue implementations will be an array.
             // Arrays in PHP force-cast an integer-string key to
@@ -72,10 +72,10 @@ class MixedExporter implements Importer, Exporter
                 throw InvalidArrayKeyType::create($field, 'string');
             }
             $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
-            $dict->items[] = new CollectionItem(field: $f, value: $v);
+            $items[] = new CollectionItem(field: $f, value: $v);
         }
 
-        return $dict;
+        return new Dict($items);
     }
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed

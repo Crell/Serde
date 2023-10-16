@@ -74,8 +74,7 @@ class ObjectExporter implements Exporter
         }
 
         if (!$field->flatten) {
-            $dict->items[] = new CollectionItem(field: $field, value: $value);
-            return $dict;
+            return $dict->add(new CollectionItem(field: $field, value: $value));
         }
 
         if ($field->typeCategory === TypeCategory::Array) {
@@ -113,8 +112,7 @@ class ObjectExporter implements Exporter
             $extra[$map->keyField()] = $map->findIdentifier($val::class);
         }
         $f = Field::create(serializedName: "$key", phpType: \get_debug_type($val), extraProperties: $extra);
-        $dict->items[] = new CollectionItem(field: $f, value: $val);
-        return $dict;
+        return $dict->add(new CollectionItem(field: $f, value: $val));
     }
 
     protected function reduceObjectProperty(Dict $dict, Field $prop, callable $subPropReader, Serializer $serializer): Dict
@@ -123,8 +121,7 @@ class ObjectExporter implements Exporter
             return $this->flattenValue($dict, $prop, $subPropReader, $serializer);
         }
 
-        $dict->items[] = new CollectionItem(field: $prop, value: $subPropReader($prop->phpName));
-        return $dict;
+        return $dict->add(new CollectionItem(field: $prop, value: $subPropReader($prop->phpName)));
     }
 
     public function canExport(Field $field, mixed $value, string $format): bool

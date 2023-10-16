@@ -27,20 +27,47 @@ class DictionaryExporter implements Exporter, Importer
             return $serializer->formatter->serializeString($runningValue, $field, $typeField->implode($value));
         }
 
-        $dict = $this->iteratorToDict($value, $field);
+        $dict = is_array($value) ? $this->arrayToDict($value, $field) : $this->iterableToDict($value, $field);
 
         return $serializer->formatter->serializeDictionary($runningValue, $field, $dict, $serializer);
     }
 
     /**
-     * @param iterable<mixed, mixed> $value
+     * @param array<mixed, mixed> $value
      */
-    protected function iteratorToDict(iterable $value, Field $field): Dict
+    protected function iterableToDict(iterable $value, Field $field): Dict
+    {
+        $dict = new Dict((static function () use ($value, $field) {
+            /** @var DictionaryField|null $typeField */
+            $typeField = $field->typeField;
+            foreach ($value as $k => $v) {
+                // Most $runningValue implementations will be an array.
+                // Arrays in PHP force-cast an integer-string key to
+                // an integer.  That means we cannot guarantee the type
+                // of the key going out in the Exporter. The Formatter
+                // will have to do so, if it cares. However, we can still
+                // detect and reject string-in-int.
+                if ($typeField?->keyType === KeyType::Int && \get_debug_type($k) === 'string') {
+                    // It's an int field, but the key is a string. That's a no-no.
+                    throw InvalidArrayKeyType::create($field, 'string');
+                }
+                $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
+                yield new CollectionItem(field: $f, value: $v);
+            }
+        })());
+
+        return $dict;
+    }
+
+    /**
+     * @param array<mixed, mixed> $value
+     */
+    protected function arrayToDict(array $value, Field $field): Dict
     {
         /** @var DictionaryField|null $typeField */
         $typeField = $field->typeField;
 
-        $dict = new Dict();
+        $items = [];
         foreach ($value as $k => $v) {
             // Most $runningValue implementations will be an array.
             // Arrays in PHP force-cast an integer-string key to
@@ -53,10 +80,10 @@ class DictionaryExporter implements Exporter, Importer
                 throw InvalidArrayKeyType::create($field, 'string');
             }
             $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
-            $dict->items[] = new CollectionItem(field: $f, value: $v);
+            $items[] = new CollectionItem(field: $f, value: $v);
         }
 
-        return $dict;
+        return new Dict($items);
     }
 
     public function canExport(Field $field, mixed $value, string $format): bool
