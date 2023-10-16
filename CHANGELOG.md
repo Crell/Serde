@@ -12,9 +12,6 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - BC BREAK: The return type of formatter methods have changed to support null as a legal value.
 - Serde now uses PHPUnit 10.
 
-### Deprecated
-- Nothing
-
 ### Fixed
 - There was a bug that prevented default values in attributes to be ignored in some cases.  That has been corrected.
 - Flattened nullable objects previously got deserialized into empty objects.  Now they are left as null.
