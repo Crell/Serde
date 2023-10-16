@@ -1235,7 +1235,8 @@ abstract class SerdeTestCases extends TestCase
         yield 'string' => [new MixedVal('hello')];
         yield 'int' => [new MixedVal(5)];
         yield 'float' => [new MixedVal(3.14)];
-        yield 'array' => [new MixedVal(['a', 'b', 'c'])];
+        yield 'sequence' => [new MixedVal(['a', 'b', 'c'])];
+        yield 'dict' => [new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C'])];
         // Objects can't work, because they cannot be imported without type data.
         // Exporting might.  Todo for later.
         //yield 'object' => [new Point(3, 4, 5)];
