@@ -253,7 +253,6 @@ abstract class SerdeTestCases extends TestCase
 
     }
 
-
     #[Test]
     public function float_fields_take_ints(): void
     {
@@ -1237,14 +1236,30 @@ abstract class SerdeTestCases extends TestCase
         yield 'float' => [new MixedVal(3.14)];
         yield 'sequence' => [new MixedVal(['a', 'b', 'c'])];
         yield 'dict' => [new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C'])];
-        // Objects can't work, because they cannot be imported without type data.
-        // Exporting might.  Todo for later.
-        //yield 'object' => [new Point(3, 4, 5)];
     }
 
     public function mixed_val_property_validate(mixed $serialized, mixed $data): void
     {
 
+    }
+
+    /**
+     * This isn't a desired feature; it's just confirmation for the future why it is how it is.
+     */
+    #[Test]
+    public function mixed_val_object_does_not_serialize(): void
+    {
+        // MixedExporter sends the property value back through the Serialize pipeline
+        // a second time with a new Field definition. However, that trips the circular
+        // reference detection.  Ideally we will fix that somehow, but I'm not sure how.
+        // Importing an object to mixed will never work correctly.
+        $this->expectException(CircularReferenceDetected::class);
+
+        $data = new MixedVal(new Point(3, 4, 5));
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $s->serialize($data, $this->format);
     }
 
     #[Test]

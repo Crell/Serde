@@ -444,6 +444,5 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
 
         self::assertIsList($toTest['strict']);
         self::assertIsList($toTest['nonstrict']);
-
     }
 }
