@@ -61,6 +61,7 @@ use Crell\Serde\Records\RequiresFieldValues;
 use Crell\Serde\Records\RequiresFieldValuesClass;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
+use Crell\Serde\Records\ScalarArrays;
 use Crell\Serde\Records\SequenceOfStrings;
 use Crell\Serde\Records\Shapes\Box;
 use Crell\Serde\Records\Shapes\Circle;
@@ -1585,5 +1586,59 @@ abstract class SerdeTestCases extends TestCase
         self::assertEquals('B', $result->strict[1]);
         self::assertEquals('A', $result->nonstrict[0]);
         self::assertEquals('B', $result->nonstrict[1]);
+    }
+
+    #[Test]
+    public function arrays_with_valid_scalar_values(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ScalarArrays(
+            ints: [1, 2, 3],
+            floats: [3.14, 2.7],
+            stringMap: ['a' => 'A'],
+            arrayMap: ['a' => [1, 2, 3]],
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->arrays_with_valid_scalar_values_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function arrays_with_valid_scalar_values_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function arrays_with_invalid_scalar_values(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $this->expectException(TypeMismatch::class);
+
+        // This should serialize fine, but then refuse to deserialize because
+        // of the floats in the int section.
+        $data = new ScalarArrays(
+            ints: [1.1, 2.2, 3],
+            floats: [3.14, 2.7],
+            stringMap: ['a' => 'A'],
+            arrayMap: ['a' => [1, 2, 3]],
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->arrays_with_valid_scalar_values_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+    }
+
+    public function arrays_with_invalid_scalar_values_validate(mixed $serialized): void
+    {
+
     }
 }

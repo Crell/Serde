@@ -436,9 +436,11 @@ Sometimes that works out, but other times the distinction between the two greatl
 
 #### `arrayType`
 
-On both a `#[SequenceField]` and `#[DictionaryField]`, the `arrayType` argument lets you specify the class that all values in that structure are.  For example, a sequence of integers can easily be serialized to and deserialized from most formats without any additional help.  However, an ordered list of `Product` objects could be serialized, but there's no way to tell then how to deserialize that data back to `Product` objects rather than just a nested associative array (which would also be legal).  The `arrayType` argument solves that issue.
+On both a `#[SequenceField]` and `#[DictionaryField]`, the `arrayType` argument lets you specify the type that all values in that structure are.  For example, a sequence of integers can easily be serialized to and deserialized from most formats without any additional help.  However, an ordered list of `Product` objects could be serialized, but there's no way to tell then how to deserialize that data back to `Product` objects rather than just a nested associative array (which would also be legal).  The `arrayType` argument solves that issue.
 
-If `arrayType` is specified, then all values of that array are assumed to be of that type.  On deserialization, then, Serde will look for nested object-like structures (depending on the specific format), and convert those into the specified object type.
+If `arrayType` is specified, then all values of that array are assumed to be of that type.  It may either be a `class-string` to specify all values are a class, or a value of the `ValueType` enum to indicate one of the four supported scalars.
+
+On deserialization, then, Serde will either validate that all incoming values are of the right scalar type, or look for nested object-like structures (depending on the specific format), and convert those into the specified object type.
 
 For example:
 

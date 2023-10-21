@@ -7,13 +7,14 @@ namespace Crell\Serde\Attributes;
 use Attribute;
 use Crell\AttributeUtils\SupportsScopes;
 use Crell\Serde\TypeField;
+use Crell\Serde\ValueType;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class SequenceField implements TypeField, SupportsScopes
 {
     /**
-     * @param string|null $arrayType
-     *   Elements in this array are objects of this type.
+     * @param string|ValueType|null $arrayType
+     *   Elements in this array are values of this type.
      * @param string|null $implodeOn
      *   Scalar values of this array should be imploded to a string and exploded on deserialization.
      * @param bool $trim
@@ -22,7 +23,7 @@ class SequenceField implements TypeField, SupportsScopes
      *   The scopes in which this attribute should apply.
      */
     public function __construct(
-        public readonly ?string $arrayType = null,
+        public readonly string|ValueType|null $arrayType = null,
         public readonly ?string $implodeOn = null,
         public readonly bool $trim = true,
         protected readonly array $scopes = [null],
