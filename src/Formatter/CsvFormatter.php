@@ -85,7 +85,8 @@ class CsvFormatter implements Formatter, Deformatter, SupportsCollecting
         if (! $typeField instanceof SequenceField) {
             throw CsvFormatRequiresExplicitRowType::create($classDef, $rowField);
         }
-        if (!$typeField->arrayType || !class_exists($typeField->arrayType)) {
+        // The row must be an object, to an array type of a primitive doesn't make sense.
+        if (!$typeField->arrayType || !is_string($typeField->arrayType) || !class_exists($typeField->arrayType)) {
             throw CsvFormatRequiresExplicitRowType::create($classDef, $rowField);
         }
 

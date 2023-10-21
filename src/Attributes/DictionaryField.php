@@ -8,6 +8,7 @@ use Attribute;
 use Crell\AttributeUtils\SupportsScopes;
 use Crell\Serde\KeyType;
 use Crell\Serde\TypeField;
+use Crell\Serde\ValueType;
 use function Crell\fp\afilter;
 use function Crell\fp\amap;
 use function Crell\fp\amapWithKeys;
@@ -20,8 +21,8 @@ use function Crell\fp\reduce;
 class DictionaryField implements TypeField, SupportsScopes
 {
     /**
-     * @param string|null $arrayType
-     *   Elements in this array are objects of this type.
+     * @param string|ValueType|null $arrayType
+     *   Elements in this array are values of this type.
      * @param string|null $implodeOn
      *   Scalar values of this array should be imploded to a string and exploded on deserialization.
      * @param string|null $joinOn
@@ -32,7 +33,7 @@ class DictionaryField implements TypeField, SupportsScopes
      *   The scopes in which this attribute should apply.
      */
     public function __construct(
-        public readonly ?string $arrayType = null,
+        public readonly string|ValueType|null $arrayType = null,
         public readonly ?KeyType $keyType = null,
         public readonly ?string $implodeOn = null,
         public readonly ?string $joinOn = null,

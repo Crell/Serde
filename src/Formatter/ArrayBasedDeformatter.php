@@ -10,6 +10,7 @@ use Crell\Serde\FormatParseError;
 use Crell\Serde\SerdeError;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMismatch;
+use Crell\Serde\ValueType;
 use function Crell\fp\first;
 use function Crell\fp\pipe;
 use function Crell\fp\reduceWithKeys;
@@ -134,11 +135,18 @@ trait ArrayBasedDeformatter
         // arrayType property, it resolves to null anyway, which is exactly what we want.
         // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
-        if (class_exists($class) || interface_exists($class)) {
-            return $this->upcastArray($data, $deserializer, $class);
+        if ($class instanceof ValueType) {
+            if ($class->assert($data)) {
+                return $data;
+            } else {
+                throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[0] . ')'));
+            }
         }
-
-        return $this->upcastArray($data, $deserializer);
+        else if (class_exists($class) || interface_exists($class)) {
+            return $this->upcastArray($data, $deserializer, $class);
+        } else {
+            return $this->upcastArray($data, $deserializer);
+        }
     }
 
     public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null
@@ -156,15 +164,24 @@ trait ArrayBasedDeformatter
             throw FormatParseError::create($field, $this->format(), $decoded);
         }
 
+        $data = $decoded[$field->serializedName];
+
         // This line is fine, because if typeField is somehow not of a type with an
         // arrayType property, it resolves to null anyway, which is exactly what we want.
         // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
-        if (class_exists($class) || interface_exists($class)) {
-            return $this->upcastArray($decoded[$field->serializedName], $deserializer, $class);
+        if ($class instanceof ValueType) {
+            if ($class->assert($data)) {
+                return $data;
+            } else {
+                throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[array_key_first($data)] . ')'));
+            }
         }
-
-        return $this->upcastArray($decoded[$field->serializedName], $deserializer);
+        else if (class_exists($class) || interface_exists($class)) {
+            return $this->upcastArray($data, $deserializer, $class);
+        } else {
+            return $this->upcastArray($data, $deserializer);
+        }
     }
 
     /**
