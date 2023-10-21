@@ -10,6 +10,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Null is now a legal value for a property to deserialize to.
 - Null values will now be serialized as null, rather than omitted.
 - BC BREAK: The return type of formatter methods have changed to support null as a legal value.
+- `arrayType` on Sequences and Dictionaries can now enforce scalar types.
 - Serde now uses PHPUnit 10.
 
 ### Fixed
