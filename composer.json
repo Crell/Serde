@@ -18,8 +18,8 @@
     ],
     "require": {
         "php": "~8.1",
-        "crell/attributeutils": "~0.8.2",
-        "crell/fp": ">= 0.3.3"
+        "crell/attributeutils": "~1.0",
+        "crell/fp": "~1.0"
     },
     "require-dev": {
         "phpbench/phpbench": "^1.1.2",
