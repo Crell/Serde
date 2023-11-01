@@ -1,0 +1,41 @@
+---
+name: Quality assurance
+on:
+    push:
+        branches: ['master']
+    pull_request: ~
+
+jobs:
+    phpunit:
+        name: PHPUnit tests on ${{ matrix.php }} ${{ matrix.composer-flags }}
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                php: [ '8.1', '8.2', '8.3' ]
+                composer-flags: [ '' ]
+                phpunit-flags: [ '--coverage-text' ]
+        steps:
+            - uses: actions/checkout@v2
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  coverage: xdebug
+                  tools: composer:v2
+            - run: composer install --no-progress ${{ matrix.composer-flags }}
+            - run: vendor/bin/phpunit ${{ matrix.phpunit-flags }}
+    phpstan:
+        name: PHPStan checks on ${{ matrix.php }}
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                php: [ '8.1', '8.2', '8.3' ]
+                composer-flags: [ '' ]
+        steps:
+            - uses: actions/checkout@v2
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  coverage: xdebug
+                  tools: composer:v2
+            - run: composer install --no-progress ${{ matrix.composer-flags }}
+            - run: vendor/bin/phpstan
