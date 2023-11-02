@@ -104,8 +104,6 @@ class DictionaryExporter implements Exporter, Importer
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof DictionaryField && $typeField->implodeOn) {
             $val = $deserializer->deformatter->deserializeString($source, $field);
-            // This is already an exhaustive match, but PHPStan doesn't know that.
-            // @phpstan-ignore-next-line
             return $val === SerdeError::Missing ? null : $typeField->explode($val);
         }
 

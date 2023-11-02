@@ -14,6 +14,7 @@ use Crell\AttributeUtils\SupportsScopes;
 use Crell\fp\Evolvable;
 use Crell\Serde\FieldTypeIncompatible;
 use Crell\Serde\IntersectionTypesNotSupported;
+use Crell\Serde\PropValue;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
 use Crell\Serde\SerdeError;
@@ -144,7 +145,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     public function __construct(
         ?string $serializedName = null,
         ?RenamingStrategy $renameWith = null,
-        mixed $default = SerdeError::Missing,
+        mixed $default = PropValue::None,
         protected readonly bool $useDefault = true,
         public readonly bool $flatten = false,
         public readonly bool $exclude = false,
@@ -153,7 +154,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         ?bool $requireValue = null,
         protected readonly array $scopes = [null],
     ) {
-        if ($default !== SerdeError::Missing) {
+        if ($default !== PropValue::None) {
             $this->defaultValue = $default;
             $this->shouldUseDefault = true;
         }
@@ -192,7 +193,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
             $constructorDefault = $this->getDefaultValueFromConstructor($subject);
 
             $this->shouldUseDefault
-                ??= $this->useDefault && $constructorDefault !== SerdeError::NoDefaultValue;
+                ??= $this->useDefault && $constructorDefault !== PropValue::None;
 
             if ($this->shouldUseDefault) {
                 $this->defaultValue ??= $constructorDefault;
@@ -225,8 +226,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
         return $param?->isDefaultValueAvailable()
             ? $param->getDefaultValue()
-            : SerdeError::NoDefaultValue;
-
+            : PropValue::None;
     }
 
     public function finalize(): void

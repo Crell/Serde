@@ -1,11 +1,9 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Crell\Serde;
 
-enum SerdeError
+enum PropValue
 {
-    case Missing;
-    case NoDefaultValue;
+    case None;
 }
