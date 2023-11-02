@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class NoTypeMapDefinedForKey extends \InvalidArgumentException
+class NoTypeMapDefinedForKey extends \InvalidArgumentException implements SerdeException
 {
     public readonly string $key;
     public readonly string $fieldName;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class TypeMismatch extends \InvalidArgumentException
+class TypeMismatch extends \InvalidArgumentException implements SerdeException
 {
 
     public readonly string $name;

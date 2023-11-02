@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class NoImporterFound extends \RuntimeException
+class NoImporterFound extends \RuntimeException implements SerdeException
 {
     public readonly string $type;
 

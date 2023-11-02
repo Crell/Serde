@@ -7,7 +7,7 @@ namespace Crell\Serde;
 use Crell\Serde\Attributes\DictionaryField;
 use Crell\Serde\Attributes\Field;
 
-class InvalidArrayKeyType extends \InvalidArgumentException
+class InvalidArrayKeyType extends \InvalidArgumentException implements SerdeException
 {
     public readonly Field $field;
     public readonly string $foundType;

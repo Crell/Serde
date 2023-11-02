@@ -6,7 +6,7 @@ namespace Crell\Serde;
 
 use Crell\Serde\Attributes\Field;
 
-class FormatParseError extends \RuntimeException
+class FormatParseError extends \RuntimeException implements SerdeException
 {
     public readonly Field $field;
     public readonly string $format;
