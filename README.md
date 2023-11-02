@@ -1086,6 +1086,56 @@ As an example, a few custom handlers are included to deal with common cases.
 * [`NativeSerializeExporter`](src/PropertyHandler/NativeSerializeExporter.php): This object will apply to any class that has a `__serialize()` method (when serializing) or `__unserialize()` method (when deserializing).  These PHP magic methods provide alternate representations of an object intended for use with PHP's native `serialize()` and `unserialize()` methods, but can also be used for any other format.  If `__serialize()` is defined, it will be invoked and whatever associative array it returns will be written to the selected format as a dictionary.  If `__unserialize()` is defined, this object will read a dictionary from the incoming data and then pass it to that method on a newly created object, which will then be responsible for populating the object as appropriate.  No further processing will be done in either direction.
 * [`EnumOnArrayImporter`](src/PropertyHandler/EnumOnArrayImporter.php): Serde natively supports PHP Enums and can serialize them as ints or strings as appropriate.  However, in the special case of reading from a PHP array format this object will take over and support reading an Enum literal in the incoming data.  That allows, for example, a configuration array to include hand-inserted Enum values and still be cleanly imported into a typed, defined object.
 
+## Architecture diagrams
+
+Serialization works approximately like this:
+
+```mermaid
+sequenceDiagram
+participant Serde
+participant Serializer
+participant Exporter
+participant Formatter
+Serde->>Formatter: initialize()
+Formatter-->>Serde: prepared value
+Serde->>Serializer: Set up
+Serde->>Serializer: serialize()
+activate Serializer
+loop For each property
+  Serializer->>Exporter: call depending on type
+  Exporter->>Formatter: type-specific write method
+  Formatter->>Serializer: serialize() sub-value
+end
+Serializer->>Formatter: finalize()
+Serializer-->>Serde: final value
+deactivate Serializer
+```
+
+And deserialization looks very similar:
+
+```mermaid
+sequenceDiagram
+participant Serde
+participant Deserializer
+participant Importer
+participant Deformatter
+Serde->>Deformatter: initialize()
+Deformatter-->>Serde: prepared source
+Serde->>Deserializer: Set up
+Serde->>Deserializer: deserialize()
+activate Deserializer
+loop For each property
+Deserializer->>Importer: call depending on type
+Importer->>Deformatter: type-specific read method
+Deformatter->>Deserializer: deserialize() sub-value
+end
+Deserializer->>Deformatter: finalize()
+Deserializer-->>Serde: final value
+deactivate Deserializer
+```
+
+In both cases, note that nearly all behavior is controlled by a one-off serializer/deserializer object, not by Serde itself.  Serde itself is just a wrapper that configures the context for the runner object.
+
 ## Dependency Injection configuration
 
 Serde is designed to be usable "out of the box" without any additional setup.  However, when included in a larger system it is best to configure it properly via Dependency Injection.
