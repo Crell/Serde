@@ -17,7 +17,7 @@ use Crell\Serde\IntersectionTypesNotSupported;
 use Crell\Serde\PropValue;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeField;
 use Crell\Serde\TypeMap;

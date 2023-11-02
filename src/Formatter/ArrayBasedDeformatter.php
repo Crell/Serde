@@ -7,7 +7,7 @@ namespace Crell\Serde\Formatter;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\FormatParseError;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMismatch;
 use Crell\Serde\ValueType;
@@ -24,10 +24,10 @@ use function Crell\fp\reduceWithKeys;
  */
 trait ArrayBasedDeformatter
 {
-    public function deserializeInt(mixed $decoded, Field $field): int|SerdeError
+    public function deserializeInt(mixed $decoded, Field $field): int|DeformatterResult
     {
         if (!isset($decoded[$field->serializedName])) {
-            return SerdeError::Missing;
+            return DeformatterResult::Missing;
         }
 
         if ($field->strict) {
@@ -41,10 +41,10 @@ trait ArrayBasedDeformatter
         return (int)($decoded[$field->serializedName]);
     }
 
-    public function deserializeFloat(mixed $decoded, Field $field): float|SerdeError
+    public function deserializeFloat(mixed $decoded, Field $field): float|DeformatterResult
     {
         if (!isset($decoded[$field->serializedName])) {
-            return SerdeError::Missing;
+            return DeformatterResult::Missing;
         }
 
         if ($field->strict) {
@@ -58,10 +58,10 @@ trait ArrayBasedDeformatter
         return (float)($decoded[$field->serializedName]);
     }
 
-    public function deserializeBool(mixed $decoded, Field $field): bool|SerdeError
+    public function deserializeBool(mixed $decoded, Field $field): bool|DeformatterResult
     {
         if (!isset($decoded[$field->serializedName])) {
-            return SerdeError::Missing;
+            return DeformatterResult::Missing;
         }
 
         if ($field->strict) {
@@ -75,10 +75,10 @@ trait ArrayBasedDeformatter
         return (bool)($decoded[$field->serializedName]);
     }
 
-    public function deserializeString(mixed $decoded, Field $field): string|SerdeError
+    public function deserializeString(mixed $decoded, Field $field): string|DeformatterResult
     {
         if (!isset($decoded[$field->serializedName])) {
-            return SerdeError::Missing;
+            return DeformatterResult::Missing;
         }
 
         if ($field->strict) {
@@ -92,11 +92,11 @@ trait ArrayBasedDeformatter
         return (string)($decoded[$field->serializedName]);
     }
 
-    public function deserializeNull(mixed $decoded, Field $field): ?SerdeError
+    public function deserializeNull(mixed $decoded, Field $field): ?DeformatterResult
     {
         // isset() returns false for null, so we cannot use that. Thanks, PHP.
         if (!array_key_exists($field->serializedName, $decoded)) {
-            return SerdeError::Missing;
+            return DeformatterResult::Missing;
         }
 
         // Strict and weak mode are the same here; null must always be null.
@@ -107,11 +107,11 @@ trait ArrayBasedDeformatter
         return $decoded[$field->serializedName];
     }
 
-    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null
+    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult|null
     {
         // isset() returns false for null, so we cannot use that. Thanks, PHP.
         if (!array_key_exists($field->serializedName, $decoded)) {
-            return SerdeError::Missing;
+            return DeformatterResult::Missing;
         }
 
         if ($decoded[$field->serializedName] === null) {
@@ -149,11 +149,11 @@ trait ArrayBasedDeformatter
         }
     }
 
-    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null
+    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult|null
     {
         // isset() returns false for null, so we cannot use that. Thanks, PHP.
         if (!array_key_exists($field->serializedName, $decoded)) {
-            return SerdeError::Missing;
+            return DeformatterResult::Missing;
         }
 
         if ($decoded[$field->serializedName] === null) {
@@ -209,9 +209,9 @@ trait ArrayBasedDeformatter
      * @param array<string, mixed> $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return array<string, mixed>|SerdeError
+     * @return array<string, mixed>|DeformatterResult
      */
-    public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError
+    public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult
     {
         $candidateNames = [$field->serializedName, ...$field->alias];
 
@@ -220,7 +220,7 @@ trait ArrayBasedDeformatter
         );
 
         if (!isset($decoded[$key])) {
-            return SerdeError::Missing;
+            return DeformatterResult::Missing;
         }
 
         if (!is_array($decoded[$key])) {
@@ -256,7 +256,7 @@ trait ArrayBasedDeformatter
                 );
                 $ret[$propField->serializedName] = $key
                     ? $deserializer->deserialize($data, $propField->with(serializedName: $key))
-                    : SerdeError::Missing;
+                    : DeformatterResult::Missing;
             }
         }
 

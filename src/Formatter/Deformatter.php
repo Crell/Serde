@@ -7,7 +7,7 @@ namespace Crell\Serde\Formatter;
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 
 /**
  * Decode data from a given format when called by an Importer.
@@ -31,39 +31,39 @@ interface Deformatter
         Deserializer $deserializer
     ): mixed;
 
-    public function deserializeInt(mixed $decoded, Field $field): int|SerdeError;
+    public function deserializeInt(mixed $decoded, Field $field): int|DeformatterResult;
 
-    public function deserializeFloat(mixed $decoded, Field $field): float|SerdeError;
+    public function deserializeFloat(mixed $decoded, Field $field): float|DeformatterResult;
 
-    public function deserializeBool(mixed $decoded, Field $field): bool|SerdeError;
+    public function deserializeBool(mixed $decoded, Field $field): bool|DeformatterResult;
 
-    public function deserializeString(mixed $decoded, Field $field): string|SerdeError;
+    public function deserializeString(mixed $decoded, Field $field): string|DeformatterResult;
 
-    public function deserializeNull(mixed $decoded, Field $field): ?SerdeError;
-
-    /**
-     * @param mixed $decoded
-     * @param Field $field
-     * @param Deserializer $deserializer
-     * @return mixed[]|SerdeError|null
-     */
-    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null;
+    public function deserializeNull(mixed $decoded, Field $field): ?DeformatterResult;
 
     /**
      * @param mixed $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return array<string|int, mixed>|SerdeError|null
+     * @return mixed[]|DeformatterResult|null
      */
-    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError|null;
+    public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult|null;
 
     /**
      * @param mixed $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return array<string, mixed>|SerdeError
+     * @return array<string|int, mixed>|DeformatterResult|null
      */
-    public function deserializeObject( mixed $decoded, Field $field, Deserializer $deserializer): array|SerdeError;
+    public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult|null;
+
+    /**
+     * @param mixed $decoded
+     * @param Field $field
+     * @param Deserializer $deserializer
+     * @return array<string, mixed>|DeformatterResult
+     */
+    public function deserializeObject( mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult;
 
     public function deserializeFinalize(mixed $decoded): void;
 }

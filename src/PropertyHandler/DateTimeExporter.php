@@ -7,7 +7,7 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\Serde\Attributes\DateField;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 
 class DateTimeExporter implements Exporter, Importer
@@ -50,7 +50,7 @@ class DateTimeExporter implements Exporter, Importer
     {
         $string = $deserializer->deformatter->deserializeString($source, $field);
 
-        if ($string === SerdeError::Missing) {
+        if ($string === DeformatterResult::Missing) {
             return null;
         }
 

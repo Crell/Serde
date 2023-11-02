@@ -10,7 +10,7 @@ use Crell\Serde\Attributes\SequenceField;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Sequence;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
@@ -76,7 +76,7 @@ class SequenceExporter implements Exporter, Importer
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof SequenceField && $typeField->implodeOn) {
             $val = $deserializer->deformatter->deserializeString($source, $field);
-            return $val === SerdeError::Missing ? null : $typeField->explode($val);
+            return $val === DeformatterResult::Missing ? null : $typeField->explode($val);
         }
 
         return $deserializer->deformatter->deserializeSequence($source, $field, $deserializer);

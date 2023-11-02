@@ -6,7 +6,7 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
@@ -22,7 +22,7 @@ class NullExporter implements Importer, Exporter
         return $value === null;
     }
 
-    public function importValue(Deserializer $deserializer, Field $field, mixed $source): ?SerdeError
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): ?DeformatterResult
     {
         return $deserializer->deformatter->deserializeNull($source, $field);
     }

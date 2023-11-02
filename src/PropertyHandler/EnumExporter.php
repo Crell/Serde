@@ -6,7 +6,7 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
@@ -38,7 +38,7 @@ class EnumExporter implements Exporter, Importer
             TypeCategory::StringEnum => $deserializer->deformatter->deserializeString($source, $field),
         };
 
-        if ($val instanceof SerdeError) {
+        if ($val instanceof DeformatterResult) {
             return $val;
         }
 

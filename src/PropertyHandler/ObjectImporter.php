@@ -10,7 +10,7 @@ use Crell\Serde\Deserializer;
 use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\InvalidArrayKeyType;
 use Crell\Serde\MissingRequiredValueWhenDeserializing;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\TypeCategory;
 
 class ObjectImporter implements Importer
@@ -23,7 +23,7 @@ class ObjectImporter implements Importer
         // Get the raw data as an array from the source.
         $dict = $deserializer->deformatter->deserializeObject($source, $field, $deserializer);
 
-        if ($dict instanceof SerdeError) {
+        if ($dict instanceof DeformatterResult) {
             return null;
         }
 
@@ -62,10 +62,10 @@ class ObjectImporter implements Importer
                 $collectingObjects[] = $propField;
             } else {
                 $value = $dict[$propField->serializedName];
-                if ($value !== SerdeError::Missing && !$propField->validate($value)) {
+                if ($value !== DeformatterResult::Missing && !$propField->validate($value)) {
                     throw InvalidArrayKeyType::create($propField, 'invalid');
                 }
-                if ($value === SerdeError::Missing) {
+                if ($value === DeformatterResult::Missing) {
                     $this->handleDefault($props, $propField, $classDef, $deserializer);
                 } else {
                     $props[$propField->phpName] = $value;
@@ -80,7 +80,7 @@ class ObjectImporter implements Importer
             return [$this->createObject($class, $props, $classDef->postLoadCallacks), []];
         }
 
-        $remaining = array_filter($dict, static fn(mixed $v) => ! $v instanceof SerdeError);
+        $remaining = array_filter($dict, static fn(mixed $v) => ! $v instanceof DeformatterResult);
         foreach ($collectingObjects as $collectingField) {
             $remaining = $deserializer->deformatter->getRemainingData($remaining, $usedNames);
             // If we've run out of remaining properties, fill in the remaining collecting

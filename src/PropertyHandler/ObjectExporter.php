@@ -8,7 +8,7 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Dict;
 use Crell\Serde\InvalidFieldForFlattening;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
@@ -32,7 +32,7 @@ class ObjectExporter implements Exporter
         // and an uninitialized value, which in this rare case are meaningfully different.
         // @todo This may benefit from caching get_object_vars(), but that will be tricky.
         $propReader = (fn (string $prop): mixed
-            => array_key_exists($prop, get_object_vars($this)) ? $this->$prop : SerdeError::Missing)->bindTo($value, $value);
+            => array_key_exists($prop, get_object_vars($this)) ? $this->$prop : DeformatterResult::Missing)->bindTo($value, $value);
 
         /** @var \Crell\Serde\Dict $dict */
         $dict = pipe(
@@ -69,7 +69,7 @@ class ObjectExporter implements Exporter
     protected function flattenValue(Dict $dict, Field $field, callable $propReader, Serializer $serializer): Dict
     {
         $value = $propReader($field->phpName);
-        if ($value === SerdeError::Missing) {
+        if ($value === DeformatterResult::Missing) {
             return $dict;
         }
 
@@ -88,7 +88,7 @@ class ObjectExporter implements Exporter
                 return $dict;
             }
             $subPropReader = (fn (string $prop): mixed
-                => array_key_exists($prop, get_object_vars($this)) ? $this->$prop : SerdeError::Missing)->bindTo($value, $value);
+                => array_key_exists($prop, get_object_vars($this)) ? $this->$prop : DeformatterResult::Missing)->bindTo($value, $value);
             // This really wants to be explicit partial application. :-(
             $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader, $serializer);
             $properties = $serializer->propertiesFor($value::class);

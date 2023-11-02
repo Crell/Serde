@@ -6,7 +6,7 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 
 class DateTimeZoneExporter implements Exporter, Importer
@@ -33,7 +33,7 @@ class DateTimeZoneExporter implements Exporter, Importer
     {
         $string = $deserializer->deformatter->deserializeString($source, $field);
 
-        if ($string instanceof SerdeError) {
+        if ($string instanceof DeformatterResult) {
             return null;
         }
 

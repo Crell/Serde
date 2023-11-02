@@ -12,7 +12,7 @@ use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
 use Crell\Serde\InvalidArrayKeyType;
 use Crell\Serde\KeyType;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
@@ -104,7 +104,7 @@ class DictionaryExporter implements Exporter, Importer
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof DictionaryField && $typeField->implodeOn) {
             $val = $deserializer->deformatter->deserializeString($source, $field);
-            return $val === SerdeError::Missing ? null : $typeField->explode($val);
+            return $val === DeformatterResult::Missing ? null : $typeField->explode($val);
         }
 
         return $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer);

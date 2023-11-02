@@ -8,7 +8,7 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
-use Crell\Serde\SerdeError;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
@@ -49,7 +49,7 @@ class NativeSerializeExporter implements Exporter, Importer
         // properties.  So deserialize as a basic dictionary instead.
         $dict = $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer);
 
-        if ($dict instanceof SerdeError) {
+        if ($dict instanceof DeformatterResult) {
             return null;
         }
 
