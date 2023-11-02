@@ -4,6 +4,17 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## 1.0.1 - 2023-11-1
+- Forgot to include a changelog on 1.0.0, hence 1.0.1. Sigh.
+- Include diagrams in the README.
+
+## 1.0.0 - 2023-11-1
+
+### Fixed
+- Split up internal Enums for better type safety.
+- Renamed internal Enums for clarity.
+- Added a marker interface for all exceptions.
+
 ## 0.7.0 - 2023-10-21
 
 ### Added
