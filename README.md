@@ -1029,7 +1029,7 @@ If serialized with the `newsystem` scope:
 ```json
 {
     "id": 5,
-    "label": "Fancy widget",
+    "name": "Fancy widget",
     "price": "9.99",
     "desc": "A fancy widget"
 }
