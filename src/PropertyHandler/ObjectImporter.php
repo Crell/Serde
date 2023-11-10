@@ -77,7 +77,7 @@ class ObjectImporter implements Importer
         // If we later add support for erroring on extra unhandled fields,
         // this is where that logic would live.
         if (! $deserializer->deformatter instanceof SupportsCollecting) {
-            return [$this->createObject($class, $props, $classDef->postLoadCallacks), []];
+            return [$this->createObject($class, $props, $classDef->postLoadCallbacks), []];
         }
 
         $remaining = array_filter($dict, static fn(mixed $v) => ! $v instanceof DeformatterResult);
@@ -112,7 +112,7 @@ class ObjectImporter implements Importer
         // If we later add support for erroring on extra unhandled fields,
         // this is where that logic would live.
 
-        return [$this->createObject($class, $props, $classDef->postLoadCallacks), $remaining];
+        return [$this->createObject($class, $props, $classDef->postLoadCallbacks), $remaining];
     }
 
     /**

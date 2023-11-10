@@ -30,7 +30,7 @@ class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttri
 
     /** @var string[] */
     #[SequenceField]
-    public readonly array $postLoadCallacks;
+    public readonly array $postLoadCallbacks;
 
     /**
      * @param bool $includeFieldsByDefault
@@ -102,7 +102,7 @@ class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttri
      */
     public function setMethods(array $methods): void
     {
-        $this->postLoadCallacks = array_keys(
+        $this->postLoadCallbacks = array_keys(
             array_filter($methods, prop('postLoadCallback'))
         );
     }
