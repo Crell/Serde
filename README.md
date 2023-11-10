@@ -1164,7 +1164,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT
 
 ## Security
 
-If you discover any security related issues, please email larry at garfieldtech dot com instead of using the issue tracker.
+If you discover any security related issues, please use the [GitHub security reporting form](https://github.com/Crell/Serde/security) rather than the issue queue.
 
 ## Credits
 
