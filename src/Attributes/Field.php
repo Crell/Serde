@@ -84,7 +84,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     public readonly bool $shouldUseDefault;
 
     /**
-     * Whether or not to require a value when deserializaing into this field.
+     * Whether or not to require a value when deserializing into this field.
      */
     public readonly bool $requireValue;
 
