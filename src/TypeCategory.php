@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 /**
- * The general cateogry of type.
+ * The general category of type.
  *
  * These do not correspond to actual types, but to the class of type that
  * Serde needs to handle differently.

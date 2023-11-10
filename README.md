@@ -271,7 +271,7 @@ class Person
 }
 ```
 
-if deserialized from an empty source (such as `{}` in JSON), will result in an object with `location` set to `Hidden`, `name` set to `Anonymous`, and `age` still unintialized.
+if deserialized from an empty source (such as `{}` in JSON), will result in an object with `location` set to `Hidden`, `name` set to `Anonymous`, and `age` still uninitialized.
 
 ### `default` (mixed, default null)
 
@@ -466,7 +466,7 @@ When deserializing, the otherwise object-ignorant data will be upcast back to `P
 
 #### `keyType`
 
-On `DictionaryField` only, it's possible to restrict the array to only allowing integer or string keys.  It has two legal values, `KeyType::Int` and `KeyType::String` (an enum).  If set to `KeyType::Int`, then deserialization will reject any arrays that have string keys, but will accept numeric strings.  If set to `KeyType::String`, then deserialiation will reject any arrays that have integer keys, including numeric strings.
+On `DictionaryField` only, it's possible to restrict the array to only allowing integer or string keys.  It has two legal values, `KeyType::Int` and `KeyType::String` (an enum).  If set to `KeyType::Int`, then deserialization will reject any arrays that have string keys, but will accept numeric strings.  If set to `KeyType::String`, then deserialization will reject any arrays that have integer keys, including numeric strings.
 
 (PHP auto-casts integer string array keys to actual integers, so there is no way to allow them in string-based dictionaries.)
 
@@ -765,7 +765,7 @@ Now when a `Sale` is serialized, an extra property will be included named `type`
 
 On deserialization, the "type" property will be read and used to determine that the remaining values should be used to construct a `DigitalBook` instance, specifically.
 
-Class name maps have the advantage that they are very simple, and will work with any class that implements that interface, even those you haven't thought of yet.  The downside is that they put a PHP implementation detail (the class name) into the output, which may not be desireable.
+Class name maps have the advantage that they are very simple, and will work with any class that implements that interface, even those you haven't thought of yet.  The downside is that they put a PHP implementation detail (the class name) into the output, which may not be desirable.
 
 #### Static Maps
 
@@ -1057,7 +1057,7 @@ Note that since there is both an unscoped and a scoped version of the `Field` on
 
 If multiple attribute variants could apply for the specified scope, the lexically first in a scope will take precedence over later ones, and a scoped attribute will take precedence over an unscoped one.
 
-Note that when deserializing, specifying a scope will exclude not only out-of-scope properties but their defaults as well.  That is, they will not be set, even to a default value, and so may be "uninitialized."  That is rarely desireable, so it may be preferable to deserialize without a scope, even if a value was serialized with a scope.  That will depend on your use case.
+Note that when deserializing, specifying a scope will exclude not only out-of-scope properties but their defaults as well.  That is, they will not be set, even to a default value, and so may be "uninitialized."  That is rarely desirable, so it may be preferable to deserialize without a scope, even if a value was serialized with a scope.  That will depend on your use case.
 
 For more on scopes, see the [AttributeUtils](https://github.com/CrellAttributeUtils#Scopes) documentation.
 

@@ -141,7 +141,7 @@ class ObjectImporter implements Importer
     }
 
     /**
-     * Intantiates an object based on the provided data.
+     * Instantiates an object based on the provided data.
      *
      * @param class-string $class
      *   The class of object to create.
