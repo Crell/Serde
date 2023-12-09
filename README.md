@@ -1061,6 +1061,14 @@ Note that when deserializing, specifying a scope will exclude not only out-of-sc
 
 For more on scopes, see the [AttributeUtils](https://github.com/CrellAttributeUtils#Scopes) documentation.
 
+### Validation with `#[PostLoad]`
+
+It is important to note that when deserializing, `__construct()` is not called at all.  That means any validation present in the constructor will not be run on deserialization.
+
+Instead, Serde will look for any method or methods that have a `#[\Crell\Serde\Attributes\PostLoad]` attribute on them.  This attribute takes no arguments other than scopes.  After an object is populated, any `PostLoad` methods will be invoked with no arguments in lexical order.  The main use case for this feature is validation, in which case the method should throw an exception if the populated data is invalid in some way.  (For instance, some integer must be positive.)
+
+The visibilty of the method is irrelevant.  Serde will call `public`, `private`, or `protected` methods the same.  Note, however, that a `private` method in a parent class of the class being deserialized to will not get called, as it is not accessible to PHP from that scope.
+
 ## Extending Serde
 
 Internally, Serde has five types of extensions that work in concert to produce a serialized or deserialized product.
