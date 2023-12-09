@@ -445,4 +445,13 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertIsList($toTest['strict']);
         self::assertIsList($toTest['nonstrict']);
     }
+
+    public function value_objects_with_similar_property_names_work_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame('Larry', $toTest['name']);
+        self::assertSame(21, $toTest['age']);
+        self::assertSame('me@example.com', $toTest['email']);
+    }
 }

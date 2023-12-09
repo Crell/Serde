@@ -49,18 +49,20 @@ class ObjectImporter implements Importer
 
         $props = [];
         $usedNames = [];
+        $seenNames = [];
         $collectingArray = null;
         /** @var Field[] $collectingObjects */
         $collectingObjects = [];
 
         /** @var Field $propField */
         foreach ($classDef->properties as $propField) {
-            $usedNames[] = $propField->serializedName;
+            $seenNames[] = $propField->serializedName;
             if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
                 $collectingArray = $propField;
             } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
                 $collectingObjects[] = $propField;
             } else {
+                $usedNames[] = $propField->serializedName;
                 $value = $dict[$propField->serializedName];
                 if ($value !== DeformatterResult::Missing && !$propField->validate($value)) {
                     throw InvalidArrayKeyType::create($propField, 'invalid');
@@ -95,7 +97,9 @@ class ObjectImporter implements Importer
                 [$object, $remaining] = $this->populateObject($remaining, $targetClass, $deserializer);
                 $props[$collectingField->phpName] = $object;
                 if ($map = $deserializer->typeMapper->typeMapForField($collectingField)) {
-                    $usedNames[] = $map->keyField();
+                    $keyField = $map->keyField();
+                    $usedNames[] = $keyField;
+                    $seenNames[] = $keyField;
                 }
             } elseif ($collectingField->shouldUseDefault) {
                 $props[$collectingField->phpName] = $collectingField->defaultValue;
@@ -103,7 +107,7 @@ class ObjectImporter implements Importer
         }
 
         // Any remaining data gets passed to a collecting array, if defined.
-        $remaining = $deserializer->deformatter->getRemainingData($remaining, $usedNames);
+        $remaining = $deserializer->deformatter->getRemainingData($remaining, $seenNames);
         if ($collectingArray) {
             $props[$collectingArray->phpName] = $remaining;
             $remaining = [];

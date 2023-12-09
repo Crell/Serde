@@ -77,6 +77,9 @@ use Crell\Serde\Records\Tasks\TaskContainer;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
+use Crell\Serde\Records\ValueObjects\Age;
+use Crell\Serde\Records\ValueObjects\Email;
+use Crell\Serde\Records\ValueObjects\Person;
 use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -1641,4 +1644,26 @@ abstract class SerdeTestCases extends TestCase
     {
 
     }
+
+    #[Test]
+    public function value_objects_with_similar_property_names_work(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new Person('Larry', new Age(21), new Email('me@example.com'));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->value_objects_with_similar_property_names_work_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function value_objects_with_similar_property_names_work_validate(mixed $serialized): void
+    {
+
+    }
+
 }
