@@ -428,6 +428,59 @@ When collecting, only the lexically last flattened array will get any data, and 
 
 In this case, the `$other` property has two keys, `foo` and `bar`, with values `beep` and `boop`, respectively.  The same JSON will deserialize back to the same object as before.
 
+#### Value objects
+
+Flattening can also be used in conjunction with renaming to silently translate value objects.  Consider:
+
+```php
+class Person
+{
+    public function __construct(
+        public string $name,
+        #[Field(flatten: true)]
+        public Age $age,
+        #[Field(flatten: true)]
+        public Email $email,
+    ) {}
+}
+
+readonly class Email
+{
+    public function __construct(
+        #[Field(serializedName: 'email')] public string $value,
+    ) {}
+}
+
+readonly class Age
+{
+    public function __construct(
+        #[Field(serializedName: 'age')] public int $value
+    ) {
+        $this->validate();
+    }
+
+    #[PostLoad]
+    private function validate(): void
+    {
+        if ($this->value < 0) {
+            throw new \InvalidArgumentException('Age cannot be negative.');
+        }
+    }
+}
+```
+
+In this example, `Email` and `Age` are value objects, in the latter case with extra validation.  However, both are marked `flatten: true`, so their properties will be moved up a level to `Person` when serializing.  However, they both use the same property name, so both have a custom serialization name specified.  The above object will serialize to (and deserialize from) something like this:
+
+```json
+{
+    "name": "Larry",
+    "age": 21,
+    "email": "me@example.com"
+}
+```
+
+Note that because deserialization bypasses the constructor, the extra validation in `Age` must be placed in a separate method that is called from the constructor and flagged to run automatically after deserialization.
+
 ### Sequences and Dictionaries
 
 In most languages, and many serialization formats, there is a difference between a sequential list of values (called variously an array, sequence, or list) and a map of arbitrary size of arbitrary values to other arbitrary values (called a dictionary or map).  PHP does not make a distinction, and shoves both data types into a single associative array variable type.
