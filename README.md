@@ -8,8 +8,6 @@ Serde (pronounced "seer-dee") is a fast, flexible, powerful, and easy to use ser
 
 At this time, Serde supports serializing PHP objects to and from PHP arrays, JSON, YAML, and CSV files.  It also supports serializing to JSON or CSV via a stream.  Further support is planned, but by design can also be extended by anyone.
 
-Serde is currently in late-beta.  It's possible there will be some small API changes still, but it should be mostly-stable and safe to use.
-
 ## Install
 
 Via Composer
