@@ -43,7 +43,7 @@ class ObjectImporter implements Importer
      * @param Deserializer $deserializer
      * @return array{object, mixed[]}
      */
-    protected function populateObject(array $dict, string $class, Deserializer $deserializer): array
+    protected function populateObject(array $dict, string $class, Deserializer $deserializer, ?Field $parentField = null): array
     {
         $classDef = $deserializer->analyzer->analyze($class, ClassSettings::class, scopes: $deserializer->scopes);
 
@@ -54,16 +54,19 @@ class ObjectImporter implements Importer
         /** @var Field[] $collectingObjects */
         $collectingObjects = [];
 
+
         /** @var Field $propField */
         foreach ($classDef->properties as $propField) {
-            $seenNames[] = $propField->serializedName;
+            // This extra indirection is to allow for parent-prefixed properties when flattening.
+            $dictName = $parentField ? (($parentField->flattenPrefix ?? '') . $propField->serializedName) : $propField->serializedName;
+            $seenNames[] = $dictName;
             if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
                 $collectingArray = $propField;
             } elseif ($propField->flatten && $propField->typeCategory === TypeCategory::Object) {
                 $collectingObjects[] = $propField;
             } else {
-                $usedNames[] = $propField->serializedName;
-                $value = $dict[$propField->serializedName];
+                $usedNames[] = $dictName;
+                $value = $dict[$dictName];
                 if ($value !== DeformatterResult::Missing && !$propField->validate($value)) {
                     throw InvalidArrayKeyType::create($propField, 'invalid');
                 }
@@ -94,7 +97,8 @@ class ObjectImporter implements Importer
             // It's possible there will be a class map but no mapping field in
             // the data. In that case, either set a default or just ignore the field.
             if ($targetClass = $deserializer->typeMapper->getTargetClass($collectingField, $dict)) {
-                [$object, $remaining] = $this->populateObject($remaining, $targetClass, $deserializer);
+                // Pass the collecting field definition through for context, such as a flattening prefix.
+                [$object, $remaining] = $this->populateObject($remaining, $targetClass, $deserializer, $collectingField);
                 $props[$collectingField->phpName] = $object;
                 if ($map = $deserializer->typeMapper->typeMapForField($collectingField)) {
                     $keyField = $map->keyField();

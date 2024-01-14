@@ -454,4 +454,12 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertSame(21, $toTest['age']);
         self::assertSame('me@example.com', $toTest['email']);
     }
+
+    public function multiple_same_class_value_objects_work_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame(18, $toTest['min_age']);
+        self::assertSame(65, $toTest['max_age']);
+    }
 }

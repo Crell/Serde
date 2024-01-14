@@ -79,6 +79,7 @@ use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
 use Crell\Serde\Records\ValueObjects\Age;
 use Crell\Serde\Records\ValueObjects\Email;
+use Crell\Serde\Records\ValueObjects\JobDescription;
 use Crell\Serde\Records\ValueObjects\Person;
 use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -1662,6 +1663,27 @@ abstract class SerdeTestCases extends TestCase
     }
 
     public function value_objects_with_similar_property_names_work_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function multiple_same_class_value_objects_work(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new JobDescription(new Age(18), new Age(65));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->multiple_same_class_value_objects_work_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function multiple_same_class_value_objects_work_validate(mixed $serialized): void
     {
 
     }
