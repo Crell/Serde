@@ -117,20 +117,19 @@ class ObjectExporter implements Exporter
 
     protected function reduceObjectProperty(Dict $dict, Field $prop, callable $subPropReader, Field $parentProperty, Serializer $serializer): Dict
     {
-        if ($prop->flatten) {
-            return $this->flattenValue($dict, $prop, $subPropReader, $serializer);
+        // If there is a prefix provided by the parent field being flattened, we need to create a new, alternate
+        // field definition for the property.  The serializedName field will be used only on the final property,
+        // so while this will produce weird strings it along the way for the intermediary fields, that doesn't matter.
+        if ($parentProperty->flattenPrefix) {
+            /** @var Field $prop */
+            $prop = $prop->with(
+                serializedName: $parentProperty->flattenPrefix . $prop->serializedName,
+                flattenPrefix: $parentProperty->flattenPrefix . $prop->flattenPrefix
+            );
         }
 
-        // If there is a prefix provided by the parent field being flattened, we need to create a new, alternate
-        // field definition for the property.
-        if ($parentProperty->flattenPrefix) {
-            $prop = Field::create(
-                serializedName: $parentProperty->flattenPrefix . $prop->serializedName,
-                phpType: $prop->phpType,
-                extraProperties: $prop->extraProperties,
-                typeField: $prop->typeField,
-                phpName: $prop->phpName,
-            );
+        if ($prop->flatten) {
+            return $this->flattenValue($dict, $prop, $subPropReader, $serializer);
         }
 
         return $dict->add(new CollectionItem(field: $prop, value: $subPropReader($prop->phpName)));

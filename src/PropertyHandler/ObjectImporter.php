@@ -54,11 +54,10 @@ class ObjectImporter implements Importer
         /** @var Field[] $collectingObjects */
         $collectingObjects = [];
 
-
         /** @var Field $propField */
         foreach ($classDef->properties as $propField) {
             // This extra indirection is to allow for parent-prefixed properties when flattening.
-            $dictName = $parentField ? (($parentField->flattenPrefix ?? '') . $propField->serializedName) : $propField->serializedName;
+            $dictName = ($parentField->flattenPrefix ?? '') . $propField->serializedName;
             $seenNames[] = $dictName;
             if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
                 $collectingArray = $propField;
@@ -98,7 +97,8 @@ class ObjectImporter implements Importer
             // the data. In that case, either set a default or just ignore the field.
             if ($targetClass = $deserializer->typeMapper->getTargetClass($collectingField, $dict)) {
                 // Pass the collecting field definition through for context, such as a flattening prefix.
-                [$object, $remaining] = $this->populateObject($remaining, $targetClass, $deserializer, $collectingField);
+                // If there's already a parent field, slip its flattenPrefix in along the way.
+                [$object, $remaining] = $this->populateObject($remaining, $targetClass, $deserializer, $collectingField->with(flattenPrefix: $parentField?->flattenPrefix . $collectingField->flattenPrefix));
                 $props[$collectingField->phpName] = $object;
                 if ($map = $deserializer->typeMapper->typeMapForField($collectingField)) {
                     $keyField = $map->keyField();

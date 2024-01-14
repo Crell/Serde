@@ -151,7 +151,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         mixed $default = PropValue::None,
         protected readonly bool $useDefault = true,
         public readonly bool $flatten = false,
-        public readonly ?string $flattenPrefix = null,
+        public readonly string $flattenPrefix = '',
         public readonly bool $exclude = false,
         public readonly array $alias = [],
         public readonly bool $strict = true,
