@@ -4,6 +4,25 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## 1.1.0 - 2024-01-20
+
+The main change in this release is better support for flattening value objects.  See the additional section in the README for more details.
+
+### Added
+- A new `flattenPrefix` setting on flattened fields allows for having multiple properties of the same type that get flattened.  The prefix allows them to be differentiated.
+
+### Deprecated
+- Nothing
+
+### Fixed
+- `serializedName`/`renameWith` is now respected on fields in flattened objects.
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.0.1 - 2023-11-1
 - Forgot to include a changelog on 1.0.0, hence 1.0.1. Sigh.
 - Include diagrams in the README.
@@ -52,7 +71,6 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Security
 - Nothing
-
 
 ## 0.5.0 - 2022-07-22
 
