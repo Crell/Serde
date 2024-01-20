@@ -26,17 +26,17 @@ services:
         environment:
             XDEBUG_MODE: "develop,profile"
             XDEBUG_CONFIG: "client_host=${HOST_IP} idekey=${IDE_KEY} client_port=${XDEBUG_PORT} discover_client_host=1 start_with_request=1"
-    blackfire:
-        # Can't use the direct image, because the CLIENT_ID/TOKEN aren't getting
-        # passed in properly, so we need to manually login on the shell and set them.
-        # If we can fixe that, we can probably go back to using the official container.
-#        image: blackfire/blackfire:2
-        build: ./docker/php/81
-        ports: ["8307"]
-        environment:
-            BLACKFIRE_DISABLE_LEGACY_PORT: 1
-            # Exposes BLACKFIRE_* environment variables from the host
-            BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID}
-            BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN}
-            BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID}
-            BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_SERVER_ID}
+#    blackfire:
+#        # Can't use the direct image, because the CLIENT_ID/TOKEN aren't getting
+#        # passed in properly, so we need to manually login on the shell and set them.
+#        # If we can fixe that, we can probably go back to using the official container.
+##        image: blackfire/blackfire:2
+#        build: ./docker/php/81
+#        ports: ["8307"]
+#        environment:
+#            BLACKFIRE_DISABLE_LEGACY_PORT: 1
+#            # Exposes BLACKFIRE_* environment variables from the host
+#            BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID}
+#            BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN}
+#            BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID}
+#            BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_SERVER_ID}
