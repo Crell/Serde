@@ -121,6 +121,9 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      *   True to use the default value on deserialization. False to skip setting it entirely.
      * @param bool $flatten
      *   True to flatten an array on serialization and collect into it when deserializing.
+     * @param string $flattenPrefix
+     *   If the field is flattened, this string will be prepended to the name of every field in the sub-value.
+     *   If not flattened, this field is ignored.
      * @param bool $exclude
      *   Set true to exclude this field from serialization entirely.
      * @param string[] $alias
@@ -148,6 +151,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         mixed $default = PropValue::None,
         protected readonly bool $useDefault = true,
         public readonly bool $flatten = false,
+        public readonly string $flattenPrefix = '',
         public readonly bool $exclude = false,
         public readonly array $alias = [],
         public readonly bool $strict = true,
@@ -298,11 +302,12 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         ?string $phpType = null,
         array $extraProperties = [],
         TypeField $typeField = null,
+        string $phpName = null,
     ): self
     {
         $new = new self();
         $new->serializedName = $serializedName;
-        $new->phpName = $serializedName;
+        $new->phpName = $phpName ?? $serializedName;
         if ($phpType) {
             $new->phpType = $phpType;
         }

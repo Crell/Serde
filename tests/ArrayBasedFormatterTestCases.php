@@ -445,4 +445,46 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertIsList($toTest['strict']);
         self::assertIsList($toTest['nonstrict']);
     }
+
+    public function value_objects_with_similar_property_names_work_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame('Larry', $toTest['name']);
+        self::assertSame(21, $toTest['age']);
+        self::assertSame('me@example.com', $toTest['email']);
+    }
+
+    public function multiple_same_class_value_objects_work_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame(18, $toTest['min_age']);
+        self::assertSame(65, $toTest['max_age']);
+    }
+
+
+    public function multiple_same_class_value_objects_work_when_nested_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame(18, $toTest['description']['min_age']);
+        self::assertSame(65, $toTest['description']['max_age']);
+    }
+
+    public function multiple_same_class_value_objects_work_when_nested_and_flattened_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame(18, $toTest['min_age']);
+        self::assertSame(65, $toTest['max_age']);
+    }
+
+    public function multiple_same_class_value_objects_work_when_nested_and_flattened_with_prefix_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame(18, $toTest['desc_min_age']);
+        self::assertSame(65, $toTest['desc_max_age']);
+    }
 }

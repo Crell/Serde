@@ -426,6 +426,98 @@ When collecting, only the lexically last flattened array will get any data, and 
 
 In this case, the `$other` property has two keys, `foo` and `bar`, with values `beep` and `boop`, respectively.  The same JSON will deserialize back to the same object as before.
 
+#### Value objects
+
+Flattening can also be used in conjunction with renaming to silently translate value objects.  Consider:
+
+```php
+class Person
+{
+    public function __construct(
+        public string $name,
+        #[Field(flatten: true)]
+        public Age $age,
+        #[Field(flatten: true)]
+        public Email $email,
+    ) {}
+}
+
+readonly class Email
+{
+    public function __construct(
+        #[Field(serializedName: 'email')] public string $value,
+    ) {}
+}
+
+readonly class Age
+{
+    public function __construct(
+        #[Field(serializedName: 'age')] public int $value
+    ) {
+        $this->validate();
+    }
+
+    #[PostLoad]
+    private function validate(): void
+    {
+        if ($this->value < 0) {
+            throw new \InvalidArgumentException('Age cannot be negative.');
+        }
+    }
+}
+```
+
+In this example, `Email` and `Age` are value objects, in the latter case with extra validation.  However, both are marked `flatten: true`, so their properties will be moved up a level to `Person` when serializing.  However, they both use the same property name, so both have a custom serialization name specified.  The above object will serialize to (and deserialize from) something like this:
+
+```json
+{
+    "name": "Larry",
+    "age": 21,
+    "email": "me@example.com"
+}
+```
+
+Note that because deserialization bypasses the constructor, the extra validation in `Age` must be placed in a separate method that is called from the constructor and flagged to run automatically after deserialization.
+
+It is also possible to specify a prefix for a flattened value, which will also be applied recursively.  For example, assuming the same Age class above:
+
+```php
+readonly class JobDescription
+{
+    public function __construct(
+        #[Field(flatten: true, flattenPrefix: 'min_')]
+        public Age $minAge,
+        #[Field(flatten: true, flattenPrefix: 'max_')]
+        public Age $maxAge,
+    ) {}
+}
+
+class JobEntry
+{
+    public function __construct(
+        #[Field(flatten: true, flattenPrefix: 'desc_')]
+        public JobDescription $description,
+    ) {}
+}
+```
+
+In this case, serializing `JobEntry` will first flatten the `$description` property, with `desc_` as a prefix.  Then, `JobDescription` will flatten both of its age fields, giving each a separate prefix.  That will result in a serialized output something like this:
+
+```json
+{
+    "desc_min_age": 18,
+    "desc_max_age": 65,
+}
+```
+
+And it will deserialize back to the same original 3-layer-object structure.
+
+### `flattenPrefix` (string, default '')
+
+When an object or array property is flattened, by default its properties will be flattened using their existing name (or `serializedName`, if specified).  That may cause issues if the same class is included in a parent class twice, or if there is some other name collission.  Instead, flattened fields may be given a `flattenPrefix` value.  That string will be prepended to the name of the property when serializing.
+
+If set on a non-flattened field, this value is meaningless and has no effect.
+
 ### Sequences and Dictionaries
 
 In most languages, and many serialization formats, there is a difference between a sequential list of values (called variously an array, sequence, or list) and a map of arbitrary size of arbitrary values to other arbitrary values (called a dictionary or map).  PHP does not make a distinction, and shoves both data types into a single associative array variable type.

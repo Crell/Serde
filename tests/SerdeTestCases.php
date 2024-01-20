@@ -77,6 +77,13 @@ use Crell\Serde\Records\Tasks\TaskContainer;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
+use Crell\Serde\Records\ValueObjects\Age;
+use Crell\Serde\Records\ValueObjects\Email;
+use Crell\Serde\Records\ValueObjects\JobDescription;
+use Crell\Serde\Records\ValueObjects\JobEntry;
+use Crell\Serde\Records\ValueObjects\JobEntryFlattened;
+use Crell\Serde\Records\ValueObjects\JobEntryFlattenedPrefixed;
+use Crell\Serde\Records\ValueObjects\Person;
 use Crell\Serde\Records\Visibility;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -1641,4 +1648,110 @@ abstract class SerdeTestCases extends TestCase
     {
 
     }
+
+    #[Test]
+    public function value_objects_with_similar_property_names_work(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new Person('Larry', new Age(21), new Email('me@example.com'));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->value_objects_with_similar_property_names_work_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function value_objects_with_similar_property_names_work_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function multiple_same_class_value_objects_work(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new JobDescription(new Age(18), new Age(65));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->multiple_same_class_value_objects_work_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function multiple_same_class_value_objects_work_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function multiple_same_class_value_objects_work_when_nested(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new JobEntry(new JobDescription(new Age(18), new Age(65)));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->multiple_same_class_value_objects_work_when_nested_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function multiple_same_class_value_objects_work_when_nested_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function multiple_same_class_value_objects_work_when_nested_and_flattened(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new JobEntryFlattened(new JobDescription(new Age(18), new Age(65)));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->multiple_same_class_value_objects_work_when_nested_and_flattened_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function multiple_same_class_value_objects_work_when_nested_and_flattened_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function multiple_same_class_value_objects_work_when_nested_and_flattened_with_prefix(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new JobEntryFlattenedPrefixed(new JobDescription(new Age(18), new Age(65)));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->multiple_same_class_value_objects_work_when_nested_and_flattened_with_prefix_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function multiple_same_class_value_objects_work_when_nested_and_flattened_with_prefix_validate(mixed $serialized): void
+    {
+
+    }
+
 }

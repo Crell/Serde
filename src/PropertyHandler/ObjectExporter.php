@@ -90,7 +90,7 @@ class ObjectExporter implements Exporter
             $subPropReader = (fn (string $prop): mixed
                 => array_key_exists($prop, get_object_vars($this)) ? $this->$prop : DeformatterResult::Missing)->bindTo($value, $value);
             // This really wants to be explicit partial application. :-(
-            $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader, $serializer);
+            $c = fn (Dict $dict, Field $prop) => $this->reduceObjectProperty($dict, $prop, $subPropReader, $field, $serializer);
             $properties = $serializer->propertiesFor($value::class);
             $dict = reduce($dict, $c)($properties);
             if ($map = $serializer->typeMapper->typeMapForField($field)) {
@@ -115,8 +115,19 @@ class ObjectExporter implements Exporter
         return $dict->add(new CollectionItem(field: $f, value: $val));
     }
 
-    protected function reduceObjectProperty(Dict $dict, Field $prop, callable $subPropReader, Serializer $serializer): Dict
+    protected function reduceObjectProperty(Dict $dict, Field $prop, callable $subPropReader, Field $parentProperty, Serializer $serializer): Dict
     {
+        // If there is a prefix provided by the parent field being flattened, we need to create a new, alternate
+        // field definition for the property.  The serializedName field will be used only on the final property,
+        // so while this will produce weird strings it along the way for the intermediary fields, that doesn't matter.
+        if ($parentProperty->flattenPrefix) {
+            /** @var Field $prop */
+            $prop = $prop->with(
+                serializedName: $parentProperty->flattenPrefix . $prop->serializedName,
+                flattenPrefix: $parentProperty->flattenPrefix . $prop->flattenPrefix
+            );
+        }
+
         if ($prop->flatten) {
             return $this->flattenValue($dict, $prop, $subPropReader, $serializer);
         }
