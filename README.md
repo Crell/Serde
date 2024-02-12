@@ -644,14 +644,14 @@ Will serialize to this JSON:
 In cases where you need to serialize the date to/from Unix Time, you can use `UnixTime`:
 
 ```php
-use Crell\Serde\Attributes\UnixTime;
+use Crell\Serde\Attributes\UnixTimeField;
 
 class Jwt
 {
-    #[UnixTime]
+    #[UnixTimeField]
     protected DateTimeImmutable $exp;
     
-    #[UnixTime(milliseconds: true)]
+    #[UnixTimeField(milliseconds: true)]
     protected DateTimeImmutable $iss;
 }
 ```
