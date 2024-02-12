@@ -26,7 +26,6 @@ class UnixTimeExporter implements Importer, Exporter {
 
         $multiplier = $typeField->milliseconds ? 1000 : 1;
 
-
         return $serializer->formatter->serializeInt($runningValue, $field, $value->getTimestamp() * $multiplier);
     }
 

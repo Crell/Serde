@@ -639,6 +639,32 @@ Will serialize to this JSON:
 }
 ```
 
+#### Unix Time
+
+In cases where you need to serialize the date to/from Unix Time, you can use `UnixTime`:
+
+```php
+use Crell\Serde\Attributes\UnixTime;
+
+class Jwt
+{
+    #[UnixTime]
+    protected DateTimeImmutable $exp;
+    
+    #[UnixTime(milliseconds: true)]
+    protected DateTimeImmutable $iss;
+}
+```
+
+Will serialize to this JSON:
+
+```json
+{
+    "exp": 1707764358,
+    "iss": 1707764358000
+}
+```
+
 #### `timezone`
 
 The `timezone` argument may be any timezone string legal in PHP, such as `America/Chicago` or `UTC`.  If specified, the value will be cast to this timezone first before it is serialized.  If not specified, the value will be left in whatever timezone it is in before being serialized.  Whether that makes a difference to the output depends on the `format`.
