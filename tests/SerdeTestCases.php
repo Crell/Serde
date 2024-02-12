@@ -87,6 +87,7 @@ use Crell\Serde\Records\TransitiveField;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
+use Crell\Serde\Records\UnixTimeExample;
 use Crell\Serde\Records\ValueObjects\Age;
 use Crell\Serde\Records\ValueObjects\Email;
 use Crell\Serde\Records\ValueObjects\JobDescription;
@@ -1192,6 +1193,41 @@ abstract class SerdeTestCases extends TestCase
         );
 
         $result = $s->deserialize($serialized, from: $this->format, to: DateTimeExample::class);
+
+        self::assertEquals($expected, $result);
+
+    }
+
+    #[Test]
+    public function unixtime_fields_support(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $timeString = '4 July 2022 14:22:22';
+        $zone = new \DateTimeZone('America/New_York');
+
+        $stamp = new \DateTime($timeString, $zone);
+        $stampImmutable = new \DateTimeImmutable($timeString, $zone);
+        $data = new UnixTimeExample(seconds: $stamp, milliseconds: $stampImmutable);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        switch($serialized) {
+            case "seconds: 1656958942\nmilliseconds: 1656958942000\n": // yaml
+            case '{"seconds":1656958942,"milliseconds":1656958942000}': // json
+            case ['seconds' => 1656958942, 'milliseconds' => 1656958942000]: // array
+                self::assertTrue(true);
+                break;
+            default:
+                self::assertTrue(false);
+                break;
+        }
+
+        // Because some of the exported formats involve data loss,
+        // we don't actually expect the exact same thing back.
+        $expected = new UnixTimeExample($stamp, $stampImmutable);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: UnixTimeExample::class);
 
         self::assertEquals($expected, $result);
 

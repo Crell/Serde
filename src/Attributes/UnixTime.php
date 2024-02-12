@@ -15,13 +15,10 @@ class UnixTime implements TypeField, SupportsScopes
     /**
      * @param bool $milliseconds
      *   Whether the field is represented as milliseconds (true) or seconds (false) since the epoch.
-     * @param string|null $timezone
-     *   The timezone string, like "America/Chicago" or "UTC", to which to force the value when exporting.
      * @param array<string|null> $scopes
      */
     public function __construct(
         public readonly bool $milliseconds = false,
-        public readonly ?string $timezone = null,
         protected readonly array $scopes = [null],
     ) {}
 

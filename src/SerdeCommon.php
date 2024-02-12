@@ -25,6 +25,7 @@ use Crell\Serde\PropertyHandler\ObjectExporter;
 use Crell\Serde\PropertyHandler\ObjectImporter;
 use Crell\Serde\PropertyHandler\ScalarExporter;
 use Crell\Serde\PropertyHandler\SequenceExporter;
+use Crell\Serde\PropertyHandler\UnixTimeExporter;
 use Symfony\Component\Yaml\Yaml;
 use function Crell\fp\afilter;
 use function Crell\fp\indexBy;
@@ -77,6 +78,7 @@ class SerdeCommon extends Serde
             new MixedExporter(),
             new DictionaryExporter(),
             new SequenceExporter(),
+            new UnixTimeExporter(), // must be before datetime exporter to prevent default (de)serializer behavior
             new DateTimeExporter(),
             new DateTimeZoneExporter(),
             ...$handlers,
