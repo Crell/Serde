@@ -10,7 +10,7 @@ use Crell\AttributeUtils\SupportsScopes;
 use Crell\Serde\TypeField;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class UnixTime implements TypeField, SupportsScopes
+class UnixTimeField implements TypeField, SupportsScopes
 {
     /**
      * @param bool $milliseconds
