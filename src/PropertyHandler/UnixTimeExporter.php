@@ -24,7 +24,7 @@ class UnixTimeExporter implements Importer, Exporter {
         /** @var UnixTime|null $typeField */
         $typeField = $field->typeField;
 
-        $multiplier = $typeField->milliseconds ? 1000 : 1;
+        $multiplier = $typeField?->milliseconds ? 1000 : 1;
 
         return $serializer->formatter->serializeInt($runningValue, $field, $value->getTimestamp() * $multiplier);
     }
@@ -45,7 +45,7 @@ class UnixTimeExporter implements Importer, Exporter {
             return null;
         }
 
-        $divider = $typeField->milliseconds ? 1000.0 : 1.0;
+        $divider = $typeField?->milliseconds ? 1000.0 : 1.0;
 
         return new ($field->phpType)('@' . ($timestamp / $divider));
     }
