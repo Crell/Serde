@@ -46,7 +46,7 @@ class UnixTimeExporter implements Importer, Exporter {
             return null;
         }
 
-        $divisor = $typeField?->resolution->value;
+        $divisor = $typeField?->resolution->value ?? 1;
 
         // We use number_format to truncate the number at 6 decimals since PHP doesn't support nanosecond precision.
         // We also specify the decimal separator and thousands separator in case the current locale would have different
