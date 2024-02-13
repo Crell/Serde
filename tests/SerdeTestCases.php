@@ -1229,7 +1229,7 @@ abstract class SerdeTestCases extends TestCase
             nanoseconds: new \DateTimeImmutable('@1656958942.123456')
         );
 
-        $result = $s->deserialize($serialized, from: $this->format, to: UnixTimeExample::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
         self::assertEquals($expected, $result);
 
