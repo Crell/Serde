@@ -653,7 +653,7 @@ On deserializing, the `format` has no effect.  Serde will pass the string value 
 
 #### Unix Time
 
-In cases where you need to serialize the date to/from Unix Time, you can use `UnixTime`,
+In cases where you need to serialize the date to/from Unix Time, you can use `UnixTimeField`,
 which supports a resolution parameter that can handle up to nanosecond resolution
 (note that PHP can't handle nanosecond resolution and so nanoseconds are truncated to microsecond resolution):
 
