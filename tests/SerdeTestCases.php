@@ -77,6 +77,7 @@ use Crell\Serde\Records\Tasks\TaskContainer;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
+use Crell\Serde\Records\UnixTimeExample;
 use Crell\Serde\Records\ValueObjects\Age;
 use Crell\Serde\Records\ValueObjects\Email;
 use Crell\Serde\Records\ValueObjects\JobDescription;
@@ -150,6 +151,8 @@ abstract class SerdeTestCases extends TestCase
      * @see non_sequence_arrays_in_weak_mode_are_coerced
      */
     protected mixed $dictsInSequenceShouldPass;
+
+    abstract protected function arrayify(mixed $serialized): array;
 
     #[Test]
     public function point(): void
@@ -1185,6 +1188,50 @@ abstract class SerdeTestCases extends TestCase
 
         self::assertEquals($expected, $result);
 
+    }
+
+    #[Test]
+    public function unixtime_fields_support(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $timeString = '@1656958942.123456';
+
+        $stamp = new \DateTime($timeString);
+        $stampImmutable = new \DateTimeImmutable($timeString);
+        $data = new UnixTimeExample(
+            seconds: $stamp,
+            milliseconds: $stampImmutable,
+            microseconds: $stampImmutable,
+            nanoseconds: $stampImmutable
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->unixtime_validate($serialized);
+
+        // Because some of the exported formats involve data loss,
+        // we don't actually expect the exact same thing back.
+        $expected = new UnixTimeExample(
+            seconds: new \DateTime('@1656958942'),
+            milliseconds: new \DateTimeImmutable('@1656958942.123'),
+            microseconds: new \DateTimeImmutable('@1656958942.123456'),
+            nanoseconds: new \DateTimeImmutable('@1656958942.123456')
+        );
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($expected, $result);
+
+    }
+
+    public function unixtime_validate(mixed $serialized): void {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame(1656958942, $toTest['seconds'], 'Seconds should be valid');
+        self::assertSame(1656958942123, $toTest['milliseconds'], 'Milliseconds should be valid');
+        self::assertSame(1656958942123456, $toTest['microseconds'], 'Microseconds should be valid');
+        self::assertSame(1656958942123456000, $toTest['nanoseconds'], 'Nanoseconds should be valid');
     }
 
     public function datetime_fields_support_custom_output_format_validate(mixed $serialized): void
