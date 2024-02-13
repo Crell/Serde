@@ -162,6 +162,8 @@ abstract class SerdeTestCases extends TestCase
      */
     protected mixed $dictsInSequenceShouldPass;
 
+    abstract protected function arrayify(mixed $serialized): array;
+
     #[Test]
     public function point(): void
     {
@@ -1203,34 +1205,43 @@ abstract class SerdeTestCases extends TestCase
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
-        $timeString = '4 July 2022 14:22:22';
-        $zone = new \DateTimeZone('America/New_York');
+        $timeString = '@1656958942.123456';
 
-        $stamp = new \DateTime($timeString, $zone);
-        $stampImmutable = new \DateTimeImmutable($timeString, $zone);
-        $data = new UnixTimeExample(seconds: $stamp, milliseconds: $stampImmutable);
+        $stamp = new \DateTime($timeString);
+        $stampImmutable = new \DateTimeImmutable($timeString);
+        $data = new UnixTimeExample(
+            seconds: $stamp,
+            milliseconds: $stampImmutable,
+            microseconds: $stampImmutable,
+            nanoseconds: $stampImmutable
+        );
 
         $serialized = $s->serialize($data, $this->format);
 
-        switch($serialized) {
-            case "seconds: 1656958942\nmilliseconds: 1656958942000\n": // yaml
-            case '{"seconds":1656958942,"milliseconds":1656958942000}': // json
-            case ['seconds' => 1656958942, 'milliseconds' => 1656958942000]: // array
-                self::assertTrue(true);
-                break;
-            default:
-                self::assertTrue(false);
-                break;
-        }
+        $this->unixtime_validate($serialized);
 
         // Because some of the exported formats involve data loss,
         // we don't actually expect the exact same thing back.
-        $expected = new UnixTimeExample($stamp, $stampImmutable);
+        $expected = new UnixTimeExample(
+            seconds: new \DateTime('@1656958942'),
+            milliseconds: new \DateTimeImmutable('@1656958942.123'),
+            microseconds: new \DateTimeImmutable('@1656958942.123456'),
+            nanoseconds: new \DateTimeImmutable('@1656958942.123456')
+        );
 
         $result = $s->deserialize($serialized, from: $this->format, to: UnixTimeExample::class);
 
         self::assertEquals($expected, $result);
 
+    }
+
+    public function unixtime_validate(mixed $serialized): void {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame(1656958942, $toTest['seconds'], 'Seconds should be valid');
+        self::assertSame(1656958942123, $toTest['milliseconds'], 'Milliseconds should be valid');
+        self::assertSame(1656958942123456, $toTest['microseconds'], 'Microseconds should be valid');
+        self::assertSame(1656958942123456000, $toTest['nanoseconds'], 'Nanoseconds should be valid');
     }
 
     public function datetime_fields_support_custom_output_format_validate(mixed $serialized): void
