@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde\Records;
 
 use Crell\Serde\Attributes\DateField;
+use Crell\Serde\Attributes\Enums\UnixTimeResolution;
 use Crell\Serde\Attributes\UnixTimeField;
 use DateTime;
 use DateTimeImmutable;
@@ -15,7 +16,13 @@ class UnixTimeExample
         #[UnixTimeField]
         public DateTime $seconds,
 
-        #[UnixTimeField(milliseconds: true)]
+        #[UnixTimeField(resolution: UnixTimeResolution::Milliseconds)]
         public DateTimeImmutable $milliseconds,
+
+        #[UnixTimeField(resolution: UnixTimeResolution::Microseconds)]
+        public DateTimeImmutable $microseconds,
+
+        #[UnixTimeField(resolution: UnixTimeResolution::Nanoseconds)]
+        public DateTimeImmutable $nanoseconds,
     ) {}
 }

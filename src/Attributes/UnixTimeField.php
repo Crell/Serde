@@ -7,18 +7,19 @@ namespace Crell\Serde\Attributes;
 
 use Attribute;
 use Crell\AttributeUtils\SupportsScopes;
+use Crell\Serde\Attributes\Enums\UnixTimeResolution;
 use Crell\Serde\TypeField;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 class UnixTimeField implements TypeField, SupportsScopes
 {
     /**
-     * @param bool $milliseconds
-     *   Whether the field is represented as milliseconds (true) or seconds (false) since the epoch.
+     * @param UnixTimeResolution $resolution
+     *   The resolution of the timestamp.
      * @param array<string|null> $scopes
      */
     public function __construct(
-        public readonly bool $milliseconds = false,
+        public readonly UnixTimeResolution $resolution = UnixTimeResolution::Seconds,
         protected readonly array $scopes = [null],
     ) {}
 

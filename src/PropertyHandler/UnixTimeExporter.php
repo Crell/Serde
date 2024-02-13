@@ -24,9 +24,10 @@ class UnixTimeExporter implements Importer, Exporter {
         /** @var UnixTimeField|null $typeField */
         $typeField = $field->typeField;
 
-        $multiplier = $typeField?->milliseconds ? 1000 : 1;
+        $multiplier = $typeField?->resolution->value;
+        $timestamp = (float) $value->format('U.u');
 
-        return $serializer->formatter->serializeInt($runningValue, $field, $value->getTimestamp() * $multiplier);
+        return $serializer->formatter->serializeInt($runningValue, $field, (int) ($timestamp * $multiplier));
     }
 
     public function canExport(Field $field, mixed $value, string $format): bool
@@ -45,9 +46,14 @@ class UnixTimeExporter implements Importer, Exporter {
             return null;
         }
 
-        $divider = $typeField?->milliseconds ? 1000.0 : 1.0;
+        $divisor = $typeField?->resolution->value;
 
-        return new ($field->phpType)('@' . ($timestamp / $divider));
+        // We use number_format to truncate the number at 6 decimals since PHP doesn't support nanosecond precision.
+        // We also specify the decimal separator and thousands separator in case the current locale would have different
+        // settings.
+        $timestamp = number_format($timestamp / $divisor, 6, '.', '');
+
+        return new ($field->phpType)('@' . $timestamp);
     }
 
     public function canImport(Field $field, string $format): bool
