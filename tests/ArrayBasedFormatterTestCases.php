@@ -427,7 +427,7 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertArrayHasKey('the_number', $toTest);
     }
 
-    public function null_stuff_validate(mixed $serialized): void
+    public function null_properties_are_allowed_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
 
