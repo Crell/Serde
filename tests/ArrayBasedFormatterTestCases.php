@@ -144,6 +144,7 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
 
         self::assertEquals('narf', $toTest['nonConstructorDefault']);
         self::assertEquals('beep', $toTest['required']);
+        self::assertNull($toTest['requiredNullable']);
         self::assertEquals('boop', $toTest['withDefault']);
         self::assertArrayNotHasKey('nullableUninitialized', $toTest);
         self::assertArrayNotHasKey('uninitialized', $toTest);
