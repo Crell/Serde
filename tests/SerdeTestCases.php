@@ -611,7 +611,7 @@ abstract class SerdeTestCases extends TestCase
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
-        $data = new EmptyData('beep');
+        $data = new EmptyData('beep', null);
 
         $serialized = $s->serialize($data, $this->format);
 

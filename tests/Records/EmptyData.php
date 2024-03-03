@@ -16,6 +16,7 @@ class EmptyData
 
     public function __construct(
         public string $required,
+        public ?string $requiredNullable,
         public string $withDefault = 'boop',
         public ?string $nullable = null,
         public readonly ?string $roNullable = null,
