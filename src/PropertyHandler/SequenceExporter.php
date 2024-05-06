@@ -76,7 +76,7 @@ class SequenceExporter implements Exporter, Importer
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof SequenceField && $typeField->implodeOn) {
             $val = $deserializer->deformatter->deserializeString($source, $field);
-            return $val === DeformatterResult::Missing ? null : $typeField->explode($val);
+            return $val === DeformatterResult::Missing || $val === null ? null : $typeField->explode($val);
         }
 
         return $deserializer->deformatter->deserializeSequence($source, $field, $deserializer);

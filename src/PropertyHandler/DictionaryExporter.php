@@ -104,7 +104,7 @@ class DictionaryExporter implements Exporter, Importer
         // We cannot easily tell them apart at the moment.
         if ($typeField instanceof DictionaryField && $typeField->implodeOn) {
             $val = $deserializer->deformatter->deserializeString($source, $field);
-            return $val === DeformatterResult::Missing ? null : $typeField->explode($val);
+            return $val === DeformatterResult::Missing || $val === null ? null : $typeField->explode($val);
         }
 
         return $deserializer->deformatter->deserializeDictionary($source, $field, $deserializer);

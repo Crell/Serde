@@ -23,7 +23,7 @@ class ObjectImporter implements Importer
         // Get the raw data as an array from the source.
         $dict = $deserializer->deformatter->deserializeObject($source, $field, $deserializer);
 
-        if ($dict instanceof DeformatterResult) {
+        if ($dict instanceof DeformatterResult || $dict === null) {
             return null;
         }
 

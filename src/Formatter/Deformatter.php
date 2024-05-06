@@ -31,15 +31,15 @@ interface Deformatter
         Deserializer $deserializer
     ): mixed;
 
-    public function deserializeInt(mixed $decoded, Field $field): int|DeformatterResult;
+    public function deserializeInt(mixed $decoded, Field $field): int|DeformatterResult|null;
 
-    public function deserializeFloat(mixed $decoded, Field $field): float|DeformatterResult;
+    public function deserializeFloat(mixed $decoded, Field $field): float|DeformatterResult|null;
 
-    public function deserializeBool(mixed $decoded, Field $field): bool|DeformatterResult;
+    public function deserializeBool(mixed $decoded, Field $field): bool|DeformatterResult|null;
 
-    public function deserializeString(mixed $decoded, Field $field): string|DeformatterResult;
+    public function deserializeString(mixed $decoded, Field $field): string|DeformatterResult|null;
 
-    public function deserializeNull(mixed $decoded, Field $field): ?DeformatterResult;
+    public function deserializeNull(mixed $decoded, Field $field): DeformatterResult|null;
 
     /**
      * @param mixed $decoded
@@ -61,9 +61,9 @@ interface Deformatter
      * @param mixed $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return array<string, mixed>|DeformatterResult
+     * @return array<string, mixed>|DeformatterResult|null
      */
-    public function deserializeObject( mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult;
+    public function deserializeObject( mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult|null;
 
     public function deserializeFinalize(mixed $decoded): void;
 }

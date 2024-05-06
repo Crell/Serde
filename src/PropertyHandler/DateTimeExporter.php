@@ -50,7 +50,7 @@ class DateTimeExporter implements Exporter, Importer
     {
         $string = $deserializer->deformatter->deserializeString($source, $field);
 
-        if ($string === DeformatterResult::Missing) {
+        if ($string === DeformatterResult::Missing || $string === null) {
             return null;
         }
 
