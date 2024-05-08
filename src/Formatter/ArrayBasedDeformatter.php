@@ -24,14 +24,16 @@ use function Crell\fp\reduceWithKeys;
  */
 trait ArrayBasedDeformatter
 {
-    public function deserializeInt(mixed $decoded, Field $field): int|DeformatterResult
+    public function deserializeInt(mixed $decoded, Field $field): int|DeformatterResult|null
     {
-        if (!isset($decoded[$field->serializedName])) {
+        if (!array_key_exists($field->serializedName, $decoded)) {
             return DeformatterResult::Missing;
         }
 
+        $value = $decoded[$field->serializedName];
+
         if ($field->strict) {
-            if (!is_int($decoded[$field->serializedName])) {
+            if (!is_int($value) && !($field->nullable && is_null($value))) {
                 throw TypeMismatch::create($field->serializedName, 'int', \get_debug_type($decoded[$field->serializedName]));
             }
             return $decoded[$field->serializedName];
@@ -41,14 +43,16 @@ trait ArrayBasedDeformatter
         return (int)($decoded[$field->serializedName]);
     }
 
-    public function deserializeFloat(mixed $decoded, Field $field): float|DeformatterResult
+    public function deserializeFloat(mixed $decoded, Field $field): float|DeformatterResult|null
     {
-        if (!isset($decoded[$field->serializedName])) {
+        if (!array_key_exists($field->serializedName, $decoded)) {
             return DeformatterResult::Missing;
         }
 
+        $value = $decoded[$field->serializedName];
+
         if ($field->strict) {
-            if (!(is_float($decoded[$field->serializedName]) || is_int($decoded[$field->serializedName]))) {
+            if (!is_int($value) && !is_float($value) && !($field->nullable && is_null($value))) {
                 throw TypeMismatch::create($field->serializedName, 'float', \get_debug_type($decoded[$field->serializedName]));
             }
             return $decoded[$field->serializedName];
@@ -58,14 +62,16 @@ trait ArrayBasedDeformatter
         return (float)($decoded[$field->serializedName]);
     }
 
-    public function deserializeBool(mixed $decoded, Field $field): bool|DeformatterResult
+    public function deserializeBool(mixed $decoded, Field $field): bool|DeformatterResult|null
     {
-        if (!isset($decoded[$field->serializedName])) {
+        if (!array_key_exists($field->serializedName, $decoded)) {
             return DeformatterResult::Missing;
         }
 
+        $value = $decoded[$field->serializedName];
+
         if ($field->strict) {
-            if (!is_bool($decoded[$field->serializedName])) {
+            if (!is_bool($value) && !($field->nullable && is_null($value))) {
                 throw TypeMismatch::create($field->serializedName, 'bool', \get_debug_type($decoded[$field->serializedName]));
             }
             return $decoded[$field->serializedName];
@@ -75,21 +81,23 @@ trait ArrayBasedDeformatter
         return (bool)($decoded[$field->serializedName]);
     }
 
-    public function deserializeString(mixed $decoded, Field $field): string|DeformatterResult
+    public function deserializeString(mixed $decoded, Field $field): string|DeformatterResult|null
     {
-        if (!isset($decoded[$field->serializedName])) {
+        if (!array_key_exists($field->serializedName, $decoded)) {
             return DeformatterResult::Missing;
         }
 
+        $value = $decoded[$field->serializedName];
+
         if ($field->strict) {
-            if (!is_string($decoded[$field->serializedName])) {
-                throw TypeMismatch::create($field->serializedName, 'string', \get_debug_type($decoded[$field->serializedName]));
+            if (!is_string($value) && !($field->nullable && is_null($value))) {
+                throw TypeMismatch::create($field->serializedName, 'string', \get_debug_type($value));
             }
-            return $decoded[$field->serializedName];
+            return $value;
         }
 
         // Weak mode.
-        return (string)($decoded[$field->serializedName]);
+        return (string)($value);
     }
 
     public function deserializeNull(mixed $decoded, Field $field): ?DeformatterResult
@@ -211,7 +219,7 @@ trait ArrayBasedDeformatter
      * @param Deserializer $deserializer
      * @return array<string, mixed>|DeformatterResult
      */
-    public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult
+    public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult|null
     {
         $candidateNames = [$field->serializedName, ...$field->alias];
 
@@ -219,7 +227,7 @@ trait ArrayBasedDeformatter
             first(static fn (string $name): bool => isset($decoded[$name]))
         );
 
-        if (!isset($decoded[$key])) {
+        if (!array_key_exists($key, $decoded)) {
             return DeformatterResult::Missing;
         }
 
@@ -252,7 +260,7 @@ trait ArrayBasedDeformatter
             } else {
                 $key = pipe(
                     $propField->alias,
-                    first(fn(string $name): bool => isset($data[$name])),
+                    first(fn(string $name): bool => array_key_exists($name, $data)),
                 );
                 $ret[$propField->serializedName] = $key
                     ? $deserializer->deserialize($data, $propField->with(serializedName: $key))

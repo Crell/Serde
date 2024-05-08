@@ -144,6 +144,7 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
 
         self::assertEquals('narf', $toTest['nonConstructorDefault']);
         self::assertEquals('beep', $toTest['required']);
+        self::assertNull($toTest['requiredNullable']);
         self::assertEquals('boop', $toTest['withDefault']);
         self::assertArrayNotHasKey('nullableUninitialized', $toTest);
         self::assertArrayNotHasKey('uninitialized', $toTest);
@@ -427,7 +428,7 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertArrayHasKey('the_number', $toTest);
     }
 
-    public function null_stuff_validate(mixed $serialized): void
+    public function null_properties_are_allowed_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
 
