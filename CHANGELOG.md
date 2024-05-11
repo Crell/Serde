@@ -4,6 +4,25 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## 1.2.0 - DATE
+
+This release includes a small *breaking change*.  The deformatter methods all now have nullable returns.  This is necessary to allow for deserializing values that are legitimately and permissibly null.  If you do not have any custom Importers, you should not be impacted.  If you do have a custom Importer, you *may* need to adjust your logic to account for the return value from the deformatter being null.
+
+### Added
+- Nothing
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Explicit null values in incoming data should now deserialize to null-valued properties, assuming the types permit.
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.1.0 - 2024-01-20
 
 The main change in this release is better support for flattening value objects.  See the additional section in the README for more details.
