@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-interface TypeField
+use Crell\AttributeUtils\Inheritable;
+use Crell\AttributeUtils\TransitiveProperty;
+
+interface TypeField extends Inheritable, TransitiveProperty
 {
     /**
      * Determines if this field is valid for a given type.
