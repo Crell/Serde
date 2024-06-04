@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Crell\Serde\Records;
 
-class TransitiveExample
+class ClassWithPropertyWithTransitiveTypeField
 {
     public function __construct(
-        public readonly Transitive $transitive,
+        public readonly TransitiveField $transitive,
     ) {
     }
 }

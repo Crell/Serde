@@ -5,8 +5,14 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Attributes\ClassNameTypeMap;
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\Attributes\StaticTypeMap;
+use Crell\Serde\Formatter\ArrayFormatter;
 use Crell\Serde\Formatter\SupportsCollecting;
+use Crell\Serde\PropertyHandler\Exporter;
+use Crell\Serde\PropertyHandler\Importer;
+use Crell\Serde\PropertyHandler\ObjectExporter;
+use Crell\Serde\PropertyHandler\ObjectImporter;
 use Crell\Serde\Records\AliasedFields;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
@@ -74,6 +80,9 @@ use Crell\Serde\Records\Tasks\BigTask;
 use Crell\Serde\Records\Tasks\SmallTask;
 use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
+use Crell\Serde\Records\TransitiveField;
+use Crell\Serde\Records\ClassWithPropertyWithTransitiveTypeField;
+use Crell\Serde\Records\TransitiveTypeField;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
@@ -1754,4 +1763,55 @@ abstract class SerdeTestCases extends TestCase
 
     }
 
+    #[Test]
+    public function transitive_type_field_is_recognized(): void
+    {
+        $exporter = new class () extends ObjectExporter {
+            public bool $wasCalled = false;
+
+            public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+            {
+                $this->wasCalled = true;
+                return parent::exportValue($serializer, $field, $value, $runningValue);
+            }
+
+            public function canExport(Field $field, mixed $value, string $format): bool
+            {
+                return $field->typeField instanceof TransitiveTypeField;
+            }
+        };
+        $importer = new class() extends ObjectImporter {
+            public bool $wasCalled = false;
+
+            public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+            {
+                $this->wasCalled = true;
+                return parent::importValue($deserializer, $field, $source);
+            }
+
+            public function canImport(Field $field, string $format): bool
+            {
+                return $field->typeField instanceof TransitiveTypeField;
+            }
+        };
+
+        $s = new SerdeCommon(handlers: [$exporter, $importer], formatters: $this->formatters);
+
+        $data = new ClassWithPropertyWithTransitiveTypeField(new TransitiveField('Beep'));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->transitive_type_field_is_recognized_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+        self::assertTrue($exporter->wasCalled);
+        self::assertTrue($importer->wasCalled);
+    }
+
+    public function transitive_type_field_is_recognized_validate(mixed $serialized): void
+    {
+
+    }
 }
