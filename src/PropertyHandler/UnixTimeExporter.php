@@ -42,7 +42,7 @@ class UnixTimeExporter implements Importer, Exporter {
         $toSerialize = match ($resolution) {
             UnixTimeResolution::Seconds => $seconds,
             UnixTimeResolution::Microseconds => $seconds * $multiplier + (int)$value->format('u'),
-            UnixTimeResolution::Milliseconds => $seconds * $multiplier + (int)($value->format('u')/1000),
+            UnixTimeResolution::Milliseconds => $seconds * $multiplier + (int)((int)($value->format('u'))/1000),
         };
 
         return $serializer->formatter->serializeInt($runningValue, $field, $toSerialize);
