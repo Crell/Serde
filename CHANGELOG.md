@@ -10,6 +10,7 @@ This release includes a small *breaking change*.  The deformatter methods all no
 
 ### Added
 - TypeField is now Transitive, so you can implement a custom TypeField for a specific object, and it will apply anywhere it is used.
+- TypeField is now Inheritable, too.
 
 ### Deprecated
 - Nothing
