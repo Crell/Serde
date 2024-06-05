@@ -43,7 +43,7 @@
     },
     "scripts": {
         "test": "XDEBUG_MODE=coverage phpunit",
-        "phpstan": "php -d memory_limit=140M vendor/bin/phpstan",
+        "phpstan": "php -d memory_limit=256M vendor/bin/phpstan",
         "coverage": "php -dextension=pcov.so -dpcov.enabled=1 -dpcov.directory=src vendor/bin/phpunit --coverage-text",
         "all-checks": [
             "@test",
