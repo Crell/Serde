@@ -1825,7 +1825,7 @@ abstract class SerdeTestCases extends TestCase
             public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
             {
                 $this->wasCalled = true;
-                return $serializer->formatter->serializeInt($runningValue, $field, $value->id, $serializer);
+                return $serializer->formatter->serializeInt($runningValue, $field, $value->id);
             }
 
             public function canExport(Field $field, mixed $value, string $format): bool
