@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Crell\Serde\Records;
+namespace Crell\Serde\Attributes;
 
 use Attribute;
 use Crell\Serde\TypeField;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-class TransitiveTypeField implements TypeField
+class ReducingTransitiveTypeField implements TypeField
 {
     public function acceptsType(string $type): bool
     {
-        return true;
+        return $type === 'object' || class_exists($type) || interface_exists($type);
     }
 
     public function validate(mixed $value): bool

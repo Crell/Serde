@@ -6,11 +6,11 @@ namespace Crell\Serde;
 
 use Crell\Serde\Attributes\ClassNameTypeMap;
 use Crell\Serde\Attributes\Field;
+use Crell\Serde\Attributes\ReducingTransitiveTypeField;
 use Crell\Serde\Attributes\StaticTypeMap;
-use Crell\Serde\Formatter\ArrayFormatter;
+use Crell\Serde\Attributes\TransitiveTypeField;
 use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\Exporter;
-use Crell\Serde\PropertyHandler\Importer;
 use Crell\Serde\PropertyHandler\ObjectExporter;
 use Crell\Serde\PropertyHandler\ObjectImporter;
 use Crell\Serde\Records\AliasedFields;
@@ -19,6 +19,8 @@ use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Callbacks\CallbackHost;
 use Crell\Serde\Records\CircularReference;
 use Crell\Serde\Records\ClassWithDefaultRenaming;
+use Crell\Serde\Records\ClassWithPropertyWithTransitiveTypeField;
+use Crell\Serde\Records\ClassWithReducibleProperty;
 use Crell\Serde\Records\DateTimeExample;
 use Crell\Serde\Records\DictionaryKeyTypes;
 use Crell\Serde\Records\Drupal\EmailItem;
@@ -63,6 +65,7 @@ use Crell\Serde\Records\Pagination\Product;
 use Crell\Serde\Records\Pagination\ProductType;
 use Crell\Serde\Records\Pagination\Results;
 use Crell\Serde\Records\Point;
+use Crell\Serde\Records\ReducibleClass;
 use Crell\Serde\Records\RequiresFieldValues;
 use Crell\Serde\Records\RequiresFieldValuesClass;
 use Crell\Serde\Records\RootMap\Type;
@@ -81,8 +84,6 @@ use Crell\Serde\Records\Tasks\SmallTask;
 use Crell\Serde\Records\Tasks\Task;
 use Crell\Serde\Records\Tasks\TaskContainer;
 use Crell\Serde\Records\TransitiveField;
-use Crell\Serde\Records\ClassWithPropertyWithTransitiveTypeField;
-use Crell\Serde\Records\TransitiveTypeField;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
@@ -1811,6 +1812,64 @@ abstract class SerdeTestCases extends TestCase
     }
 
     public function transitive_type_field_is_recognized_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function objects_can_be_reduced_to_primitive(): void
+    {
+        $exporter = new class () implements Exporter {
+            public bool $wasCalled = false;
+
+            public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
+            {
+                $this->wasCalled = true;
+                return $serializer->formatter->serializeInt($runningValue, $field, $value->id, $serializer);
+            }
+
+            public function canExport(Field $field, mixed $value, string $format): bool
+            {
+                return $field->typeField instanceof ReducingTransitiveTypeField;
+            }
+        };
+        $importer = new class() extends ObjectImporter {
+            public bool $wasCalled = false;
+
+            public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+            {
+                $this->wasCalled = true;
+                $id = $deserializer->deformatter->deserializeInt($source, $field);
+
+                return match ($id) {
+                    1 => new ReducibleClass(1, 'One'),
+                    2 => new ReducibleClass(2, 'Two'),
+                    default => throw new \Exception('Record not found'),
+                };
+            }
+
+            public function canImport(Field $field, string $format): bool
+            {
+                return $field->typeField instanceof ReducingTransitiveTypeField;
+            }
+        };
+
+        $s = new SerdeCommon(handlers: [$exporter, $importer], formatters: $this->formatters);
+
+        $data = new ClassWithReducibleProperty(new ReducibleClass(1, 'One'));
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->objects_can_be_reduced_to_primitive_validate($serialized);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+        self::assertTrue($exporter->wasCalled);
+        self::assertTrue($importer->wasCalled);
+    }
+
+    public function objects_can_be_reduced_to_primitive_validate(mixed $serialized): void
     {
 
     }
