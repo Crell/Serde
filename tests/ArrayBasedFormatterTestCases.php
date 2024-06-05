@@ -420,6 +420,15 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertSame('2022-07-04T13:22:22.000-05:00', $toTest['forceToChicago']);
     }
 
+    public function unixtime_fields_in_range_are_supported_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertSame(1656958942, $toTest['seconds'], 'Seconds should be valid');
+        self::assertSame(1656958942123, $toTest['milliseconds'], 'Milliseconds should be valid');
+        self::assertSame(1656958942123456, $toTest['microseconds'], 'Microseconds should be valid');
+    }
+
     public function class_level_renaming_applies_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
@@ -488,4 +497,5 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertSame(18, $toTest['desc_min_age']);
         self::assertSame(65, $toTest['desc_max_age']);
     }
+
 }

@@ -654,8 +654,7 @@ On deserializing, the `format` has no effect.  Serde will pass the string value 
 #### Unix Time
 
 In cases where you need to serialize the date to/from Unix Time, you can use `UnixTimeField`,
-which supports a resolution parameter that can handle up to nanosecond resolution
-(note that PHP can't handle nanosecond resolution and so nanoseconds are truncated to microsecond resolution):
+which supports a resolution parameter that can handle up to microsecond resolution:
 
 ```php
 use Crell\Serde\Attributes\UnixTimeField;
@@ -679,6 +678,10 @@ Will serialize to this JSON:
     "iss": 1707764358000
 }
 ```
+
+The serialized integer should be read as "this many seconds since the epoc" or "this many milliseconds since the epoc," etc.  ("The epoc" being 1 January 1970, the first year after humans first walked on the moon.)
+
+Note that the permissible range of milliseconds and microseconds is considerably smaller than that for seconds, since there is a limit on the size of an integer that we can represent.  For timestamps in the early 21st century there should be no issue, but trying to record the microseconds since the epoc for the setting of Dune (somewhere in the 10,000s) won't work.
 
 ### Generators, Iterables, and Traversables
 

@@ -21,8 +21,5 @@ class UnixTimeExample
 
         #[UnixTimeField(resolution: UnixTimeResolution::Microseconds)]
         public DateTimeImmutable $microseconds,
-
-        #[UnixTimeField(resolution: UnixTimeResolution::Nanoseconds)]
-        public DateTimeImmutable $nanoseconds,
     ) {}
 }
