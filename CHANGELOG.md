@@ -9,8 +9,9 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 This release includes a small *breaking change*.  The deformatter methods all now have nullable returns.  This is necessary to allow for deserializing values that are legitimately and permissibly null.  If you do not have any custom Importers, you should not be impacted.  If you do have a custom Importer, you *may* need to adjust your logic to account for the return value from the deformatter being null.
 
 ### Added
-- TypeField is now Transitive, so you can implement a custom TypeField for a specific object, and it will apply anywhere it is used.
-- TypeField is now Inheritable, too.
+- `TypeField` is now `Transitive`, so you can implement a custom TypeField for a specific object, and it will apply anywhere it is used.
+- `TypeField` is now `Inheritable`, too.
+- There is a new `UnixTimeField` that can be applied to `DateTime*` properties.  As it says on the tin, it serializes to/from a Unix timestamp integer, in second, millisecond, or microsecond resolution.
 
 ### Deprecated
 - Nothing
