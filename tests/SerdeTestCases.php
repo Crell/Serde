@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Attributes\ClassNameTypeMap;
+use Crell\Serde\Attributes\Enums\UnixTimeResolution;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Attributes\ReducingTransitiveTypeField;
 use Crell\Serde\Attributes\StaticTypeMap;
@@ -87,6 +88,7 @@ use Crell\Serde\Records\TransitiveField;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
+use Crell\Serde\Records\UnixTimeExample;
 use Crell\Serde\Records\ValueObjects\Age;
 use Crell\Serde\Records\ValueObjects\Email;
 use Crell\Serde\Records\ValueObjects\JobDescription;
@@ -160,6 +162,8 @@ abstract class SerdeTestCases extends TestCase
      * @see non_sequence_arrays_in_weak_mode_are_coerced
      */
     protected mixed $dictsInSequenceShouldPass;
+
+    abstract protected function arrayify(mixed $serialized): array;
 
     #[Test]
     public function point(): void
@@ -1194,10 +1198,74 @@ abstract class SerdeTestCases extends TestCase
         $result = $s->deserialize($serialized, from: $this->format, to: DateTimeExample::class);
 
         self::assertEquals($expected, $result);
-
     }
 
     public function datetime_fields_support_custom_output_format_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function unixtime_fields_in_range_are_supported(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $timeString = '@1656958942.123456';
+
+        $stamp = new \DateTime($timeString);
+        $stampImmutable = new \DateTimeImmutable($timeString);
+        $data = new UnixTimeExample(
+            seconds: $stamp,
+            milliseconds: $stampImmutable,
+            microseconds: $stampImmutable
+        );
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->unixtime_fields_in_range_are_supported_validate($serialized);
+
+        // Because some of the exported formats involve data loss,
+        // we don't actually expect the exact same thing back.
+        $expected = new UnixTimeExample(
+            seconds: new \DateTime('@1656958942'),
+            milliseconds: new \DateTimeImmutable('@1656958942.123'),
+            microseconds: new \DateTimeImmutable('@1656958942.123456')
+        );
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($expected, $result);
+    }
+
+    public function unixtime_fields_in_range_are_supported_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function unixtime_fields_out_of_range_throw(): void
+    {
+        $this->expectException(UnixTimestampOutOfRange::class);
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        // Determined experimentally to be one second larger than the allowed range.
+        $timeString = '@9223372036856';
+
+        $stamp = new \DateTime($timeString);
+        $stampImmutable = new \DateTimeImmutable($timeString);
+        $data = new UnixTimeExample(
+            seconds: $stamp,
+            milliseconds: $stampImmutable,
+            microseconds: $stampImmutable
+        );
+
+        $this->expectExceptionObject(UnixTimestampOutOfRange::create($stampImmutable, UnixTimeResolution::Microseconds));
+
+        $s->serialize($data, $this->format);
+    }
+
+    public function unixtime_fields_out_of_range_throw_validate(mixed $serialized): void
     {
 
     }

@@ -619,7 +619,7 @@ As with `SequenceField`, values will automatically be `trim()`ed unless `trim: f
 
 ### Date and Time fields
 
-`DateTime` and `DateTimeImmutable` fields can also be serialized, and you can control how they are serialized using the `DateField` attribute.  It has two arguments, which may be used individually or together.  Specifying neither is the same as not specifying the `DateField` attribute at all.
+`DateTime` and `DateTimeImmutable` fields can also be serialized, and you can control how they are serialized using the `DateField` or the `UnixTimeField` attribute.  `DateField` has two arguments, which may be used individually or together.  Specifying neither is the same as not specifying the `DateField` attribute at all.
 
 ```php
 use Crell\Serde\Attributes\DateField;
@@ -650,6 +650,38 @@ On deserializing, the `timezone` has no effect.  If the incoming value has a tim
 This argument lets you specify the format that will be used when serializing.  It may be any string accepted by PHP's [date_format syntax](https://www.php.net/manual/en/datetimeimmutable.createfromformat.php), including one of the various constants defined on `DateTimeInterface`.  If not specified, the default format is `RFC3339_EXTENDED`, or `Y-m-d\TH:i:s.vP`.  While not the most human-friendly, it is the default format used by Javascript/JSON so makes for reasonable compatibility.
 
 On deserializing, the `format` has no effect.  Serde will pass the string value to a `DateTime` or `DateTimeImmutable` constructor, so any format recognized by PHP will be parsed according to PHP's standard date-parsing rules.
+
+#### Unix Time
+
+In cases where you need to serialize the date to/from Unix Time, you can use `UnixTimeField`,
+which supports a resolution parameter that can handle up to microsecond resolution:
+
+```php
+use Crell\Serde\Attributes\UnixTimeField;
+use Crell\Serde\Attributes\Enums\UnixTimeResolution;
+
+class Jwt
+{
+    #[UnixTimeField]
+    protected DateTimeImmutable $exp;
+    
+    #[UnixTimeField(resolution: UnixTimeResolution::Milliseconds)]
+    protected DateTimeImmutable $iss;
+}
+```
+
+Will serialize to this JSON:
+
+```json
+{
+    "exp": 1707764358,
+    "iss": 1707764358000
+}
+```
+
+The serialized integer should be read as "this many seconds since the epoc" or "this many milliseconds since the epoc," etc.  ("The epoc" being 1 January 1970, the first year after humans first walked on the moon.)
+
+Note that the permissible range of milliseconds and microseconds is considerably smaller than that for seconds, since there is a limit on the size of an integer that we can represent.  For timestamps in the early 21st century there should be no issue, but trying to record the microseconds since the epoc for the setting of Dune (somewhere in the 10,000s) won't work.
 
 ### Generators, Iterables, and Traversables
 
