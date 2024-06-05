@@ -1193,13 +1193,14 @@ The visibilty of the method is irrelevant.  Serde will call `public`, `private`,
 
 ## Extending Serde
 
-Internally, Serde has five types of extensions that work in concert to produce a serialized or deserialized product.
+Internally, Serde has six types of extensions that work in concert to produce a serialized or deserialized product.
 
 * Type Maps, as discussed above, are optional and translate a class name to a lookup identifier and back.
 * A [`Exporter`](src/PropertyHandler/Exporter.php) is responsible for pulling values off of an object, processing them if necessary, and then passing them on to a Formatter.  This is part of the Serialization pipeline.
 * A [`Importer`](src/PropertyHandler/Importer.php) is responsible for using a Deformatter to extract data from incoming data and then translate it as necessary to be written to an object.  This is part of the Deserialization pipeline.
 * A [`Formatter`](src/Formatter/Formatter.php) is responsible for writing to a specific output format, like JSON or YAML.  This is part of the Serialization pipeline.
 * A [`Deformatter`](src/Formatter/Deformatter.php) is responsible for reading data off of an incoming format and passing it back to an `Importer`.  This is part of the Deserialization pipeline.
+* A [`TypeField`](src/TypeField.php) is a custom per-type field that can be added to a property to provide more type-specific logic to a corresponding Exporter or Importer.  In a sense, they are "extra arguments" to an Exporter or Importer, and if you implement a custom one you will almost certainly implement your own Exporter or Importer to go with it.  `DateTimeField`, `DictionaryField`, and `SequenceField` are examples of Type Fields.  TypeFields are also Transitive, so they can be put on a custom class to apply to anywhere that class is used on a property (unless overridden locally).
 
 Collectively, `Importer` and `Exporter` instances are called "handlers."
 
