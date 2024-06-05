@@ -4,7 +4,7 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## 1.2.0 - DATE
+## 1.2.0 - 2024-06-04
 
 This release includes a small *breaking change*.  The deformatter methods all now have nullable returns.  This is necessary to allow for deserializing values that are legitimately and permissibly null.  If you do not have any custom Importers, you should not be impacted.  If you do have a custom Importer, you *may* need to adjust your logic to account for the return value from the deformatter being null.
 
