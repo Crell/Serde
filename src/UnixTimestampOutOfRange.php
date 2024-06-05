@@ -6,7 +6,7 @@ namespace Crell\Serde;
 
 use Crell\Serde\Attributes\Enums\UnixTimeResolution;
 
-class UnixTimestampOutOfRange extends \InvalidArgumentException
+class UnixTimestampOutOfRange extends \InvalidArgumentException implements SerdeException
 {
     public readonly \DateTimeInterface $timestamp;
     public readonly UnixTimeResolution $resolution;
