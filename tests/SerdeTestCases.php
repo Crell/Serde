@@ -39,6 +39,7 @@ use Crell\Serde\Records\FlatMapNested\HostObject;
 use Crell\Serde\Records\FlatMapNested\Item;
 use Crell\Serde\Records\FlatMapNested\NestedA;
 use Crell\Serde\Records\FlattenedNullableMain;
+use Crell\Serde\Records\FlattenedValueObjectMain;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\ImplodingArrays;
 use Crell\Serde\Records\InvalidFieldType;
@@ -1291,6 +1292,28 @@ abstract class SerdeTestCases extends TestCase
         $serialized = $s->serialize($data, $this->format);
 
         $this->validateSerialized($serialized, __FUNCTION__);
+
+        /** @var FlattenedNullableMain $result */
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    #[Test]
+    public function nullable_value_objects_flattened(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new FlattenedValueObjectMain(null);
+
+        // Serialisation here hides the issue...
+        // $serialized = $s->serialize($data, $this->format);
+
+        $serialized = match ($this->format) {
+            'array' => ['order_id' => null],
+            'json' => '{"order_id":null}',
+            'yaml' => 'order_id: null',
+        };
 
         /** @var FlattenedNullableMain $result */
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
