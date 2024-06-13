@@ -469,7 +469,7 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
     {
         $toTest = $this->arrayify($serialized);
 
-        self::assertTrue(isset($toTest['order_id']));
+        self::assertArrayHasKey('order_id', $toTest);
         self::assertNull($toTest['order_id']);
     }
 
