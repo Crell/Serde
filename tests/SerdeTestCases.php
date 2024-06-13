@@ -1306,19 +1306,19 @@ abstract class SerdeTestCases extends TestCase
 
         $data = new FlattenedValueObjectMain(null);
 
-        // Serialisation here hides the issue...
-        // $serialized = $s->serialize($data, $this->format);
+        $serialized = $s->serialize($data, $this->format);
 
-        $serialized = match ($this->format) {
-            'array' => ['order_id' => null],
-            'json' => '{"order_id":null}',
-            'yaml' => 'order_id: null',
-        };
+        $this->nullable_value_objects_flattened_validate($serialized);
 
         /** @var FlattenedNullableMain $result */
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
         self::assertEquals($data, $result);
+    }
+
+    public function nullable_value_objects_flattened_validate(mixed $serialized): void
+    {
+
     }
 
     #[Test]

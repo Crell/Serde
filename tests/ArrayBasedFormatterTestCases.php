@@ -465,6 +465,14 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertSame('me@example.com', $toTest['email']);
     }
 
+    public function nullable_value_objects_flattened_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertTrue(isset($toTest['order_id']));
+        self::assertNull($toTest['order_id']);
+    }
+
     public function multiple_same_class_value_objects_work_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
