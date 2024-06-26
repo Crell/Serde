@@ -43,6 +43,12 @@ class JsonStreamFormatter implements Formatter
         return $runningValue;
     }
 
+    public function serializeString(mixed $runningValue, Field $field, ?string $next): mixed
+    {
+        $runningValue->printf('"%s"', str_replace('"', '\"', $next));
+        return $runningValue;
+    }
+
     /**
      * @param FormatterStream $runningValue
      */

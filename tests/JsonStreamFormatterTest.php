@@ -131,7 +131,7 @@ class JsonStreamFormatterTest extends TestCase
         yield AllFieldTypes::class => [
             'data' => new AllFieldTypes(
                 anint: 5,
-                string: 'hello',
+                string: '"hello"',
                 afloat: 3.14,
                 bool: true,
                 dateTimeImmutable: new \DateTimeImmutable('2021-05-01 08:30:45', new \DateTimeZone('America/Chicago')),
