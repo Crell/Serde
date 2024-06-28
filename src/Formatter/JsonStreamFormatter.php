@@ -46,6 +46,15 @@ class JsonStreamFormatter implements Formatter
     /**
      * @param FormatterStream $runningValue
      */
+    public function serializeString(mixed $runningValue, Field $field, ?string $next): mixed
+    {
+        $runningValue->printf('"%s"', is_string($next) ? str_replace('"', '\"', $next) : null);
+        return $runningValue;
+    }
+
+    /**
+     * @param FormatterStream $runningValue
+     */
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): FormatterStream
     {
         if ($runningValue->isNamedContext()) {
