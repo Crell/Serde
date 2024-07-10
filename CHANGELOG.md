@@ -25,6 +25,23 @@ This release includes a small *breaking change*.  The deformatter methods all no
 ### Security
 - Nothing
 
+## 1.3.0 - DATE
+
+### Added
+- Null values may now be excluded when serializing. See the `omitNullFields` and `omitIfNull` flags in the README.
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.1.0 - 2024-01-20
 
 The main change in this release is better support for flattening value objects.  See the additional section in the README for more details.

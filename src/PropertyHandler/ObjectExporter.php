@@ -73,6 +73,10 @@ class ObjectExporter implements Exporter
             return $dict;
         }
 
+        if ($field->omitIfNull && is_null($value)) {
+            return $dict;
+        }
+
         if (!$field->flatten) {
             return $dict->add(new CollectionItem(field: $field, value: $value));
         }

@@ -101,6 +101,7 @@ There is also a `ClassSettings` attribute that may be placed on classes to be se
 * `includeFieldsByDefault`, which defaults to `true`.  If set to false, a property with no `#[Field]` attribute will be ignored.  It is equivalent to setting `exclude: true` on all properties implicitly.
 * `requireValues`, which defaults to `false`.  If set to true, then when deserializing any field that is not provided in the incoming data will result in an exception.  This may also be turned on or off on a per-field level.  (See `requireValue` below.)  The class-level setting applies to any field that does not specify its behavior.
 * `renameWith`.  If set, the specified renaming strategy will be used for all properties of the class, unless a property specifies its own.  (See `renameWith` below.)  The class-level setting applies to any field that does not specify its behavior.
+* `omitNullFields`, which defaults to false.  If set to true, any property on the class that is null will be omitted when serializing. It has on effect on deserialization.  This may also be turned on or off on a per-field level.  (See `omitIfNull` below.)
 * `scopes`, which sets the scope of a given class definition attribute.  See the section on Scopes below.
 
 ### `exclude` (bool, default false)
@@ -239,6 +240,10 @@ All three of the following JSON strings would be read into an identical object:
 ```
 
 This is mainly useful when an API key has changed, and legacy incoming data may still have an old key name.
+
+### `omitIfNull` (bool, default false)
+
+This key only applies on serialization.  If set to true, and the value of this property is null when an object is serialized, it will be omitted from the output entirely.  If false, a `null` will be written to the output, however that looks for the particular format.
 
 ### `useDefault` (bool, default true)
 

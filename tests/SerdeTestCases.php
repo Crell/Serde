@@ -31,6 +31,8 @@ use Crell\Serde\Records\Drupal\Node;
 use Crell\Serde\Records\Drupal\StringItem;
 use Crell\Serde\Records\Drupal\TextItem;
 use Crell\Serde\Records\EmptyData;
+use Crell\Serde\Records\ExcludeNullFields;
+use Crell\Serde\Records\ExcludeNullFieldsClass;
 use Crell\Serde\Records\Exclusions;
 use Crell\Serde\Records\ExplicitDefaults;
 use Crell\Serde\Records\FlatMapNested\HostObject;
@@ -1618,6 +1620,50 @@ abstract class SerdeTestCases extends TestCase
     }
 
     public function nullable_properties_flattened_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function null_properties_may_be_excluded(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ExcludeNullFields('A');
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->null_properties_may_be_excluded_validate($serialized);
+
+        /** @var ExcludeNullFields $result */
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function null_properties_may_be_excluded_validate(mixed $serialized): void
+    {
+
+    }
+
+    #[Test]
+    public function null_properties_may_be_excluded_class_level(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new ExcludeNullFieldsClass('A');
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->null_properties_may_be_excluded_class_level_validate($serialized);
+
+        /** @var ExcludeNullFields $result */
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function null_properties_may_be_excluded_class_level_validate(mixed $serialized): void
     {
 
     }
