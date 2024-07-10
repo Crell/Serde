@@ -97,6 +97,12 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     protected ?RenamingStrategy $rename;
 
     /**
+     * Whether or not to omit values when serializing if they are null.
+     */
+    public readonly bool $omitIfNull;
+
+
+    /**
      * Additional key/value pairs to be included with an object.
      *
      * Only viable on object properties, and really not something
@@ -107,7 +113,6 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      * @var array<string, mixed>
      */
     public readonly array $extraProperties;
-
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
     /**
@@ -139,6 +144,9 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      *   to false to disable this check, in which case the value may be uninitialized
      *   after deserialization.  If a property has a default value, this directive
      *   has no effect.
+     * @param bool $omitIfNull
+     *   When serializing, if a property is set to null, exclude it from the output
+     *   entirely.  Default false, meaning a "null" will be written to the output format.
      * @param array<string|null> $scopes
      *   If specified, this Field entry will be included only when operating in
      *   the specified scopes.  To also be included in the default "unscoped" case,
@@ -156,6 +164,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         public readonly array $alias = [],
         public readonly bool $strict = true,
         ?bool $requireValue = null,
+        ?bool $omitIfNull = null,
         protected readonly array $scopes = [null],
     ) {
         if ($default !== PropValue::None) {
@@ -165,6 +174,9 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         // Null means we want to accept a default value later from the class.
         if ($requireValue !== null) {
             $this->requireValue = $requireValue;
+        }
+        if ($omitIfNull !== null) {
+            $this->omitIfNull = $omitIfNull;
         }
         // Upcast the literal serialized name to a converter if appropriate.
         $this->rename ??=
@@ -213,6 +225,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         // If there is no requireValue flag set, inherit it from the class attribute.
         $this->requireValue ??= $class->requireValues;
         $this->rename ??= $class->renameWith ?? null;
+        $this->omitIfNull ??= $class->omitNullFields ?? false;
     }
 
     protected function getDefaultValueFromConstructor(\ReflectionProperty $subject): mixed

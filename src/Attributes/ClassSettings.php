@@ -46,12 +46,17 @@ class ClassSettings implements FromReflectionClass, ParseProperties, HasSubAttri
      *   If true, all fields will be required when deserializing into this object.
      *   If false, fields will not be required and unset fields will be left uninitialized.
      *   this may be overridden on a per-field basis with #[Field(requireValue: true)]
-     */
+     * @param bool $omitNullFields
+     *    When serializing, if a property is set to null, exclude it from the output
+     *    entirely.  Default false, meaning a "null" will be written to the output format.
+     *    This may be overridden on a per-field basis.
+    */
     public function __construct(
         public readonly bool $includeFieldsByDefault = true,
         public readonly array $scopes = [null],
         public readonly bool $requireValues = false,
         public readonly ?RenamingStrategy $renameWith = null,
+        public readonly bool $omitNullFields = false,
     ) {}
 
     public function fromReflection(\ReflectionClass $subject): void

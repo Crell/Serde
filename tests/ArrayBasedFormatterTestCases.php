@@ -498,4 +498,20 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertSame(65, $toTest['desc_max_age']);
     }
 
+    public function null_properties_may_be_excluded_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals('A', $toTest['name']);
+        self::assertArrayNotHasKey('age', $toTest);
+    }
+
+    public function null_properties_may_be_excluded_class_level_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals('A', $toTest['name']);
+        self::assertArrayNotHasKey('age', $toTest);
+    }
+
 }
