@@ -184,6 +184,29 @@ abstract class SerdeTestCases extends TestCase
         self::assertEquals($data, $result);
     }
 
+    #[Test, DataProvider('round_trip_flattening_examples'), Group('flattening')]
+    public function round_trip_flattening(object $data, string $name): void
+    {
+        foreach ($this->formatters as $formatter) {
+            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
+                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
+            }
+        }
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $validateMethod = $name . '_validate';
+        if (method_exists($this, $validateMethod)) {
+            $this->$validateMethod($serialized);
+        }
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
     public static function round_trip_examples(): iterable
     {
         yield [
@@ -313,6 +336,72 @@ abstract class SerdeTestCases extends TestCase
     }
 
     /**
+     * These all relate to flattening, so only work on some formatters.
+     */
+    public static function round_trip_flattening_examples(): iterable
+    {
+        yield [
+            'data' => new Flattening(
+                first: 'Larry',
+                last: 'Garfield',
+                other: ['a' => 'A', 'b' => 2, 'c' => 'C'],
+            ),
+            'name' => 'flattening',
+        ];
+        yield [
+            'data' => new ThingList(name: 'list', things: [
+                'A' => new ThingA('a', 'b'),
+                'B' => new ThingB('d', 'd'),
+                'C' => new ThingC('e', 'f'),
+            ]),
+            'name' => 'mapped_collected_dictionary',
+        ];
+        yield [
+            'data' => new ThingList(name: 'list', things: [
+                new ThingA('a', 'b'),
+                new ThingB('d', 'd'),
+                new ThingC('e', 'f'),
+            ]),
+            'name' => 'mapped_collected_sequence',
+        ];
+        yield [
+            'data' => new Results(
+                pagination: new Pagination(
+                    total: 500,
+                    offset: 40,
+                    limit: 10,
+                ),
+                products: [
+                    new Product('Widget', 4.95),
+                    new Product('Gadget', 99.99),
+                    new Product('Dohickey', 11.50),
+                ]
+            ),
+            'name' => 'pagination_flatten_object',
+        ];
+        yield [
+            'data' => new DetailedResults(
+                pagination: new NestedPagination(
+                    total: 500,
+                    limit: 10,
+                    state: new PaginationState(40),
+                ),
+                type: new ProductType(
+                    name: 'Beep',
+                    category: 'Boop'
+                ),
+                products: [
+                    new Product('Widget', 4.95),
+                    new Product('Gadget', 99.99),
+                    new Product('Dohickey', 11.50),
+                ],
+                other: ['narf' => 'poink', 'bleep' => 'bloop']
+            ),
+            'name' => 'pagination_flatten_multiple_object',
+        ];
+    }
+
+    /**
      * This tests an empty object value, which means something different in different formats.
      */
     #[Test]
@@ -340,37 +429,6 @@ abstract class SerdeTestCases extends TestCase
         $result = $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
 
         self::assertEquals(new AllFieldTypes(), $result);
-    }
-
-    #[Test, Group('flattening')]
-    public function flattening(): void
-    {
-        foreach ($this->formatters as $formatter) {
-            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
-                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
-            }
-        }
-
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $data = new Flattening(
-            first: 'Larry',
-            last: 'Garfield',
-            other: ['a' => 'A', 'b' => 2, 'c' => 'C'],
-        );
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->flattening_validate($serialized);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: Flattening::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    protected function flattening_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('typemap')]
@@ -670,149 +728,6 @@ abstract class SerdeTestCases extends TestCase
     }
 
     public function drupal_example_validate(mixed $serialized): void
-    {
-
-    }
-
-    #[Test, Group('flattening')]
-    public function mapped_collected_dictionary(): void
-    {
-        foreach ($this->formatters as $formatter) {
-            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
-                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
-            }
-        }
-
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $data = new ThingList(name: 'list', things: [
-            'A' => new ThingA('a', 'b'),
-            'B' => new ThingB('d', 'd'),
-            'C' => new ThingC('e', 'f'),
-        ]);
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->mapped_collected_dictionary_validate($serialized);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: ThingList::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public function mapped_collected_dictionary_validate(mixed $serialized): void
-    {
-
-    }
-
-    #[Test, Group('flattening')]
-    public function mapped_collected_sequence(): void
-    {
-        foreach ($this->formatters as $formatter) {
-            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
-                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
-            }
-        }
-
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $data = new ThingList(name: 'list', things: [
-            new ThingA('a', 'b'),
-            new ThingB('d', 'd'),
-            new ThingC('e', 'f'),
-        ]);
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->mapped_collected_sequence_validate($serialized);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: ThingList::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public function mapped_collected_sequence_validate(mixed $serialized): void
-    {
-
-    }
-
-    #[Test, Group('flattening')]
-    public function pagination_flatten_object(): void
-    {
-        foreach ($this->formatters as $formatter) {
-            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
-                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
-            }
-        }
-
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $data = new Results(
-            pagination: new Pagination(
-                total: 500,
-                offset: 40,
-                limit: 10,
-            ),
-            products: [
-                new Product('Widget', 4.95),
-                new Product('Gadget', 99.99),
-                new Product('Dohickey', 11.50),
-            ]
-        );
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->pagination_flatten_object_validate($serialized);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: Results::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public function pagination_flatten_object_validate(mixed $serialized): void
-    {
-
-    }
-
-    #[Test, Group('flattening')]
-    public function pagination_flatten_multiple_object(): void
-    {
-        foreach ($this->formatters as $formatter) {
-            if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
-                $this->markTestSkipped('Skipping flattening tests on non-flattening formatters');
-            }
-        }
-
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $data = new DetailedResults(
-            pagination: new NestedPagination(
-                total: 500,
-                limit: 10,
-                state: new PaginationState(40),
-            ),
-            type: new ProductType(
-                name: 'Beep',
-                category: 'Boop'
-            ),
-            products: [
-                new Product('Widget', 4.95),
-                new Product('Gadget', 99.99),
-                new Product('Dohickey', 11.50),
-            ],
-            other: ['narf' => 'poink', 'bleep' => 'bloop']
-        );
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->pagination_flatten_multiple_object_validate($serialized);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: DetailedResults::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public function pagination_flatten_multiple_object_validate(mixed $serialized): void
     {
 
     }
@@ -1188,7 +1103,7 @@ abstract class SerdeTestCases extends TestCase
 
         $this->mixed_val_property_validate($serialized, $data);
 
-        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+        $result = $s->deserialize($serialized, from: $this->format, to: MixedVal::class);
 
         self::assertEquals($data, $result);
     }
