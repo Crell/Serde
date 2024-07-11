@@ -167,25 +167,29 @@ abstract class SerdeTestCases extends TestCase
 
     abstract protected function arrayify(mixed $serialized): array;
 
-    #[Test]
-    public function point(): void
+    #[Test, DataProvider('round_trip_examples')]
+    public function round_trip(object $data, string $name): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
-        $p1 = new Point(1, 2, 3);
+        $serialized = $s->serialize($data, $this->format);
 
-        $serialized = $s->serialize($p1, $this->format);
+        $validateMethod = $name . '_validate';
+        if (method_exists($this, $validateMethod)) {
+            $this->$validateMethod($serialized);
+        }
 
-        $this->point_validate($serialized);
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
-        $result = $s->deserialize($serialized, from: $this->format, to: Point::class);
-
-        self::assertEquals($p1, $result);
+        self::assertEquals($data, $result);
     }
 
-    protected function point_validate(mixed $serialized): void
+    public static function round_trip_examples(): iterable
     {
-
+        yield [
+            'data' => new Point(1, 2, 3),
+            'name' => 'point',
+        ];
     }
 
     #[Test]
