@@ -4,6 +4,23 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## 1.3.0 - DATE
+
+### Added
+- Null values may now be excluded when serializing. See the `omitNullFields` and `omitIfNull` flags in the README.
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Greatly simplified and cleaned up the test suite.
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.2.0 - 2024-06-04
 
 This release includes a small *breaking change*.  The deformatter methods all now have nullable returns.  This is necessary to allow for deserializing values that are legitimately and permissibly null.  If you do not have any custom Importers, you should not be impacted.  If you do have a custom Importer, you *may* need to adjust your logic to account for the return value from the deformatter being null.
@@ -18,23 +35,6 @@ This release includes a small *breaking change*.  The deformatter methods all no
 
 ### Fixed
 - Explicit null values in incoming data should now deserialize to null-valued properties, assuming the types permit.
-
-### Removed
-- Nothing
-
-### Security
-- Nothing
-
-## 1.3.0 - DATE
-
-### Added
-- Null values may now be excluded when serializing. See the `omitNullFields` and `omitIfNull` flags in the README.
-
-### Deprecated
-- Nothing
-
-### Fixed
-- Nothing
 
 ### Removed
 - Nothing
