@@ -8,6 +8,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Added
 - Null values may now be excluded when serializing. See the `omitNullFields` and `omitIfNull` flags in the README.
+- We now require AttributeUtils 1.2, which lets us use closures rather than method name strings for subAttribute callbacks. (Internal improvement.)
 
 ### Deprecated
 - Nothing

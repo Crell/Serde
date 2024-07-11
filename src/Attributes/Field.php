@@ -17,7 +17,6 @@ use Crell\Serde\IntersectionTypesNotSupported;
 use Crell\Serde\PropValue;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
-use Crell\Serde\DeformatterResult;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeField;
 use Crell\Serde\TypeMap;
@@ -277,19 +276,12 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     public function subAttributes(): array
     {
         return [
-            TypeMap::class => 'fromTypeMap',
-            TypeField::class => 'fromTypeField',
+            TypeMap::class => fn(?TypeMap $map) => $this->typeMap = $map,
+            TypeField::class => $this->fromTypeField(...),
         ];
     }
 
-    public function fromTypeMap(?TypeMap $map): void
-    {
-        // This may assign to null, which is OK as that will
-        // evaluate to false when we need it to.
-        $this->typeMap = $map;
-    }
-
-    public function fromTypeField(?TypeField $typeField): void
+    protected function fromTypeField(?TypeField $typeField): void
     {
         if ($typeField && !$typeField->acceptsType($this->phpType)) {
             throw FieldTypeIncompatible::create($typeField::class, $this->phpType);
