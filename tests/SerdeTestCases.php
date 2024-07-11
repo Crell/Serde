@@ -167,6 +167,14 @@ abstract class SerdeTestCases extends TestCase
 
     abstract protected function arrayify(mixed $serialized): array;
 
+    protected function validateSerialized(mixed $serialized, string $name): void
+    {
+        $validateMethod = $name . '_validate';
+        if (method_exists($this, $validateMethod)) {
+            $this->$validateMethod($serialized);
+        }
+    }
+
     #[Test, DataProvider('round_trip_examples')]
     public function round_trip(object $data, string $name): void
     {
@@ -174,10 +182,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $validateMethod = $name . '_validate';
-        if (method_exists($this, $validateMethod)) {
-            $this->$validateMethod($serialized);
-        }
+        $this->validateSerialized($serialized, $name);
 
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
@@ -197,10 +202,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $validateMethod = $name . '_validate';
-        if (method_exists($this, $validateMethod)) {
-            $this->$validateMethod($serialized);
-        }
+        $this->validateSerialized($serialized, $name);
 
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
@@ -265,10 +267,16 @@ abstract class SerdeTestCases extends TestCase
             'name' => 'name_mangling',
         ];
         yield [
-            'data' => new NestedObject('First',
-                new NestedObject('Second',
-                    new NestedObject('Third',
-                        new NestedObject('Fourth')))),
+            'data' => new NestedObject(
+                'First',
+                new NestedObject(
+                    'Second',
+                    new NestedObject(
+                        'Third',
+                        new NestedObject('Fourth')
+                    )
+                )
+            ),
             'name' => 'nested_objects',
         ];
         yield [
@@ -276,7 +284,11 @@ abstract class SerdeTestCases extends TestCase
             'name' => 'empty_values',
         ];
         yield [
-            'data' => new NativeSerUn(1, 'beep', new \DateTimeImmutable('1918-11-11 11:11:11', new \DateTimeZone('America/Chicago'))),
+            'data' => new NativeSerUn(
+                1,
+                'beep',
+                new \DateTimeImmutable('1918-11-11 11:11:11', new \DateTimeZone('America/Chicago'))
+            ),
             'name' => 'native_object_serialization',
         ];
         yield [
@@ -450,16 +462,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->static_type_map_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: TaskContainer::class);
 
         self::assertEquals($data, $result);
-    }
-
-    protected function static_type_map_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('typemap')]
@@ -499,16 +506,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->custom_type_map_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: TaskContainer::class);
 
         self::assertEquals($data, $result);
-    }
-
-    protected function custom_type_map_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('typemap')]
@@ -520,16 +522,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->typemap_on_parent_class_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: Box::class);
 
         self::assertEquals($data, $result);
-    }
-
-    protected function typemap_on_parent_class_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('typemap')]
@@ -537,7 +534,7 @@ abstract class SerdeTestCases extends TestCase
     {
         $typeMap = new ClassNameTypeMap(key: 'class');
 
-        $s = new SerdeCommon( formatters: $this->formatters, typeMaps: [
+        $s = new SerdeCommon(formatters: $this->formatters, typeMaps: [
             Shape::class => $typeMap,
         ]);
 
@@ -545,16 +542,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->classname_typemap_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: Box::class);
 
         self::assertEquals($data, $result);
-    }
-
-    protected function classname_typemap_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -584,16 +576,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->root_type_map_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: Type::class);
 
         self::assertEquals($data, $result);
-    }
-
-    protected function root_type_map_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('typemap')]
@@ -630,16 +617,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->nested_objects_with_flattening_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: NestedFlattenObject::class);
 
         self::assertEquals($data, $result);
-    }
-
-    protected function nested_objects_with_flattening_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -651,18 +633,13 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->exclude_values_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         /** @var Exclusions $result */
         $result = $s->deserialize($serialized, from: $this->format, to: Exclusions::class);
 
         self::assertEquals('one', $result->one);
         self::assertNull($result->two ?? null);
-    }
-
-    public function exclude_values_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('typemap')]
@@ -720,16 +697,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->drupal_example_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: Node::class);
 
         self::assertEquals($data, $result);
-    }
-
-    public function drupal_example_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('flattening'), Group('typemap')]
@@ -760,16 +732,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->flatten_and_map_objects_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: Wrapper::class);
 
         self::assertEquals($data, $result);
-    }
-
-    public function flatten_and_map_objects_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -797,16 +764,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->array_imploding_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: ImplodingArrays::class);
 
         self::assertEquals($data, $result);
-    }
-
-    public function array_imploding_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('flattening'), Group('typemap')]
@@ -837,16 +799,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->flat_map_nested_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: HostObject::class);
 
         self::assertEquals($data, $result);
-    }
-
-    public function flat_map_nested_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -858,7 +815,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->post_deserialize_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         /** @var CallbackHost $result */
         $result = $s->deserialize($serialized, from: $this->format, to: CallbackHost::class);
@@ -866,11 +823,6 @@ abstract class SerdeTestCases extends TestCase
         self::assertEquals($data, $result);
 
         self::assertEquals('Larry Garfield', $result->fullName);
-    }
-
-    public function post_deserialize_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('typemap')]
@@ -891,16 +843,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->mapped_arrays_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: ShapeList::class);
 
         self::assertEquals($data, $result);
-    }
-
-    public function mapped_arrays_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test, Group('typemap')]
@@ -912,16 +859,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->root_typemap_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: Shape::class);
 
         self::assertEquals($data, $result);
-    }
-
-    public function root_typemap_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -950,11 +892,6 @@ abstract class SerdeTestCases extends TestCase
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $result = $s->deserialize($this->invalidDictIntKey, $this->format, DictionaryKeyTypes::class);
-    }
-
-    public function dictionary_key_int_in_string_throws_in_serialize_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -994,7 +931,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->datetime_fields_support_custom_output_format_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         // Because some of the exported formats involve data loss,
         // we don't actually expect the exact same thing back.
@@ -1014,11 +951,6 @@ abstract class SerdeTestCases extends TestCase
         self::assertEquals($expected, $result);
     }
 
-    public function datetime_fields_support_custom_output_format_validate(mixed $serialized): void
-    {
-
-    }
-
     #[Test]
     public function unixtime_fields_in_range_are_supported(): void
     {
@@ -1036,7 +968,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->unixtime_fields_in_range_are_supported_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         // Because some of the exported formats involve data loss,
         // we don't actually expect the exact same thing back.
@@ -1049,11 +981,6 @@ abstract class SerdeTestCases extends TestCase
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
         self::assertEquals($expected, $result);
-    }
-
-    public function unixtime_fields_in_range_are_supported_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -1074,14 +1001,11 @@ abstract class SerdeTestCases extends TestCase
             microseconds: $stampImmutable
         );
 
-        $this->expectExceptionObject(UnixTimestampOutOfRange::create($stampImmutable, UnixTimeResolution::Microseconds));
+        $this->expectExceptionObject(
+            UnixTimestampOutOfRange::create($stampImmutable, UnixTimeResolution::Microseconds)
+        );
 
         $s->serialize($data, $this->format);
-    }
-
-    public function unixtime_fields_out_of_range_throw_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -1119,7 +1043,6 @@ abstract class SerdeTestCases extends TestCase
 
     public function mixed_val_property_validate(mixed $serialized, mixed $data): void
     {
-
     }
 
     /**
@@ -1154,13 +1077,13 @@ abstract class SerdeTestCases extends TestCase
             yield from ['a' => 1, 'b' => 2, 'c' => 3];
         };
 
-        $pointSeq = static function(): iterable {
+        $pointSeq = static function (): iterable {
             yield new Point(1, 2, 3);
             yield new Point(4, 5, 6);
             yield new Point(7, 2, 9);
         };
 
-        $pointDict = static function(): iterable {
+        $pointDict = static function (): iterable {
             yield 'A' => new Point(1, 2, 3);
             yield 'B' => new Point(4, 5, 6);
             yield 'C' => new Point(7, 2, 9);
@@ -1175,7 +1098,8 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->generator_property_is_run_out_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
+
 
         // Deserialization is always to an array, so we
         // need a separate expected object.
@@ -1189,11 +1113,6 @@ abstract class SerdeTestCases extends TestCase
         $result = $s->deserialize($serialized, from: $this->format, to: Iterables::class);
 
         self::assertEquals($expected, $result);
-    }
-
-    public function generator_property_is_run_out_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -1212,16 +1131,11 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->traversable_object_not_iterated_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: Traversables::class);
 
         self::assertEquals($data, $result);
-    }
-
-    public function traversable_object_not_iterated_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -1353,7 +1267,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->null_properties_are_allowed_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         /** @var NullProps $result */
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
@@ -1367,11 +1281,6 @@ abstract class SerdeTestCases extends TestCase
         self::assertEquals($data, $result);
     }
 
-    public function null_properties_are_allowed_validate(mixed $serialized): void
-    {
-
-    }
-
     #[Test]
     public function nullable_properties_flattened(): void
     {
@@ -1381,7 +1290,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->nullable_properties_flattened_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         /** @var FlattenedNullableMain $result */
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
@@ -1389,10 +1298,6 @@ abstract class SerdeTestCases extends TestCase
         self::assertEquals($data, $result);
     }
 
-    public function nullable_properties_flattened_validate(mixed $serialized): void
-    {
-
-    }
     #[Test]
     public function non_sequence_arrays_are_normalized_to_sequences(): void
     {
@@ -1406,16 +1311,11 @@ abstract class SerdeTestCases extends TestCase
         $serialized = $s->serialize($data, $this->format);
 
         // This will do the actual validation.
-        $this->non_sequence_arrays_are_normalized_to_sequences_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 //
 //        /** @var SequenceOfStrings $result */
 //        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 //
-
-    }
-
-    public function non_sequence_arrays_are_normalized_to_sequences_validate(mixed $serialized): void
-    {
 
     }
 
@@ -1462,14 +1362,10 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->arrays_with_invalid_scalar_values_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
+
 
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
-    }
-
-    public function arrays_with_invalid_scalar_values_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -1510,18 +1406,13 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->transitive_type_field_is_recognized_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
         self::assertEquals($data, $result);
         self::assertTrue($exporter->wasCalled);
         self::assertTrue($importer->wasCalled);
-    }
-
-    public function transitive_type_field_is_recognized_validate(mixed $serialized): void
-    {
-
     }
 
     #[Test]
@@ -1568,17 +1459,12 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->objects_can_be_reduced_to_primitive_validate($serialized);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
         self::assertEquals($data, $result);
         self::assertTrue($exporter->wasCalled);
         self::assertTrue($importer->wasCalled);
-    }
-
-    public function objects_can_be_reduced_to_primitive_validate(mixed $serialized): void
-    {
-
     }
 }
