@@ -88,8 +88,30 @@ class ObjectExporter implements Exporter
         }
 
         if ($field->typeCategory === TypeCategory::Object) {
+            // This whole mess is to keep the code below nullsafe.
+            // If we want to serialize a null but flattened object, we
+            // need to be aware of the flatten prefix it would have used.
+            // If there's a single property on the child object, we can use
+            // it to form the resulting field name that will be null.
+            // If there's several, we skip it and just use the flattenPrefix
+            // of the field itself, because that's all we can reasonably do.
             if ($value === null) {
-                return $dict;
+                if ($field->flattenPrefix) {
+                    $properties = $serializer->propertiesFor($field->phpType);
+                    if (count($properties) === 1) {
+                        $prop = reset($properties);
+                        /** @var Field $newField */
+                        $newField = $field->with(
+                            serializedName: $field->flattenPrefix . $prop->serializedName,
+                            flattenPrefix: $field->flattenPrefix . $prop->flattenPrefix
+                        );
+                        return $dict->add(new CollectionItem(field: $newField, value: null));
+                    } else {
+                        return $dict->add(new CollectionItem(field: $field, value: null));
+                    }
+                } else {
+                    return $dict->add(new CollectionItem(field: $field, value: null));
+                }
             }
             $subPropReader = (fn (string $prop): mixed
                 => array_key_exists($prop, get_object_vars($this)) ? $this->$prop : DeformatterResult::Missing)->bindTo($value, $value);
