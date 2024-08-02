@@ -38,6 +38,10 @@ class EnumExporter implements Exporter, Importer
             TypeCategory::StringEnum => $deserializer->deformatter->deserializeString($source, $field),
         };
 
+        if ($field->nullable && $val === null) {
+            return null;
+        }
+
         if ($val instanceof DeformatterResult) {
             return $val;
         }

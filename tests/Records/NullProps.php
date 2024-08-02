@@ -12,5 +12,6 @@ class NullProps
         public ?string $string = null,
         public ?array $array = null,
         public ?NullProps $object = null,
+        public ?BackedSize $enum = null,
     ) {}
 }
