@@ -15,6 +15,8 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Fixed
 - Greatly simplified and cleaned up the test suite.
+- Added better escaping to JSON Stream Formatter to handle strings that contain quotes or other JSON-meaningful characters.
+- Fixed handling of deserializing a nullable enum field.
 
 ### Removed
 - Nothing
