@@ -154,6 +154,12 @@ class JsonStreamFormatterTest extends TestCase
             )
         ];
 
+        yield AllFieldTypes::class . ' with JSON-type characters' => [
+            'data' => new AllFieldTypes(
+                string: '{ "with quotes", and { characters ".',
+            )
+        ];
+
         yield NullArrays::class => [
             'data' => new NullArrays(),
         ];
