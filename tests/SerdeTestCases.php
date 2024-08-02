@@ -39,6 +39,7 @@ use Crell\Serde\Records\FlatMapNested\HostObject;
 use Crell\Serde\Records\FlatMapNested\Item;
 use Crell\Serde\Records\FlatMapNested\NestedA;
 use Crell\Serde\Records\FlattenedNullableMain;
+use Crell\Serde\Records\FlattenedValueObjectMain;
 use Crell\Serde\Records\Flattening;
 use Crell\Serde\Records\ImplodingArrays;
 use Crell\Serde\Records\InvalidFieldType;
@@ -1296,6 +1297,28 @@ abstract class SerdeTestCases extends TestCase
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
         self::assertEquals($data, $result);
+    }
+
+    #[Test]
+    public function nullable_value_objects_flattened(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $data = new FlattenedValueObjectMain(null);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->nullable_value_objects_flattened_validate($serialized);
+
+        /** @var FlattenedNullableMain $result */
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public function nullable_value_objects_flattened_validate(mixed $serialized): void
+    {
+
     }
 
     #[Test]
