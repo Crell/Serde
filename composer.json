@@ -22,12 +22,14 @@
         "crell/fp": "~1.0"
     },
     "require-dev": {
+        "devium/toml": "^1.0",
         "phpbench/phpbench": "^1.3.0",
         "phpstan/phpstan": "^1.11",
         "phpunit/phpunit": "~10.5",
         "symfony/yaml": "^5.4"
     },
     "suggest": {
+        "devium/toml": "Enables serializing to/from TOML files.",
         "symfony/yaml": "Enables serializing to/from YAML files."
     },
     "autoload": {
