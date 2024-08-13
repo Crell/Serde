@@ -15,6 +15,11 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
     public function setUp(): void
     {
         parent::setUp();
+
+        if (version_compare(PHP_VERSION, '8.2') < 0) {
+            $this->markTestSkipped('PHP >=8.2 is required to run this test');
+        }
+
         $this->formatters = [new TomlFormatter()];
         $this->format = 'toml';
         $this->emptyData = '';
