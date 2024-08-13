@@ -16,14 +16,6 @@ class TomlFormatter implements Formatter, Deformatter, SupportsCollecting
     use ArrayBasedFormatter;
     use ArrayBasedDeformatter;
 
-    /**
-     * Constructor parameters map directly to the devium/toml component's encode() and decode() methods.
-     *
-     * @see Toml::encode()
-     * @see Toml::decode()
-     */
-    public function __construct() {}
-
     public function format(): string
     {
         return 'toml';
