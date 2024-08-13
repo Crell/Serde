@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Records\AllFieldTypes;
 use Devium\Toml\Toml;
 use Crell\Serde\Formatter\TomlFormatter;
+use Devium\Toml\TomlError;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use stdClass;
 
 class TomlFormatterTest extends ArrayBasedFormatterTestCases
 {
@@ -51,9 +56,55 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
         ]);
     }
 
+    #[Test, DataProvider('round_trip_examples')]
+    public function round_trip(object $data, string $name): void
+    {
+        if (in_array($name, [
+            'array_of_null_serializes_cleanly',
+            'arrays_with_valid_scalar_values',
+        ], true)) {
+            $this->markTestSkipped("it's normal for TOML");
+        }
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->validateSerialized($serialized, $name);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($this->clearNullKeys($data), $this->clearNullKeys($result));
+    }
+
+    protected function clearNullKeys(object $data): object
+    {
+        $obj = new stdClass();
+        foreach (array_keys(get_object_vars($data)) as $key) {
+            if ($data->{$key} !== null) {
+                $obj->{$key} = $data->{$key};
+            }
+        }
+
+        return $obj;
+    }
+
+    protected function empty_values_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertEquals('narf', $toTest['nonConstructorDefault']);
+        self::assertEquals('beep', $toTest['required']);
+        self::assertArrayNotHasKey('requiredNullable', $toTest);
+        self::assertEquals('boop', $toTest['withDefault']);
+        self::assertArrayNotHasKey('nullableUninitialized', $toTest);
+        self::assertArrayNotHasKey('uninitialized', $toTest);
+        self::assertNull($toTest['roNullable']);
+    }
+
     protected function arrayify(mixed $serialized): array
     {
-        return Toml::decode($serialized, true);
+        return (array) Toml::decode($serialized, true);
     }
 
     public static function non_strict_properties_examples(): iterable
@@ -69,6 +120,25 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
         foreach (self::strict_mode_throws_examples_data() as $k => $v) {
             $v['serialized'] = Toml::encode($v['serialized']);
             yield $k => $v;
+        }
+    }
+
+    #[Test, DataProvider('strict_mode_throws_examples')]
+    public function strict_mode_throws_correct_exception(mixed $serialized, string $errorField, string $expectedType, string $foundType): void
+    {
+        if ($expectedType === 'float' && $foundType === 'string') {
+            $this->markTestSkipped("it's normal for TOML");
+        }
+
+        $s = new SerdeCommon();
+
+        try {
+            $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
+            $this->fail('No exception was generated.');
+        } catch (TypeMismatch $e) {
+            self::assertEquals($errorField, $e->name);
+            self::assertEquals($expectedType, $e->expectedType);
+            self::assertEquals($foundType, $e->foundType);
         }
     }
 }

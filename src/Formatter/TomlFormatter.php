@@ -6,6 +6,7 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Deserializer;
 use Devium\Toml\Toml;
 use Devium\Toml\TomlError;
@@ -38,6 +39,9 @@ class TomlFormatter implements Formatter, Deformatter, SupportsCollecting
         return ['root' => []];
     }
 
+    /**
+     * @throws TomlError
+     */
     public function serializeFinalize(mixed $runningValue, ClassSettings $classDef): string
     {
         return Toml::encode($runningValue['root']);
@@ -64,5 +68,14 @@ class TomlFormatter implements Formatter, Deformatter, SupportsCollecting
     public function deserializeFinalize(mixed $decoded): void
     {
 
+    }
+
+    public function deserializeFloat(mixed $decoded, Field $field): float|DeformatterResult|null
+    {
+        if (!array_key_exists($field->serializedName, $decoded)) {
+            return DeformatterResult::Missing;
+        }
+
+        return (float)($decoded[$field->serializedName]);
     }
 }
