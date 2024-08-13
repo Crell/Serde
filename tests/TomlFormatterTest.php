@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-use Crell\Serde\Records\AllFieldTypes;
 use Devium\Toml\Toml;
 use Crell\Serde\Formatter\TomlFormatter;
-use Devium\Toml\TomlError;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use stdClass;
@@ -54,6 +52,16 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
             'strict' => ['A', 'B'],
             'nonstrict' => ['a' => 'A', 'b' => 'B'],
         ]);
+    }
+
+    #[Test, DataProvider('strict_mode_throws_examples')]
+    public function strict_mode_throws_correct_exception(mixed $serialized, string $errorField, string $expectedType, string $foundType): void
+    {
+        if ($expectedType === 'float' && $foundType === 'string') {
+            $this->markTestSkipped("it's normal for TOML");
+        }
+
+        parent::strict_mode_throws_correct_exception($serialized, $errorField, $expectedType, $foundType);
     }
 
     #[Test, DataProvider('round_trip_examples')]
@@ -120,25 +128,6 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
         foreach (self::strict_mode_throws_examples_data() as $k => $v) {
             $v['serialized'] = Toml::encode($v['serialized']);
             yield $k => $v;
-        }
-    }
-
-    #[Test, DataProvider('strict_mode_throws_examples')]
-    public function strict_mode_throws_correct_exception(mixed $serialized, string $errorField, string $expectedType, string $foundType): void
-    {
-        if ($expectedType === 'float' && $foundType === 'string') {
-            $this->markTestSkipped("it's normal for TOML");
-        }
-
-        $s = new SerdeCommon();
-
-        try {
-            $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
-            $this->fail('No exception was generated.');
-        } catch (TypeMismatch $e) {
-            self::assertEquals($errorField, $e->name);
-            self::assertEquals($expectedType, $e->expectedType);
-            self::assertEquals($foundType, $e->foundType);
         }
     }
 }
