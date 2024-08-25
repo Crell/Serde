@@ -108,7 +108,7 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
         self::assertEquals('boop', $toTest['withDefault']);
         self::assertArrayNotHasKey('nullableUninitialized', $toTest);
         self::assertArrayNotHasKey('uninitialized', $toTest);
-        self::assertNull($toTest['roNullable']);
+        self::assertArrayNotHasKey('roNullable', $toTest);
     }
 
     protected function arrayify(mixed $serialized): array

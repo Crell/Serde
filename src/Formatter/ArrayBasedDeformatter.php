@@ -150,7 +150,7 @@ trait ArrayBasedDeformatter
             if ($class->assert($data)) {
                 return $data;
             } else {
-                throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[0] . ')'));
+                throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[0]) . ')');
             }
         }
         else if (class_exists($class) || interface_exists($class)) {
