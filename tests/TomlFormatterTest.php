@@ -113,7 +113,7 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
 
     protected function arrayify(mixed $serialized): array
     {
-        return (array) Toml::decode($serialized, true);
+        return (array) Toml::decode($serialized, true, true);
     }
 
     public static function non_strict_properties_examples(): iterable

@@ -54,7 +54,7 @@ class TomlFormatter implements Formatter, Deformatter, SupportsCollecting
         Deserializer $deserializer
     ): array
     {
-        return ['root' => Toml::decode($serialized ?: '', true)];
+        return ['root' => Toml::decode($serialized ?: '', true, true)];
     }
 
     public function deserializeFinalize(mixed $decoded): void
