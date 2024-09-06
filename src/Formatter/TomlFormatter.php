@@ -50,12 +50,24 @@ class TomlFormatter implements Formatter, Deformatter, SupportsCollecting
         return Toml::encode($runningValue['root']);
     }
 
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param Sequence $next
+     * @return array<string, mixed>
+     */
     public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): array
     {
         $next->items = array_filter(collect($next->items), static fn(CollectionItem $i) => !is_null($i->value));
         return $this->serializeArraySequence($runningValue, $field, $next, $serializer);
     }
 
+    /**
+     * @param array<string, mixed> $runningValue
+     * @param Field $field
+     * @param Dict $next
+     * @return array<string, mixed>
+     */
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): array
     {
         $next->items = array_filter(collect($next->items), static fn(CollectionItem $i) => !is_null($i->value));
