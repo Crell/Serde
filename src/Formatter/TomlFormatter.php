@@ -6,15 +6,26 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
+use Crell\Serde\CollectionItem;
 use Crell\Serde\DeformatterResult;
 use Crell\Serde\Deserializer;
+use Crell\Serde\Dict;
+use Crell\Serde\Sequence;
+use Crell\Serde\Serializer;
 use Devium\Toml\Toml;
 use Devium\Toml\TomlError;
 
+use function Crell\fp\collect;
+
 class TomlFormatter implements Formatter, Deformatter, SupportsCollecting
 {
-    use ArrayBasedFormatter;
-    use ArrayBasedDeformatter;
+    use ArrayBasedFormatter {
+        ArrayBasedFormatter::serializeSequence as serializeArraySequence;
+        ArrayBasedFormatter::serializeDictionary as serializeArrayDictionary;
+    }
+    use ArrayBasedDeformatter {
+        ArrayBasedDeformatter::deserializeFloat as deserializeArrayFloat;
+    }
 
     public function format(): string
     {
@@ -39,6 +50,18 @@ class TomlFormatter implements Formatter, Deformatter, SupportsCollecting
         return Toml::encode($runningValue['root']);
     }
 
+    public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): array
+    {
+        $next->items = array_filter(collect($next->items), static fn(CollectionItem $i) => !is_null($i->value));
+        return $this->serializeArraySequence($runningValue, $field, $next, $serializer);
+    }
+
+    public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): array
+    {
+        $next->items = array_filter(collect($next->items), static fn(CollectionItem $i) => !is_null($i->value));
+        return $this->serializeArrayDictionary($runningValue, $field, $next, $serializer);
+    }
+
     /**
      * @param mixed $serialized
      * @param ClassSettings $classDef
@@ -57,17 +80,19 @@ class TomlFormatter implements Formatter, Deformatter, SupportsCollecting
         return ['root' => Toml::decode($serialized ?: '', true, true)];
     }
 
+    /**
+     * TOML in particular frequently uses strings to represent floats, so in that case, cast it like weak mode, always.
+     */
+    public function deserializeFloat(mixed $decoded, Field $field): float|DeformatterResult|null
+    {
+        if ($field->phpType === 'float' && is_string($decoded[$field->serializedName]) && is_numeric($decoded[$field->serializedName])) {
+            $decoded[$field->serializedName] = (float)$decoded[$field->serializedName];
+        }
+        return $this->deserializeArrayFloat($decoded, $field);
+    }
+
     public function deserializeFinalize(mixed $decoded): void
     {
 
-    }
-
-    public function deserializeFloat(mixed $decoded, Field $field): float|DeformatterResult|null
-    {
-        if (!array_key_exists($field->serializedName, $decoded)) {
-            return DeformatterResult::Missing;
-        }
-
-        return (float)($decoded[$field->serializedName]);
     }
 }
