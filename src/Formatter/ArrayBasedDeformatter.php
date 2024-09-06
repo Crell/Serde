@@ -144,6 +144,9 @@ trait ArrayBasedDeformatter
         // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
         if ($class instanceof ValueType) {
+            if (!$field->strict) {
+                $data = $class->coerce($data);
+            }
             if ($class->assert($data)) {
                 return $data;
             } else {
@@ -179,6 +182,9 @@ trait ArrayBasedDeformatter
         // @phpstan-ignore-next-line
         $class = $field?->typeField?->arrayType ?? '';
         if ($class instanceof ValueType) {
+            if (!$field->strict) {
+                $data = $class->coerce($data);
+            }
             if ($class->assert($data)) {
                 return $data;
             } else {

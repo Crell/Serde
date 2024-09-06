@@ -286,6 +286,8 @@ This key only applies on deserialization.  If set to `true`, a type mismatch in 
 
 For sequence fields, `strict` set to `true` will reject a non-sequence value.  (It must pass an `array_is_list()` check.)  If `strict` is `false`, any array-ish value will be accepted but passed through `array_values()` to discard any keys and reindex it.
 
+Additionally, in non-`strict` mode, numeric strings in the incoming array will be cast to ints or floats as appropriate in both sequence fields and dictionary fields.  In `strict` mode, numeric strings will still be rejected.
+
 The exact handling of this setting may vary slightly depending on the incoming format, as some formats handle their own types differently.  (For instance, everything is a string in XML.)
 
 ### `requireValue` (bool, default false)

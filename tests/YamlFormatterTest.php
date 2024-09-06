@@ -49,6 +49,11 @@ class YamlFormatterTest extends ArrayBasedFormatterTestCases
             'strict' => ['A', 'B'],
             'nonstrict' => ['a' => 'A', 'b' => 'B'],
         ]);
+
+        $this->weakModeLists = YAML::dump([
+            'seq' => [1, '2', 3],
+            'dict' => ['a' => 1, 'b' => '2'],
+        ]);
     }
 
     protected function arrayify(mixed $serialized): array
