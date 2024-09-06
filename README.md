@@ -6,7 +6,7 @@
 
 Serde (pronounced "seer-dee") is a fast, flexible, powerful, and easy to use serialization and deserialization library for PHP that supports a number of standard formats.  It draws inspiration from both Rust's Serde crate and Symfony Serializer, although it is not directly based on either.
 
-At this time, Serde supports serializing PHP objects to and from PHP arrays, JSON, YAML, and CSV files.  It also supports serializing to JSON or CSV via a stream.  Further support is planned, but by design can also be extended by anyone.
+At this time, Serde supports serializing PHP objects to and from PHP arrays, JSON, YAML, TOML, and CSV files.  It also supports serializing to JSON or CSV via a stream.  Further support is planned, but by design can also be extended by anyone.
 
 ## Install
 
@@ -47,6 +47,7 @@ Serde can serialize to:
 * JSON (`json`)
 * Streaming JSON (`json-stream`)
 * YAML (`yaml`)
+* TOML (`toml`)
 * CSV (`csv`)
 * Streaming CSV (`csv-stream`)
 
@@ -55,9 +56,14 @@ Serde can deserialize from:
 * PHP arrays (`array`)
 * JSON (`json`)
 * YAML (`yaml`)
+* TOML (`toml`)
 * CSV (`csv`)
 
-(YAML support requires the [`Symfony/Yaml`](https://github.com/symfony/yaml) library.)  XML support is in progress.
+YAML support requires the [`Symfony/Yaml`](https://github.com/symfony/yaml) library.
+
+TOML support requires the [`Vanodevium/Toml`](https://github.com/vanodevium/toml) library.
+
+XML support is in progress.
 
 ### Robust object support
 
