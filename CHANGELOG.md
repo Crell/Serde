@@ -7,6 +7,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## 1.3.0 - DATE
 
 ### Added
+- TOML support!  Provided by the [`vanodevium/toml`](https://github.com/vanodevium/toml) library (sold separately).  As with YAML, just require that library and Serde will pick it up and use it.  Slava Ukraine!
 - Null values may now be excluded when serializing. See the `omitNullFields` and `omitIfNull` flags in the README.
 - We now require AttributeUtils 1.2, which lets us use closures rather than method name strings for subAttribute callbacks. (Internal improvement.)
 - When `strict` is false on a sequence or dictionary, numeric strings will get cast to an int or float as appropriate.  Previously the list values were processed in strict mode regardless of what the field was set to.
