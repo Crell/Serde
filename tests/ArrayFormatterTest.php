@@ -53,6 +53,11 @@ class ArrayFormatterTest extends ArrayBasedFormatterTestCases
             'strict' => ['A', 'B'],
             'nonstrict' => ['a' => 'A', 'b' => 'B'],
         ];
+
+        $this->weakModeLists = [
+            'seq' => [1, '2', 3],
+            'dict' => ['a' => 1, 'b' => '2'],
+        ];
     }
 
     protected function arrayify(mixed $serialized): array

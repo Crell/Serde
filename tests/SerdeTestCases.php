@@ -99,6 +99,7 @@ use Crell\Serde\Records\ValueObjects\JobEntryFlattened;
 use Crell\Serde\Records\ValueObjects\JobEntryFlattenedPrefixed;
 use Crell\Serde\Records\ValueObjects\Person;
 use Crell\Serde\Records\Visibility;
+use Crell\Serde\Records\WeakLists;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -158,6 +159,13 @@ abstract class SerdeTestCases extends TestCase
      * @see non_sequence_arrays_in_strict_mode_throw()
      */
     protected mixed $dictsInSequenceShouldFail;
+
+    /**
+     * Data to deserialize that contains numeric-string lists, which should still coerce into an integer list safely.
+     *
+     * @see lists_in_weak_mode_coerce_elements())
+     */
+    protected mixed $weakModeLists;
 
     /**
      * Data to deserialize that should pass, because the strict is valid and non-strict gets coerced to a list.
@@ -1281,7 +1289,7 @@ abstract class SerdeTestCases extends TestCase
         self::assertEquals($data, $result);
     }
 
-    #[Test]
+    #[Test, Group('flattening')]
     public function nullable_properties_flattened(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -1296,6 +1304,22 @@ abstract class SerdeTestCases extends TestCase
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
         self::assertEquals($data, $result);
+    }
+
+    #[Test]
+    public function lists_in_weak_mode_coerce_elements(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        /** @var WeakLists $result */
+        $result = $s->deserialize($this->weakModeLists, $this->format, WeakLists::class);
+
+        self::assertIsArray($result->seq);
+        self::assertIsArray($result->dict);
+
+        foreach ([...$result->seq, ...$result->dict] as $val) {
+            self::assertIsInt($val);
+        }
     }
 
     #[Test]
