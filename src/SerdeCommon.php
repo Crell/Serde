@@ -11,6 +11,7 @@ use Crell\Serde\Formatter\ArrayFormatter;
 use Crell\Serde\Formatter\Deformatter;
 use Crell\Serde\Formatter\Formatter;
 use Crell\Serde\Formatter\JsonFormatter;
+use Crell\Serde\Formatter\TomlFormatter;
 use Crell\Serde\Formatter\YamlFormatter;
 use Crell\Serde\PropertyHandler\DateTimeExporter;
 use Crell\Serde\PropertyHandler\DateTimeZoneExporter;
@@ -26,6 +27,7 @@ use Crell\Serde\PropertyHandler\ObjectImporter;
 use Crell\Serde\PropertyHandler\ScalarExporter;
 use Crell\Serde\PropertyHandler\SequenceExporter;
 use Crell\Serde\PropertyHandler\UnixTimeExporter;
+use Devium\Toml\Toml;
 use Symfony\Component\Yaml\Yaml;
 use function Crell\fp\afilter;
 use function Crell\fp\indexBy;
@@ -93,6 +95,9 @@ class SerdeCommon extends Serde
         $formatters[] = new ArrayFormatter();
         if (class_exists(Yaml::class)) {
             $formatters[] = new YamlFormatter();
+        }
+        if (class_exists(Toml::class)) {
+            $formatters[] = new TomlFormatter();
         }
 
         // These lines by definition filter the array to the correct type, but

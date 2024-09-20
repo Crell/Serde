@@ -20,7 +20,7 @@ use Crell\Serde\TypeCategory;
  *
  * This class makes a good-faith attempt to detect the type of a given field by its value.
  * It currently does not work for objects, and on import it works only on array-based
- * formats (JSON, YAML, etc.)
+ * formats (JSON, YAML, TOML, etc.)
  */
 class MixedExporter implements Importer, Exporter
 {
@@ -55,6 +55,6 @@ class MixedExporter implements Importer, Exporter
         // We can only import if we know that the $source will be an array so that it
         // can be introspected.  If it's not, then this class has no way to tell what
         // type to tell the Deformatter to read.
-        return $field->typeCategory === TypeCategory::Mixed && in_array($format, ['json', 'yaml', 'array']);
+        return $field->typeCategory === TypeCategory::Mixed && in_array($format, ['json', 'yaml', 'array', 'toml']);
     }
 }
