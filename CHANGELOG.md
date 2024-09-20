@@ -4,7 +4,7 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## 1.3.0 - DATE
+## 1.3.0 - 2024-09-19
 
 ### Added
 - TOML support!  Provided by the [`vanodevium/toml`](https://github.com/vanodevium/toml) library (sold separately).  As with YAML, just require that library and Serde will pick it up and use it.  Slava Ukraine!
