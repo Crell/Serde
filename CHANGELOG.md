@@ -4,6 +4,23 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## 1.3.1 - 2024-09-25
+
+### Added
+- Nothing
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Fixed two implicit nullable arguments for full PHP 8.4 compatibility.
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.3.0 - 2024-09-19
 
 ### Added
