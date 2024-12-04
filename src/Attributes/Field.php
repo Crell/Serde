@@ -240,7 +240,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
         $param = $params[$declaringClass->getName()][$subject->getName()] ?? null;
 
-        return $param?->isDefaultValueAvailable()
+        return $param?->isDefaultValueAvailable() && $param->isPromoted()
             ? $param->getDefaultValue()
             : PropValue::None;
     }
