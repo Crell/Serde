@@ -5,7 +5,6 @@
 # Run "docker-compose down -v" to fully wipe everything and start over.
 # Run "docker-compose run -u $(id -u ${USER}):$(id -g ${USER}) --rm php80 bash" to log into the container to run tests selectively.
 
-version: "3"
 services:
     php81:
         build: ./docker/php/81

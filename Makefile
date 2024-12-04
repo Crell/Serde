@@ -12,13 +12,13 @@ ifeq ($(origin .RECIPEPREFIX), undefined)
 endif
 .RECIPEPREFIX = >
 
-compose_command = docker-compose run -u $(id -u ${USER}):$(id -g ${USER}) --rm php81
+compose_command = docker compose run -u $(id -u ${USER}):$(id -g ${USER}) --rm php81
 
 build: tmp/.docker-built
 
 tmp/.docker-built: docker-compose.yml docker/php/81/Dockerfile
 > mkdir -p $(@D)	# Makes the tmp directory
-> docker-compose build
+> docker compose build
 > touch $@			# Touches the file that is this target.
 
 shell: build
@@ -26,7 +26,7 @@ shell: build
 .PHONY: shell
 
 destroy:
-> docker-compose down -v
+> docker compose down -v
 > rm -rf tmp
 .PHONY: destroy
 
