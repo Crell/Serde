@@ -57,6 +57,7 @@ use Crell\Serde\Records\MultipleScopesDefaultTrue;
 use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
+use Crell\Serde\Records\NonPromotedDefault;
 use Crell\Serde\Records\NullArrays;
 use Crell\Serde\Records\NullProps;
 use Crell\Serde\Records\OptionalPoint;
@@ -449,6 +450,18 @@ abstract class SerdeTestCases extends TestCase
         $result = $s->deserialize($serialized, from: $this->format, to: AllFieldTypes::class);
 
         self::assertEquals(new AllFieldTypes(), $result);
+    }
+
+    #[Test]
+    public function matching_constructor_param_only_uses_default_if_promoted(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $this->emptyData;
+
+        $result = $s->deserialize($serialized, from: $this->format, to: NonPromotedDefault::class);
+
+        self::assertEquals('not set', $result->value ?? 'not set');
     }
 
     #[Test, Group('typemap')]
