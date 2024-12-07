@@ -7,3 +7,6 @@ RUN apt-get update \
         php8.4-xdebug \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+
+# Composer complains without this setting.
+RUN git config --global --add safe.directory /app
