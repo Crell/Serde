@@ -1,0 +1,41 @@
+#!/bin/bash
+
+set -euo pipefail
+
+project="serde"
+appContainer="php-fpm"
+
+function build {
+    docker compose build
+}
+
+function start {
+    docker compose up -d
+}
+
+function stop {
+    docker compose down
+}
+
+function restart {
+  stop
+  start
+}
+
+function shell {
+  start
+  docker exec -it $(docker ps -q --filter="NAME=${project}-${appContainer}") bash
+}
+
+function default {
+    start
+}
+
+function help {
+    echo "$0 <task> <args>"
+    echo "Tasks:"
+    compgen -A function | cat -n
+}
+
+TIMEFORMAT="Task completed in %3lR"
+time ${@:-default}
