@@ -1,0 +1,236 @@
+<html>
+<head>
+    <title>PHPDocker.io Readme</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+
+    <style>
+        * {
+            line-height: 1.8em;
+        }
+
+        code {
+            font-size: 1.2em;
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            color: #111;
+            font-family: monospace;
+            padding: 3px;
+        }
+
+        pre code {
+            border-left: 3px solid #f36d33;
+            page-break-inside: avoid;
+            margin-bottom: 1.6em;
+            max-width: 100%;
+            overflow: auto;
+            padding: 1em 1.5em;
+            display: block;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+<div class="pure-g">
+    <div class="pure-u-1-24"></div>
+    <div class="pure-u-22-24">
+        <h1>PHPDocker.io generated environment</h1>
+
+<h1>Add to your project</h1>
+
+<p>Simply, unzip the file into your project, this will create <code>docker-compose.yml</code> on the root of your project and a folder
+named <code>phpdocker</code> containing nginx and php-fpm config for it.</p>
+
+<p>Ensure the webserver config on <code>phpdocker/nginx/nginx.conf</code> is correct for your project. PHPDocker.io will have
+customised this file according to the front controller location relative to the docker-compose file you chose on the
+generator (by default <code>public/index.php</code>).</p>
+
+<p>Note: you may place the files elsewhere in your project. Make sure you modify the locations for the php-fpm dockerfile,
+the php.ini overrides and nginx config on <code>docker-compose.yml</code> if you do so.</p>
+
+<h1>How to run</h1>
+
+<p>Dependencies:</p>
+
+<ul>
+<li>docker. See <a href="https://docs.docker.com/engine/installation">https://docs.docker.com/engine/installation</a></li>
+<li>docker-compose. See <a href="https://docs.docker.com/compose/install/">docs.docker.com/compose/install</a></li>
+</ul>
+
+<p>Once you're done, simply <code>cd</code> to your project and run <code>docker-compose up -d</code>. This will initialise and start all the
+containers, then leave them running in the background.</p>
+
+<h2>Services exposed outside your environment</h2>
+
+<p>You can access your application via <strong><code>localhost</code></strong>. Mailhog and nginx both respond to any hostname, in case you want to
+add your own hostname on your <code>/etc/hosts</code></p>
+
+<table>
+<thead>
+<tr>
+  <th>Service</th>
+  <th>Address outside containers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Webserver</td>
+  <td><a href="http://localhost:24000">localhost:24000</a></td>
+</tr>
+</tbody>
+</table>
+
+<h2>Hosts within your environment</h2>
+
+<p>You'll need to configure your application to use any services you enabled:</p>
+
+<table>
+<thead>
+<tr>
+  <th>Service</th>
+  <th>Hostname</th>
+  <th>Port number</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>php-fpm</td>
+  <td>php-fpm</td>
+  <td>9000</td>
+</tr>
+</tbody>
+</table>
+
+<h1>Docker compose cheatsheet</h1>
+
+<p><strong>Note:</strong> you need to cd first to where your docker-compose.yml file lives.</p>
+
+<ul>
+<li>Start containers in the background: <code>docker-compose up -d</code></li>
+<li>Start containers on the foreground: <code>docker-compose up</code>. You will see a stream of logs for every container running.
+ctrl+c stops containers.</li>
+<li>Stop containers: <code>docker-compose stop</code></li>
+<li>Kill containers: <code>docker-compose kill</code></li>
+<li>View container logs: <code>docker-compose logs</code> for all containers or <code>docker-compose logs SERVICE_NAME</code> for the logs of
+all containers in <code>SERVICE_NAME</code>.</li>
+<li>Execute command inside of container: <code>docker-compose exec SERVICE_NAME COMMAND</code> where <code>COMMAND</code> is whatever you want
+to run. Examples:
+
+<ul>
+<li>Shell into the PHP container, <code>docker-compose exec php-fpm bash</code></li>
+<li>Run symfony console, <code>docker-compose exec php-fpm bin/console</code></li>
+<li>Open a mysql shell, <code>docker-compose exec mysql mysql -uroot -pCHOSEN_ROOT_PASSWORD</code></li>
+</ul></li>
+</ul>
+
+<h1>Application file permissions</h1>
+
+<p>As in all server environments, your application needs the correct file permissions to work properly. You can change the
+files throughout the container, so you won't care if the user exists or has the same ID on your host.</p>
+
+<p><code>docker-compose exec php-fpm chown -R www-data:www-data /app/public</code></p>
+
+<h1>Recommendations</h1>
+
+<p>It's hard to avoid file permission issues when fiddling about with containers due to the fact that, from your OS point
+of view, any files created within the container are owned by the process that runs the docker engine (this is usually
+root). Different OS will also have different problems, for instance you can run stuff in containers
+using <code>docker exec -it -u $(id -u):$(id -g) CONTAINER_NAME COMMAND</code> to force your current user ID into the process, but
+this will only work if your host OS is Linux, not mac. Follow a couple of simple rules and save yourself a world of
+hurt.</p>
+
+<ul>
+<li>Run composer outside of the php container, as doing so would install all your dependencies owned by <code>root</code> within your
+vendor folder.</li>
+<li>Run commands (ie Symfony's console, or Laravel's artisan) straight inside of your container. You can easily open a
+shell as described above and do your thing from there.</li>
+</ul>
+
+<h1>Simple basic Xdebug configuration with integration to PHPStorm</h1>
+
+<h2>Xdebug 2</h2>
+
+<p>To configure <strong>Xdebug 2</strong> you need add these lines in php-fpm/php-ini-overrides.ini:</p>
+
+<h3>For linux:</h3>
+
+<pre><code>xdebug.remote_enable = 1
+xdebug.remote_connect_back = 1
+xdebug.remote_autostart = 1
+</code></pre>
+
+<h3>For macOS and Windows:</h3>
+
+<pre><code>xdebug.remote_enable = 1
+xdebug.remote_host = host.docker.internal
+xdebug.remote_autostart = 1
+</code></pre>
+
+<h2>Xdebug 3</h2>
+
+<p>To configure <strong>Xdebug 3</strong> you need add these lines in php-fpm/php-ini-overrides.ini:</p>
+
+<h3>For linux:</h3>
+
+<pre><code>xdebug.mode=debug
+xdebug.discover_client_host=true
+xdebug.start_with_request=yes
+xdebug.client_port=9000
+</code></pre>
+
+<h3>For macOS and Windows:</h3>
+
+<pre><code>xdebug.mode = debug
+xdebug.client_host = host.docker.internal
+xdebug.start_with_request = yes
+</code></pre>
+
+<h2>Add the section “environment” to the php-fpm service in docker-compose.yml:</h2>
+
+<pre><code>environment:
+  PHP_IDE_CONFIG: "serverName=Docker"
+</code></pre>
+
+<h3>Create a server configuration in PHPStorm:</h3>
+
+<ul>
+<li>In PHPStorm open Preferences | Languages &amp; Frameworks | PHP | Servers</li>
+<li>Add new server</li>
+<li>The “Name” field should be the same as the parameter “serverName” value in “environment” in docker-compose.yml (i.e. *
+Docker* in the example above)</li>
+<li>A value of the "port" field should be the same as first port(before a colon) in "webserver" service in
+docker-compose.yml</li>
+<li>Select "Use path mappings" and set mappings between a path to your project on a host system and the Docker container.</li>
+<li>Finally, add “Xdebug helper” extension in your browser, set breakpoints and start debugging</li>
+</ul>
+
+<h3>Create a launch.json for visual studio code</h3>
+
+<pre><code>  {
+      "version": "0.2.0",
+      "configurations": [
+          {
+              "name": "Docker",
+              "type": "php",
+              "request": "launch",
+              "port": 9000,
+              // Server Remote Path -&gt; Local Project Path
+              "pathMappings": {
+                  "/application/public": "${workspaceRoot}/"
+              },
+          }
+      ]
+  }
+</code></pre>
+    </div>
+    <div class="pure-u-1-24"></div>
+</div>
+
+<script>
+  var tables = document.getElementsByTagName('table')
+  for (var i = 0; i < tables.length; i++) {
+    tables[i].className = 'pure-table'
+  }
+</script>
+</body>
+</html>
