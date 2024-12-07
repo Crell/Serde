@@ -4,6 +4,24 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## 1.3.2 - 2024-12-06
+
+### Added
+- Nothing
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Default values will now only be extracted from a constructor parameter if it's promoted.
+- Switched to PHPDocker.io-based containers for development.  (No impact on users.)
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.3.1 - 2024-09-25
 
 ### Added
