@@ -35,6 +35,8 @@ use Crell\Serde\Records\ExcludeNullFields;
 use Crell\Serde\Records\ExcludeNullFieldsClass;
 use Crell\Serde\Records\Exclusions;
 use Crell\Serde\Records\ExplicitDefaults;
+use Crell\Serde\Records\FlatCollection\FlatThing;
+use Crell\Serde\Records\FlatCollection\FlatThingList;
 use Crell\Serde\Records\FlatMapNested\HostObject;
 use Crell\Serde\Records\FlatMapNested\Item;
 use Crell\Serde\Records\FlatMapNested\NestedA;
@@ -362,6 +364,14 @@ abstract class SerdeTestCases extends TestCase
      */
     public static function round_trip_flattening_examples(): iterable
     {
+        yield [
+            'data' => new FlatThingList(
+                new FlatThing(1,1),
+                new FlatThing(1,2),
+                new FlatThing(2,1),
+            ),
+            'name' => 'flat_thing_list',
+        ];
         yield [
             'data' => new Flattening(
                 first: 'Larry',
