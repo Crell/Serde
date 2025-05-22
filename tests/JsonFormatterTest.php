@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+use Crell\Serde\Formatter\CsvFormatter;
 use Crell\Serde\Formatter\JsonFormatter;
+use Crell\Serde\Records\Point;
+use Crell\Serde\Records\PointList;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 class JsonFormatterTest extends ArrayBasedFormatterTestCases
 {
@@ -85,5 +90,18 @@ class JsonFormatterTest extends ArrayBasedFormatterTestCases
             $v['serialized'] = json_encode($v['serialized'], JSON_THROW_ON_ERROR);
             yield $k => $v;
         }
+    }
+
+    #[Test]
+    public function json_deserialize_list(): void
+    {
+        $points = '[{"x":1,"y":2,"z":3},{"x":4,"y":5,"z":6},{"x":7,"y":8,"z":9}]';
+
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $deserialized = $s->deserialize($points, from: 'json', to: PointList::class);
+
+        self::assertInstanceOf(PointList::class, $deserialized);
+        self::assertCount(3, $deserialized->points);
     }
 }
