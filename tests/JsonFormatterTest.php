@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-use Crell\Serde\Formatter\CsvFormatter;
 use Crell\Serde\Formatter\JsonFormatter;
-use Crell\Serde\Records\Point;
 use Crell\Serde\Records\PointList;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 
 class JsonFormatterTest extends ArrayBasedFormatterTestCases
