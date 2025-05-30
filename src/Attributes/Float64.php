@@ -21,7 +21,7 @@ class Float64 implements TypeField, SupportsScopes
 
     public function acceptsType(string $type): bool
     {
-        return $type === 'float' || $type === 'string';
+        return $type === 'float';
     }
 
     public function validate(mixed $value): bool
