@@ -21,7 +21,7 @@ class SFixed64 implements TypeField, SupportsScopes
 
     public function acceptsType(string $type): bool
     {
-        return $type === 'int';
+        return $type === 'int' || $type === 'string';
     }
 
     public function validate(mixed $value): bool
