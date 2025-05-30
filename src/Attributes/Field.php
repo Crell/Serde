@@ -151,6 +151,8 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      *   the specified scopes.  To also be included in the default "unscoped" case,
      *   include an array element of `null`, or include a non-scoped copy of the
      *   Field.
+     * @param int|null $fieldNum
+     *    Some formatters (such as protobuf) allow specifying the serialized order of data.
      */
     public function __construct(
         ?string $serializedName = null,
@@ -165,6 +167,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         ?bool $requireValue = null,
         ?bool $omitIfNull = null,
         protected readonly array $scopes = [null],
+        public readonly int|null $fieldNum = null,
     ) {
         if ($default !== PropValue::None) {
             $this->defaultValue = $default;
