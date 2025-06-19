@@ -4,7 +4,7 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## 1.4.0 - DATE
+## 1.4.0 - 2025-06-19
 
 ### Added
 - Deserializing to a flattened array property now respects the array type specified by a `SequenceField` or `DictionaryField`.  That means it is now possible to serialize to/from an array structure, into an object with a single array property.
