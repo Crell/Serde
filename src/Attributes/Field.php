@@ -371,6 +371,9 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
         if ($this->phpType === $valueType) {
             $valid = true;
+        } elseif ($this->phpType === 'mixed') {
+            // From a type perspective, mixed accepts anything.
+            $valid = true;
         } elseif ($this->nullable && $valueType === 'null') {
             $valid = true;
         } elseif (is_object($value) || class_exists($this->phpType) || interface_exists($this->phpType)) {

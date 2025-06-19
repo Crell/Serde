@@ -696,6 +696,27 @@ The serialized integer should be read as "this many seconds since the epoc" or "
 
 Note that the permissible range of milliseconds and microseconds is considerably smaller than that for seconds, since there is a limit on the size of an integer that we can represent.  For timestamps in the early 21st century there should be no issue, but trying to record the microseconds since the epoc for the setting of Dune (somewhere in the 10,000s) won't work.
 
+### Mixed values
+
+`mixed` values pose an interesting challenge, as their data type is by definition not specified.
+
+On serialization, Serde will make a good faith effort to derive the type to serialize to from the value itself.  So if a `mixed` property has a value of `"beep"`, it will try to serialize as a string.  If it has a value `[1, 2, 3]`, it will try to serialize as an array.
+
+On deserialization, primitive types (`int`, `float`, `string`) will be read successfully and written to the property.  If no additional information is provided, then sequences and dictionaries will also be read into the property as an `array`, but objects are not supported.  (They'll be treated like a dictionary.)
+
+Alternatively, you may specify the field as a `#[MixedField(Point::class)]`, which has one required argument, `suggestedType`.  If that is specified, any incoming array-ish value will be deserialized to the specified class.  If the value is not compatible with that class, an exception will be thrown.  That means it is not possible to support both array deserialization and object deserialization at the same time.
+
+```php
+class Message
+{
+    public string $message;
+    #[MixedField(SomeClass::class)]
+    public mixed $result;
+}
+```
+
+If you are only ever serializing an object with a `mixed` property, these concerns should not apply and no additional effort should be required.
+
 ### Generators, Iterables, and Traversables
 
 PHP has a number of "lazy list" options.  Generally, they are all objects that implement the `\Traversable` interface.  However, there are several syntax options available with their own subtleties.  Serde supports them in different ways.
