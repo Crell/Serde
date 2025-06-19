@@ -519,11 +519,47 @@ In this case, serializing `JobEntry` will first flatten the `$description` prope
 ```json
 {
     "desc_min_age": 18,
-    "desc_max_age": 65,
+    "desc_max_age": 65
 }
 ```
 
 And it will deserialize back to the same original 3-layer-object structure.
+
+#### List objects
+
+It is common in some conventions to have not an object, but an array (sequence) get sent on the wire.  This is especially true for JSON APIs, that may send a payload like this:
+
+```json
+[
+    {"x":  1, "y":  2},
+    {"x":  3, "y":  4},
+    {"x":  5, "y":  6}
+]
+```
+
+Flattening provides a way to support those structures by reading them into an object property.
+
+For example, we could model the above JSON like this:
+
+```php
+class Point
+{
+    public function(public int $x, public int $y) {}
+}
+
+class PointList
+{
+    public function __construct(
+        #[Field(flatten: true)]
+        #[SequenceField(arrayType: Point::class)]
+        public array $points,
+    ) {}
+}
+```
+
+On serialization, that will flatten the array of points to the level of the `PointList` object itself, producing the JSON shown above.
+
+On deserialization, Serde will "collect" any otherwise undefined properties up into `$points`, as it is an array marked `flatten`.  Serde will also detect that there is a `SequenceField` or `DictionaryField` defined, and deserialize each entry in the incoming array as that object.  That provides a full round-trip between a JSON array-of-objects and a PHP object-with-array-property.
 
 ### `flattenPrefix` (string, default '')
 

@@ -7,6 +7,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## 1.4.0 - DATE
 
 ### Added
+- Deserializing to a flattened array property now respects the array type specified by a `SequenceField` or `DictionaryField`.  That means it is now possible to serialize to/from an array structure, into an object with a single array property.
 - A new `MixedField` type field is available for use on `mixed` properties. If specified, it allows specifying a preferred object type that an array-ish value will be cast into when deserializing.  If the object deserialization fails, the whole deserialization will fail.
 
 ### Deprecated
