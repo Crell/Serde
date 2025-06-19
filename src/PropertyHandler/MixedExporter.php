@@ -26,7 +26,9 @@ class MixedExporter implements Importer, Exporter
 {
     public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        return $serializer->serialize($value, $runningValue, Field::create(
+        // We need to bypass the circular reference check in Serializer::serialize(),
+        // or else an object would always fail here.
+        return $serializer->doSerialize($value, $runningValue, Field::create(
             serializedName: $field->serializedName,
             phpType: \get_debug_type($value),
         ));

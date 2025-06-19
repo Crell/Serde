@@ -1060,6 +1060,7 @@ abstract class SerdeTestCases extends TestCase
         yield 'float' => [new MixedVal(3.14)];
         yield 'sequence' => [new MixedVal(['a', 'b', 'c'])];
         yield 'dict' => [new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C'])];
+        yield 'object' => [new MixedVal(new Point(1, 2, 3))];
     }
 
     public function mixed_val_property_validate(mixed $serialized, mixed $data): void

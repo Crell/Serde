@@ -44,14 +44,28 @@ class Serializer
             $this->seenObjects[] = $value;
         }
 
-        $reader = $this->findExporter($field, $value);
-        $result = $reader->exportValue($this, $field, $value, $runningValue);
+        $result = $this->doSerialize($value, $runningValue, $field);
 
         if (is_object($value)) {
             array_pop($this->seenObjects);
         }
 
         return $result;
+    }
+
+    /**
+     * @internal
+     *
+     * There's one case where we need the circular detection disabled, and that's when
+     * dealing with mixed fields.  A mixed field throws its value back through the serializer,
+     * which is normally fine but would trigger the circular reference checks in serialize().
+     * Instead, we split it out to a separate method that no one should use except MixedExporter.
+     * That means if you're reading this, you should walk away now because you're not supposed
+     * to use this method.
+     */
+    public function doSerialize(mixed $value, mixed $runningValue, Field $field): mixed
+    {
+        return $this->findExporter($field, $value)->exportValue($this, $field, $value, $runningValue);
     }
 
     protected function findExporter(Field $field, mixed $value): Exporter
