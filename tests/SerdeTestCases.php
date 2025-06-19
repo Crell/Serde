@@ -37,6 +37,7 @@ use Crell\Serde\Records\Exclusions;
 use Crell\Serde\Records\ExplicitDefaults;
 use Crell\Serde\Records\FlatCollection\FlatThing;
 use Crell\Serde\Records\FlatCollection\FlatThingList;
+use Crell\Serde\Records\FlatCollection\FlatThingMap;
 use Crell\Serde\Records\FlatMapNested\HostObject;
 use Crell\Serde\Records\FlatMapNested\Item;
 use Crell\Serde\Records\FlatMapNested\NestedA;
@@ -371,6 +372,14 @@ abstract class SerdeTestCases extends TestCase
                 new FlatThing(2,1),
             ),
             'name' => 'flat_thing_list',
+        ];
+        yield [
+            'data' => new FlatThingMap(
+                first: new FlatThing(1,1),
+                second: new FlatThing(1,2),
+                third: new FlatThing(2,1),
+            ),
+            'name' => 'flat_thing_map',
         ];
         yield [
             'data' => new Flattening(

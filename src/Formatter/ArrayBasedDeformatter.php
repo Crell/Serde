@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\Field;
+use Crell\Serde\Attributes\SequenceField;
 use Crell\Serde\Deserializer;
 use Crell\Serde\FormatParseError;
 use Crell\Serde\DeformatterResult;
@@ -297,6 +298,14 @@ trait ArrayBasedDeformatter
         if ($collectingArray && $map = $deserializer->typeMapper->typeMapForField($collectingArray)) {
             foreach ($remaining as $k => $v) {
                 $class = $map->findClass($v[$map->keyField()]);
+                $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: "$k", phpType: $class));
+            }
+        } elseif ($class = $collectingArray->typeField->arrayType ?? false) {
+            // @todo This check should really rely on there being an interface with an arrayType
+            //   property, which SequenceField and DictionaryField then implement. As is,
+            //   it's a little shaky as we're just relying on both attributes having the same
+            //   property name by convention.  Something for the inevitable PHP 8.4+ upgrade.
+            foreach ($remaining as $k => $v) {
                 $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: "$k", phpType: $class));
             }
         } elseif ($remaining) {

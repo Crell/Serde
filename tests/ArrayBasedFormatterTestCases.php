@@ -514,4 +514,10 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertArrayNotHasKey('age', $toTest);
     }
 
+    public function flat_thing_list_validate(mixed $serialized): void
+    {
+        $toTest = $this->arrayify($serialized);
+
+        self::assertIsList($toTest);
+    }
 }
