@@ -107,7 +107,7 @@ There is also a `ClassSettings` attribute that may be placed on classes to be se
 * `includeFieldsByDefault`, which defaults to `true`.  If set to false, a property with no `#[Field]` attribute will be ignored.  It is equivalent to setting `exclude: true` on all properties implicitly.
 * `requireValues`, which defaults to `false`.  If set to true, then when deserializing any field that is not provided in the incoming data will result in an exception.  This may also be turned on or off on a per-field level.  (See `requireValue` below.)  The class-level setting applies to any field that does not specify its behavior.
 * `renameWith`.  If set, the specified renaming strategy will be used for all properties of the class, unless a property specifies its own.  (See `renameWith` below.)  The class-level setting applies to any field that does not specify its behavior.
-* `omitNullFields`, which defaults to false.  If set to true, any property on the class that is null will be omitted when serializing. It has on effect on deserialization.  This may also be turned on or off on a per-field level.  (See `omitIfNull` below.)
+* `omitNullFields`, which defaults to false.  If set to true, any property on the class that is null will be omitted when serializing. It has no effect on deserialization.  This may also be turned on or off on a per-field level.  (See `omitIfNull` below.)
 * `scopes`, which sets the scope of a given class definition attribute.  See the section on Scopes below.
 
 ### `exclude` (bool, default false)
@@ -527,7 +527,7 @@ And it will deserialize back to the same original 3-layer-object structure.
 
 ### `flattenPrefix` (string, default '')
 
-When an object or array property is flattened, by default its properties will be flattened using their existing name (or `serializedName`, if specified).  That may cause issues if the same class is included in a parent class twice, or if there is some other name collission.  Instead, flattened fields may be given a `flattenPrefix` value.  That string will be prepended to the name of the property when serializing.
+When an object or array property is flattened, by default its properties will be flattened using their existing name (or `serializedName`, if specified).  That may cause issues if the same class is included in a parent class twice, or if there is some other name collision.  Instead, flattened fields may be given a `flattenPrefix` value.  That string will be prepended to the name of the property when serializing.
 
 If set on a non-flattened field, this value is meaningless and has no effect.
 
@@ -640,7 +640,7 @@ use Crell\Serde\Attributes\DateField;
 class Settings
 {
     #[DateField(format: 'Y-m-d')]
-    protected DateTimeImmutable $date = new DateTimeImmutable('4 July 2022-07-04 14:22);
+    protected DateTimeImmutable $date = new DateTimeImmutable('2022-07-04 14:22);
 }
 ```
 
