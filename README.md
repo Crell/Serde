@@ -439,128 +439,6 @@ When collecting, only the lexically last flattened array will get any data, and 
 
 In this case, the `$other` property has two keys, `foo` and `bar`, with values `beep` and `boop`, respectively.  The same JSON will deserialize back to the same object as before.
 
-#### Value objects
-
-Flattening can also be used in conjunction with renaming to silently translate value objects.  Consider:
-
-```php
-class Person
-{
-    public function __construct(
-        public string $name,
-        #[Field(flatten: true)]
-        public Age $age,
-        #[Field(flatten: true)]
-        public Email $email,
-    ) {}
-}
-
-readonly class Email
-{
-    public function __construct(
-        #[Field(serializedName: 'email')] public string $value,
-    ) {}
-}
-
-readonly class Age
-{
-    public function __construct(
-        #[Field(serializedName: 'age')] public int $value
-    ) {
-        $this->validate();
-    }
-
-    #[PostLoad]
-    private function validate(): void
-    {
-        if ($this->value < 0) {
-            throw new \InvalidArgumentException('Age cannot be negative.');
-        }
-    }
-}
-```
-
-In this example, `Email` and `Age` are value objects, in the latter case with extra validation.  However, both are marked `flatten: true`, so their properties will be moved up a level to `Person` when serializing.  However, they both use the same property name, so both have a custom serialization name specified.  The above object will serialize to (and deserialize from) something like this:
-
-```json
-{
-    "name": "Larry",
-    "age": 21,
-    "email": "me@example.com"
-}
-```
-
-Note that because deserialization bypasses the constructor, the extra validation in `Age` must be placed in a separate method that is called from the constructor and flagged to run automatically after deserialization.
-
-It is also possible to specify a prefix for a flattened value, which will also be applied recursively.  For example, assuming the same Age class above:
-
-```php
-readonly class JobDescription
-{
-    public function __construct(
-        #[Field(flatten: true, flattenPrefix: 'min_')]
-        public Age $minAge,
-        #[Field(flatten: true, flattenPrefix: 'max_')]
-        public Age $maxAge,
-    ) {}
-}
-
-class JobEntry
-{
-    public function __construct(
-        #[Field(flatten: true, flattenPrefix: 'desc_')]
-        public JobDescription $description,
-    ) {}
-}
-```
-
-In this case, serializing `JobEntry` will first flatten the `$description` property, with `desc_` as a prefix.  Then, `JobDescription` will flatten both of its age fields, giving each a separate prefix.  That will result in a serialized output something like this:
-
-```json
-{
-    "desc_min_age": 18,
-    "desc_max_age": 65
-}
-```
-
-And it will deserialize back to the same original 3-layer-object structure.
-
-#### List objects
-
-It is common in some conventions to have not an object, but an array (sequence) get sent on the wire.  This is especially true for JSON APIs, that may send a payload like this:
-
-```json
-[
-    {"x":  1, "y":  2},
-    {"x":  3, "y":  4},
-    {"x":  5, "y":  6}
-]
-```
-
-Flattening provides a way to support those structures by reading them into an object property.
-
-For example, we could model the above JSON like this:
-
-```php
-class Point
-{
-    public function(public int $x, public int $y) {}
-}
-
-class PointList
-{
-    public function __construct(
-        #[Field(flatten: true)]
-        #[SequenceField(arrayType: Point::class)]
-        public array $points,
-    ) {}
-}
-```
-
-On serialization, that will flatten the array of points to the level of the `PointList` object itself, producing the JSON shown above.
-
-On deserialization, Serde will "collect" any otherwise undefined properties up into `$points`, as it is an array marked `flatten`.  Serde will also detect that there is a `SequenceField` or `DictionaryField` defined, and deserialize each entry in the incoming array as that object.  That provides a full round-trip between a JSON array-of-objects and a PHP object-with-array-property.
-
 ### `flattenPrefix` (string, default '')
 
 When an object or array property is flattened, by default its properties will be flattened using their existing name (or `serializedName`, if specified).  That may cause issues if the same class is included in a parent class twice, or if there is some other name collision.  Instead, flattened fields may be given a `flattenPrefix` value.  That string will be prepended to the name of the property when serializing.
@@ -1260,6 +1138,132 @@ It is important to note that when deserializing, `__construct()` is not called a
 Instead, Serde will look for any method or methods that have a `#[\Crell\Serde\Attributes\PostLoad]` attribute on them.  This attribute takes no arguments other than scopes.  After an object is populated, any `PostLoad` methods will be invoked with no arguments in lexical order.  The main use case for this feature is validation, in which case the method should throw an exception if the populated data is invalid in some way.  (For instance, some integer must be positive.)
 
 The visibilty of the method is irrelevant.  Serde will call `public`, `private`, or `protected` methods the same.  Note, however, that a `private` method in a parent class of the class being deserialized to will not get called, as it is not accessible to PHP from that scope.
+
+## Advanced patterns
+
+Serde contains numerous dials and switches, which allows for some very powerful if not always obvious usage patterns.  A collection of them are provided below.
+
+### Value objects
+
+Flattening can also be used in conjunction with renaming to silently translate value objects.  Consider:
+
+```php
+class Person
+{
+    public function __construct(
+        public string $name,
+        #[Field(flatten: true)]
+        public Age $age,
+        #[Field(flatten: true)]
+        public Email $email,
+    ) {}
+}
+
+readonly class Email
+{
+    public function __construct(
+        #[Field(serializedName: 'email')] public string $value,
+    ) {}
+}
+
+readonly class Age
+{
+    public function __construct(
+        #[Field(serializedName: 'age')] public int $value
+    ) {
+        $this->validate();
+    }
+
+    #[PostLoad]
+    private function validate(): void
+    {
+        if ($this->value < 0) {
+            throw new \InvalidArgumentException('Age cannot be negative.');
+        }
+    }
+}
+```
+
+In this example, `Email` and `Age` are value objects, in the latter case with extra validation.  However, both are marked `flatten: true`, so their properties will be moved up a level to `Person` when serializing.  However, they both use the same property name, so both have a custom serialization name specified.  The above object will serialize to (and deserialize from) something like this:
+
+```json
+{
+    "name": "Larry",
+    "age": 21,
+    "email": "me@example.com"
+}
+```
+
+Note that because deserialization bypasses the constructor, the extra validation in `Age` must be placed in a separate method that is called from the constructor and flagged to run automatically after deserialization.
+
+It is also possible to specify a prefix for a flattened value, which will also be applied recursively.  For example, assuming the same Age class above:
+
+```php
+readonly class JobDescription
+{
+    public function __construct(
+        #[Field(flatten: true, flattenPrefix: 'min_')]
+        public Age $minAge,
+        #[Field(flatten: true, flattenPrefix: 'max_')]
+        public Age $maxAge,
+    ) {}
+}
+
+class JobEntry
+{
+    public function __construct(
+        #[Field(flatten: true, flattenPrefix: 'desc_')]
+        public JobDescription $description,
+    ) {}
+}
+```
+
+In this case, serializing `JobEntry` will first flatten the `$description` property, with `desc_` as a prefix.  Then, `JobDescription` will flatten both of its age fields, giving each a separate prefix.  That will result in a serialized output something like this:
+
+```json
+{
+    "desc_min_age": 18,
+    "desc_max_age": 65
+}
+```
+
+And it will deserialize back to the same original 3-layer-object structure.
+
+### List objects
+
+It is common in some conventions to have not an object, but an array (sequence) get sent on the wire.  This is especially true for JSON APIs, that may send a payload like this:
+
+```json
+[
+    {"x":  1, "y":  2},
+    {"x":  3, "y":  4},
+    {"x":  5, "y":  6}
+]
+```
+
+Flattening provides a way to support those structures by reading them into an object property.
+
+For example, we could model the above JSON like this:
+
+```php
+class Point
+{
+    public function(public int $x, public int $y) {}
+}
+
+class PointList
+{
+    public function __construct(
+        #[Field(flatten: true)]
+        #[SequenceField(arrayType: Point::class)]
+        public array $points,
+    ) {}
+}
+```
+
+On serialization, that will flatten the array of points to the level of the `PointList` object itself, producing the JSON shown above.
+
+On deserialization, Serde will "collect" any otherwise undefined properties up into `$points`, as it is an array marked `flatten`.  Serde will also detect that there is a `SequenceField` or `DictionaryField` defined, and deserialize each entry in the incoming array as that object.  That provides a full round-trip between a JSON array-of-objects and a PHP object-with-array-property.
 
 ## Extending Serde
 
