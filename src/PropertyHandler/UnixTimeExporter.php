@@ -25,7 +25,7 @@ class UnixTimeExporter implements Importer, Exporter {
     {
         /** @var UnixTimeField|null $typeField */
         $typeField = $field->typeField;
-        $resolution = $typeField?->resolution ?? UnixTimeResolution::Seconds;
+        $resolution = $typeField->resolution ?? UnixTimeResolution::Seconds;
         $multiplier = $resolution->value;
 
         // If the resulting value is going to be outside of the Integer range, just reject it. You can't be that precise

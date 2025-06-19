@@ -500,7 +500,7 @@ abstract class SerdeTestCases extends TestCase
                 return 'size';
             }
 
-            public function findClass(string $id): ?string
+            public function findClass(string $id): string
             {
                 // Or do a DB lookup or whatever.
                 return match ($id) {
@@ -509,7 +509,7 @@ abstract class SerdeTestCases extends TestCase
                 };
             }
 
-            public function findIdentifier(string $class): ?string
+            public function findIdentifier(string $class): string
             {
                 return match ($class) {
                     SmallTask::class => 'small',
@@ -673,7 +673,7 @@ abstract class SerdeTestCases extends TestCase
                 return 'type';
             }
 
-            public function findClass(string $id): ?string
+            public function findClass(string $id): string
             {
                 // Or do a DB lookup or whatever.
                 return match ($id) {
@@ -684,7 +684,7 @@ abstract class SerdeTestCases extends TestCase
                 };
             }
 
-            public function findIdentifier(string $class): ?string
+            public function findIdentifier(string $class): string
             {
                 return match ($class) {
                     StringItem::class => 'string',

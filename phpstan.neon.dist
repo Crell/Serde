@@ -2,6 +2,7 @@ parameters:
     level: 8
     tmpDir: build/phpstan
     resultCachePath: %currentWorkingDirectory%/build/phpstan/resultCache.php
+    treatPhpDocTypesAsCertain: false
     paths:
         - src
         - tests

@@ -35,7 +35,7 @@ class DateTimeExporter implements Exporter, Importer
             }
         }
 
-        $format = $typeField?->format ?? \DateTimeInterface::RFC3339_EXTENDED;
+        $format = $typeField->format ?? \DateTimeInterface::RFC3339_EXTENDED;
 
         $string = $value->format($format);
         return $serializer->formatter->serializeString($runningValue, $field, $string);

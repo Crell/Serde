@@ -24,7 +24,7 @@
     "require-dev": {
         "devium/toml": "^1.0.5",
         "phpbench/phpbench": "^1.3.0",
-        "phpstan/phpstan": "^1.11",
+        "phpstan/phpstan": "^2.1.17",
         "phpunit/phpunit": "~10.5",
         "symfony/yaml": "^5.4"
     },

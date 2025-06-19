@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
+// @phpstan-ignore trait.unused
 trait Reimportable
 {
     /**

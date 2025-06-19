@@ -93,7 +93,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      * This property is unset after the analysis phase to minimize
      * the serialized size of this object.
      */
-    protected ?RenamingStrategy $rename;
+    private ?RenamingStrategy $rename;
 
     /**
      * Whether or not to omit values when serializing if they are null.

@@ -7,7 +7,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## 1.4.0 - DATE
 
 ### Added
-- A new `MixedField` type field is available for use on `mixed` properties. If specified, it allows specifying a preferred object type that an array-ish value will be cast into when deserializing.  If the object deserialiation fails, the whole deserialization will fail.
+- A new `MixedField` type field is available for use on `mixed` properties. If specified, it allows specifying a preferred object type that an array-ish value will be cast into when deserializing.  If the object deserialization fails, the whole deserialization will fail.
 
 ### Deprecated
 - Nothing
@@ -16,7 +16,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Serializing an object that is assigned to a `mixed` field will no longer generate a circular reference error.
 
 ### Removed
-- Nothing
+- The `rename` property on `Field` is now `private` instead of `protected`. This shouldn't matter to anyone unless you're extending `Field`. If you're extending `Field` and messing with the `rename` property, you're probably doing something you shouldn't.
 
 ### Security
 - Nothing
