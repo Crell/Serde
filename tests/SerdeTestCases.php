@@ -367,17 +367,17 @@ abstract class SerdeTestCases extends TestCase
     {
         yield [
             'data' => new FlatThingList(
-                new FlatThing(1,1),
-                new FlatThing(1,2),
-                new FlatThing(2,1),
+                new Point(1,1, 3),
+                new Point(1,2, 4),
+                new Point(2,1, 5),
             ),
             'name' => 'flat_thing_list',
         ];
         yield [
             'data' => new FlatThingMap(
-                first: new FlatThing(1,1),
-                second: new FlatThing(1,2),
-                third: new FlatThing(2,1),
+                first: new Point(1,1, 3),
+                second: new Point(1,2, 3),
+                third: new Point(2,1, 5),
             ),
             'name' => 'flat_thing_map',
         ];
