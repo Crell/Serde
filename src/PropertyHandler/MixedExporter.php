@@ -6,6 +6,7 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Attributes\DictionaryField;
 use Crell\Serde\Attributes\Field;
+use Crell\Serde\Attributes\MixedField;
 use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Dict;
@@ -40,6 +41,12 @@ class MixedExporter implements Importer, Exporter
         // case, we're guaranteed that the $source is array-based, so we can introspect
         // it directly.
         $type = \get_debug_type($source[$field->serializedName]);
+
+        /** @var MixedField|null $typeField */
+        $typeField = $field->typeField;
+        if ($typeField && class_exists($typeField->suggestedType) && $type === 'array') {
+            $type = $typeField->suggestedType;
+        }
 
         return $deserializer->deserialize($source, Field::create(
             serializedName: $field->serializedName,

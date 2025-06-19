@@ -49,6 +49,7 @@ use Crell\Serde\Records\MappedCollected\ThingB;
 use Crell\Serde\Records\MappedCollected\ThingC;
 use Crell\Serde\Records\MappedCollected\ThingList;
 use Crell\Serde\Records\MixedVal;
+use Crell\Serde\Records\MixedValObject;
 use Crell\Serde\Records\MultiCollect\ThingOneA;
 use Crell\Serde\Records\MultiCollect\ThingTwoC;
 use Crell\Serde\Records\MultiCollect\Wrapper;
@@ -1060,30 +1061,32 @@ abstract class SerdeTestCases extends TestCase
         yield 'float' => [new MixedVal(3.14)];
         yield 'sequence' => [new MixedVal(['a', 'b', 'c'])];
         yield 'dict' => [new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C'])];
-        yield 'object' => [new MixedVal(new Point(1, 2, 3))];
+    }
+
+    #[Test,  DataProvider('mixed_val_property_object_examples')]
+    public function mixed_val_property_object(mixed $data): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->mixed_val_property_validate($serialized, $data);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: MixedValObject::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public static function mixed_val_property_object_examples(): iterable
+    {
+        yield 'string' => [new MixedValObject('hello')];
+        yield 'int' => [new MixedValObject(5)];
+        yield 'float' => [new MixedValObject(3.14)];
+        yield 'object' => [new MixedValObject(new Point(1, 2, 3))];
     }
 
     public function mixed_val_property_validate(mixed $serialized, mixed $data): void
     {
-    }
-
-    /**
-     * This isn't a desired feature; it's just confirmation for the future why it is how it is.
-     */
-    #[Test]
-    public function mixed_val_object_does_not_serialize(): void
-    {
-        // MixedExporter sends the property value back through the Serialize pipeline
-        // a second time with a new Field definition. However, that trips the circular
-        // reference detection.  Ideally we will fix that somehow, but I'm not sure how.
-        // Importing an object to mixed will never work correctly.
-        $this->expectException(CircularReferenceDetected::class);
-
-        $data = new MixedVal(new Point(3, 4, 5));
-
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $serialized = $s->serialize($data, $this->format);
     }
 
     #[Test]
