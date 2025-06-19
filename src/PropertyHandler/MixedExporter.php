@@ -20,8 +20,11 @@ use Crell\Serde\TypeCategory;
  * Exporter/importer for `mixed` properties.
  *
  * This class makes a good-faith attempt to detect the type of a given field by its value.
- * It currently does not work for objects, and on import it works only on array-based
- * formats (JSON, YAML, TOML, etc.)
+ * On import, it currently works only on array-based formats (JSON, YAML, TOML, etc.)
+ *
+ * To deserialize into an object, the property must have the MixedField attribute.
+ *
+ * @see MixedField
  */
 class MixedExporter implements Importer, Exporter
 {

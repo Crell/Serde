@@ -4,6 +4,23 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## 1.4.0 - DATE
+
+### Added
+- A new `MixedField` type field is available for use on `mixed` properties. If specified, it allows specifying a preferred object type that an array-ish value will be cast into when deserializing.  If the object deserialiation fails, the whole deserialization will fail.
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Serializing an object that is assigned to a `mixed` field will no longer generate a circular reference error.
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.3.2 - 2024-12-06
 
 ### Added
