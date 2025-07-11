@@ -67,6 +67,8 @@ class MixedExporter implements Importer, Exporter
         // We can only import if we know that the $source will be an array so that it
         // can be introspected.  If it's not, then this class has no way to tell what
         // type to tell the Deformatter to read.
+        // @todo In 2.0, change the API to pass the full Deformatter, not just the format string,
+        //   so that we can check against an ArrayBased interface instead of a hard coded list.
         return $field->typeCategory === TypeCategory::Mixed && in_array($format, ['json', 'yaml', 'array', 'toml']);
     }
 }
