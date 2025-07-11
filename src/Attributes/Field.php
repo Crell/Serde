@@ -11,7 +11,10 @@ use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\ReadsClass;
 use Crell\AttributeUtils\SupportsScopes;
+use Crell\AttributeUtils\TypeComplexity;
+use Crell\AttributeUtils\TypeDef;
 use Crell\fp\Evolvable;
+use Crell\Serde\CompoundType;
 use Crell\Serde\FieldTypeIncompatible;
 use Crell\Serde\IntersectionTypesNotSupported;
 use Crell\Serde\PropValue;
@@ -100,6 +103,13 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      */
     public readonly bool $omitIfNull;
 
+    /**
+     * For more complex cases, the full type definition of the property.
+     *
+     * The phpType field contains the "preferred type" in those complex cases,
+     * so even a complex type can "look like" a simple type in most cases.
+     */
+    public readonly TypeDef $typeDef;
 
     /**
      * Additional key/value pairs to be included with an object.
@@ -112,6 +122,7 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      * @var array<string, mixed>
      */
     public readonly array $extraProperties;
+
     public const TYPE_NOT_SPECIFIED = '__NO_TYPE__';
 
     /**
@@ -194,7 +205,17 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
     public function fromReflection(\ReflectionProperty $subject): void
     {
         $this->phpName = $subject->name;
-        $this->phpType ??= $this->getNativeType($subject);
+
+        $this->typeDef = new TypeDef($subject->getType());
+        if (!in_array($this->typeDef->complexity, [TypeComplexity::Simple, TypeComplexity::Union], true)) {
+            throw IntersectionTypesNotSupported::create($subject);
+        }
+
+        // If it's a simple type, we can derive it now.
+        $type = $this->typeDef->getSimpleType();
+        if ($type) {
+            $this->phpType = $type;
+        }
 
         // An untyped property is equivalent to mixed, which is nullable.
         // Damnit, PHP.
@@ -247,6 +268,18 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
     public function finalize(): void
     {
+        if (!$this->phpType) {
+            if ($this->typeField instanceof CompoundType) {
+                $this->phpType = $this->typeField->primaryType();
+            } else {
+                $this->phpType = 'mixed';
+            }
+        }
+
+        if ($this->typeField && !$this->typeField->acceptsType($this->phpType)) {
+            throw FieldTypeIncompatible::create($this->typeField::class, $this->phpType);
+        }
+
         // We cannot compute these until we have the PHP type,
         // but they can still be determined entirely at analysis time
         // and cached.
@@ -283,9 +316,6 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
     protected function fromTypeField(?TypeField $typeField): void
     {
-        if ($typeField && !$typeField->acceptsType($this->phpType)) {
-            throw FieldTypeIncompatible::create($typeField::class, $this->phpType);
-        }
         // This may assign to null, which is OK as that will
         // evaluate to false when we need it to.
         $this->typeField = $typeField;
@@ -336,18 +366,6 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
             $this->phpType === 'null' => TypeCategory::Null,
             $this->phpType === 'mixed' => TypeCategory::Mixed,
             default => throw UnsupportedType::create($this->phpType),
-        };
-    }
-
-    protected function getNativeType(\ReflectionProperty $property): string
-    {
-        // @todo Support easy unions, like int|float.
-        $rType = $property->getType();
-        return match(true) {
-            $rType instanceof \ReflectionUnionType => throw UnionTypesNotSupported::create($property),
-            $rType instanceof \ReflectionIntersectionType => throw IntersectionTypesNotSupported::create($property),
-            $rType instanceof \ReflectionNamedType => $rType->getName(),
-            default => static::TYPE_NOT_SPECIFIED,
         };
     }
 
