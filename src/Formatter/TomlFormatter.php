@@ -17,7 +17,7 @@ use Devium\Toml\TomlError;
 
 use function Crell\fp\collect;
 
-class TomlFormatter implements Formatter, Deformatter, SupportsCollecting
+class TomlFormatter implements Formatter, Deformatter, SupportsCollecting, SupportsTypeIntrospection
 {
     use ArrayBasedFormatter {
         ArrayBasedFormatter::serializeSequence as serializeArraySequence;

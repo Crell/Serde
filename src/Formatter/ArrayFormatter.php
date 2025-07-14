@@ -8,7 +8,7 @@ use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 
-class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting
+class ArrayFormatter implements Formatter, Deformatter, SupportsCollecting, SupportsTypeIntrospection
 {
     use ArrayBasedFormatter;
     use ArrayBasedDeformatter;

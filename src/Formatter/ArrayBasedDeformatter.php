@@ -325,4 +325,9 @@ trait ArrayBasedDeformatter
     {
         return array_diff_key($source, array_flip($used));
     }
+
+    public function getType(mixed $decoded, Field $field): string
+    {
+        return \get_debug_type($decoded[$field->serializedName]);
+    }
 }
