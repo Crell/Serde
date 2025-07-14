@@ -15,5 +15,5 @@ interface CompoundType
      * Because most of Serde assumes a single type, any compound type
      * needs to declare what single type it falls back to in most cases.
      */
-    public function primaryType(): string;
+    public function suggestedType(): string;
 }

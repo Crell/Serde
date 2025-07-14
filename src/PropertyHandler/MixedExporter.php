@@ -4,15 +4,10 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
-use Crell\Serde\Attributes\DictionaryField;
+use Crell\AttributeUtils\TypeComplexity;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Attributes\MixedField;
-use Crell\Serde\CollectionItem;
 use Crell\Serde\Deserializer;
-use Crell\Serde\Dict;
-use Crell\Serde\InvalidArrayKeyType;
-use Crell\Serde\KeyType;
-use Crell\Serde\Sequence;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 
@@ -47,8 +42,24 @@ class MixedExporter implements Importer, Exporter
 
         /** @var MixedField|null $typeField */
         $typeField = $field->typeField;
-        if ($typeField && class_exists($typeField->suggestedType) && $type === 'array') {
-            $type = $typeField->suggestedType;
+
+        // We can make some educated guesses about the type.
+
+        if ($typeField && $type === 'array' && class_exists($typeField->suggestedType())) {
+            // If the data is an array, and a suggested type is specified, assume the specified type.
+            $type = $typeField->suggestedType();
+        }
+        else if ($field->typeDef->complexity === TypeComplexity::Union && $type === 'array') {
+            // If it's a union type, and the incoming data is an array, and one of the
+            // listed types is a class, we can deduce that is probably what it should
+            // be deserialized into.  If multiple classes are specified, the first
+            // will be used.  If that's not desired, specify a suggested type via attribute.
+            foreach ($field->typeDef->getUnionTypes() as $t) {
+                if (class_exists($t)) {
+                    $type = $t;
+                    break;
+                }
+            }
         }
 
         return $deserializer->deserialize($source, Field::create(
@@ -59,7 +70,7 @@ class MixedExporter implements Importer, Exporter
 
     public function canExport(Field $field, mixed $value, string $format): bool
     {
-        return $field->typeCategory === TypeCategory::Mixed;
+        return $field->typeCategory === TypeCategory::Mixed && $field->typeDef->accepts(get_debug_type($value));
     }
 
     public function canImport(Field $field, string $format): bool

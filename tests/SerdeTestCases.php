@@ -20,8 +20,10 @@ use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Callbacks\CallbackHost;
 use Crell\Serde\Records\CircularReference;
 use Crell\Serde\Records\ClassWithDefaultRenaming;
+use Crell\Serde\Records\ClassWithInterfaces;
 use Crell\Serde\Records\ClassWithPropertyWithTransitiveTypeField;
 use Crell\Serde\Records\ClassWithReducibleProperty;
+use Crell\Serde\Records\CompoundTypes;
 use Crell\Serde\Records\DateTimeExample;
 use Crell\Serde\Records\DictionaryKeyTypes;
 use Crell\Serde\Records\Drupal\EmailItem;
@@ -107,8 +109,10 @@ use Crell\Serde\Records\Visibility;
 use Crell\Serde\Records\WeakLists;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Crell\Serde\Records\UnionTypes;
 
 /**
  * Testing base class.
@@ -1082,6 +1086,10 @@ abstract class SerdeTestCases extends TestCase
         yield 'dict' => [new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C'])];
     }
 
+    public function mixed_val_property_validate(mixed $serialized, mixed $data): void
+    {
+    }
+
     #[Test,  DataProvider('mixed_val_property_object_examples')]
     public function mixed_val_property_object(mixed $data): void
     {
@@ -1089,7 +1097,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->mixed_val_property_validate($serialized, $data);
+        $this->mixed_val_property_object_validate($serialized, $data);
 
         $result = $s->deserialize($serialized, from: $this->format, to: MixedValObject::class);
 
@@ -1104,7 +1112,57 @@ abstract class SerdeTestCases extends TestCase
         yield 'object' => [new MixedValObject(new Point(1, 2, 3))];
     }
 
-    public function mixed_val_property_validate(mixed $serialized, mixed $data): void
+    public function mixed_val_property_object_validate(mixed $serialized, mixed $data): void
+    {
+    }
+
+    #[Test,  DataProvider('union_types_examples')]
+    public function union_types(mixed $data): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->union_types_validate($serialized, $data);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public static function union_types_examples(): iterable
+    {
+        yield 'all primitives' => [new UnionTypes(5, 3.14, 'point', 'email')];
+        yield 'object and string' => [new UnionTypes('five', 3, new Point(1, 2, 3), 'email')];
+        yield 'property with 2 classes' => [new UnionTypes('five', 3, new Point(1, 2, 3), new Email('email@example.com'))];
+    }
+
+    public function union_types_validate(mixed $serialized, mixed $data): void
+    {
+    }
+
+    #[Test,  DataProvider('compound_types_examples')]
+    #[RequiresPhp('>=8.2')]
+    public function compound_types(mixed $data): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->compound_types_validate($serialized, $data);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
+
+        self::assertEquals($data, $result);
+    }
+
+    public static function compound_types_examples(): iterable
+    {
+        yield 'string' => [new CompoundTypes('foo')];
+        yield 'intersection type' => [new CompoundTypes(new ClassWithInterfaces('a'))];
+    }
+
+    public function compound_types_validate(mixed $serialized, mixed $data): void
     {
     }
 
