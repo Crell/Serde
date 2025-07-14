@@ -11,20 +11,17 @@ use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\HasSubAttributes;
 use Crell\AttributeUtils\ReadsClass;
 use Crell\AttributeUtils\SupportsScopes;
-use Crell\AttributeUtils\TypeComplexity;
 use Crell\AttributeUtils\TypeDef;
 use Crell\fp\Evolvable;
-use Crell\Serde\CompoundType;
 use Crell\Serde\FieldTypeIncompatible;
-use Crell\Serde\IntersectionTypesNotSupported;
 use Crell\Serde\PropValue;
 use Crell\Serde\Renaming\LiteralName;
 use Crell\Serde\Renaming\RenamingStrategy;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeField;
 use Crell\Serde\TypeMap;
-use Crell\Serde\UnionTypesNotSupported;
 use Crell\Serde\UnsupportedType;
+
 use function Crell\fp\indexBy;
 use function Crell\fp\method;
 use function Crell\fp\pipe;
@@ -207,9 +204,6 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
         $this->phpName = $subject->name;
 
         $this->typeDef = new TypeDef($subject->getType());
-        if (!in_array($this->typeDef->complexity, [TypeComplexity::Simple, TypeComplexity::Union], true)) {
-            throw IntersectionTypesNotSupported::create($subject);
-        }
 
         // If it's a simple type, we can derive it now.
         $type = $this->typeDef->getSimpleType();
@@ -268,15 +262,9 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
 
     public function finalize(): void
     {
-        if (!$this->phpType) {
-            if ($this->typeField instanceof CompoundType) {
-                $this->phpType = $this->typeField->primaryType();
-            } else {
-                $this->phpType = 'mixed';
-            }
-        }
+        $this->phpType ??= 'mixed';
 
-        if ($this->typeField && !$this->typeField->acceptsType($this->phpType)) {
+        if ($this->typeField && !$this->typeField->acceptsType($this->phpType) && $this->typeDef->accepts($this->phpType)) {
             throw FieldTypeIncompatible::create($this->typeField::class, $this->phpType);
         }
 
