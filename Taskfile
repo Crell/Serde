@@ -2,7 +2,11 @@
 
 set -euo pipefail
 
-project="serde"
+dirname=${PWD##*/}    # Get the current dir name, without full path
+dirname=${dirname:-/} # to correct for the case where PWD is / (root)
+dirname=`echo $dirname | tr '[:upper:]' '[:lower:]'` # Convert the dirname to lowercase.
+
+project=${dirname}
 appContainer="php-fpm"
 
 function build {
@@ -24,7 +28,7 @@ function restart {
 
 function shell {
   start
-  docker compose exec -it -u $(id -u):$(id -g) ${appContainer} bash
+  docker compose exec -u $(id -u):$(id -g) ${appContainer} bash
 }
 
 function default {
