@@ -10,7 +10,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - Union, Intersection, and Compound types are now supported.  They work by falling back to `mixed`, and then relying on the Deformatter to derive the type.  Not all Deformatters will have that ability, but the most common bundled ones do.  (`json`, `yaml`, `toml`, and `array`.)  Additionally, Union Types may specify `TypeField`s that apply only when specific types are used.
 
 ### Deprecated
-- Nothing
+- Version 1.5 and later requires at least PHP 8.2.  PHP 8.1 is no longer supported.
 
 ### Fixed
 - Nothing
