@@ -198,10 +198,11 @@ abstract class SerdeTestCases extends TestCase
 
     #[Test]
     #[DataProvider('round_trip_examples')]
-    #[DataProvider('union_types_examples')]
-    #[DataProvider('compound_types_examples')]
+    #[DataProvider('value_object_flatten_examples')]
     #[DataProvider('mixed_val_property_examples')]
     #[DataProvider('mixed_val_property_object_examples')]
+    #[DataProvider('union_types_examples')]
+    #[DataProvider('compound_types_examples')]
     public function round_trip(object $data, string $name): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -349,7 +350,10 @@ abstract class SerdeTestCases extends TestCase
             ),
             'name' => 'arrays_with_valid_scalar_values',
         ];
+    }
 
+    public static function value_object_flatten_examples(): \Generator
+    {
         // This set is for ensuring value objects can flatten cleanly.
         yield [
             'data' => new Person('Larry', new Age(21), new Email('me@example.com')),
