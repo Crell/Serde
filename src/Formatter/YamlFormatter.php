@@ -9,7 +9,7 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Symfony\Component\Yaml\Yaml;
 
-class YamlFormatter implements Formatter, Deformatter, SupportsCollecting
+class YamlFormatter implements Formatter, Deformatter, SupportsCollecting, SupportsTypeIntrospection
 {
     use ArrayBasedFormatter;
     use ArrayBasedDeformatter;

@@ -6,6 +6,7 @@ namespace Crell\Serde\Attributes;
 
 use Attribute;
 use Crell\AttributeUtils\SupportsScopes;
+use Crell\Serde\CompoundType;
 use Crell\Serde\TypeField;
 
 /**
@@ -15,7 +16,7 @@ use Crell\Serde\TypeField;
  * value should be deserialized.
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class MixedField implements TypeField, SupportsScopes
+class MixedField implements TypeField, SupportsScopes, CompoundType
 {
     /**
      * @param string $suggestedType
@@ -28,6 +29,11 @@ class MixedField implements TypeField, SupportsScopes
         public readonly string $suggestedType,
         protected readonly array $scopes = [null],
     ) {}
+
+    public function suggestedType(): string
+    {
+        return $this->suggestedType;
+    }
 
     public function scopes(): array
     {

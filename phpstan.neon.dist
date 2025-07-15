@@ -10,6 +10,7 @@ parameters:
         - tests/Records/*
     ignoreErrors:
         - identifier: missingType.generics
+          reportUnmatched: false
         # PHPStan whines about every match without a default, even if logically it's still complete.
         - '#Match expression does not handle remaining value#'
         # As far as I can tell, PHPStan is just buggy on explode(). It gives this error

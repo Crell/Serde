@@ -14,14 +14,17 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\Exporter;
 use Crell\Serde\PropertyHandler\ObjectExporter;
 use Crell\Serde\PropertyHandler\ObjectImporter;
+use Crell\Serde\Records\ACT;
 use Crell\Serde\Records\AliasedFields;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\Callbacks\CallbackHost;
 use Crell\Serde\Records\CircularReference;
 use Crell\Serde\Records\ClassWithDefaultRenaming;
+use Crell\Serde\Records\ClassWithInterfaces;
 use Crell\Serde\Records\ClassWithPropertyWithTransitiveTypeField;
 use Crell\Serde\Records\ClassWithReducibleProperty;
+use Crell\Serde\Records\CompoundTypes;
 use Crell\Serde\Records\DateTimeExample;
 use Crell\Serde\Records\DictionaryKeyTypes;
 use Crell\Serde\Records\Drupal\EmailItem;
@@ -78,6 +81,7 @@ use Crell\Serde\Records\RequiresFieldValues;
 use Crell\Serde\Records\RequiresFieldValuesClass;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
+use Crell\Serde\Records\SAT;
 use Crell\Serde\Records\ScalarArrays;
 use Crell\Serde\Records\SequenceOfStrings;
 use Crell\Serde\Records\Shapes\Box;
@@ -95,6 +99,8 @@ use Crell\Serde\Records\TransitiveField;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
+use Crell\Serde\Records\UnionTypeSubTypeField;
+use Crell\Serde\Records\UnionTypeWithInterface;
 use Crell\Serde\Records\UnixTimeExample;
 use Crell\Serde\Records\ValueObjects\Age;
 use Crell\Serde\Records\ValueObjects\Email;
@@ -107,8 +113,10 @@ use Crell\Serde\Records\Visibility;
 use Crell\Serde\Records\WeakLists;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Crell\Serde\Records\UnionTypes;
 
 /**
  * Testing base class.
@@ -117,7 +125,7 @@ use PHPUnit\Framework\TestCase;
  *
  * - Extend this class.
  * - In setUp(), set the $formatters and $format property accordingly.
- * - Override any of the *_validate() methods desired to introspect
+ * - Optionally define a <method name>_validate($serialized) method to introspect
  *   the serialized data for that test in a format-specific way.
  */
 abstract class SerdeTestCases extends TestCase
@@ -182,13 +190,19 @@ abstract class SerdeTestCases extends TestCase
 
     protected function validateSerialized(mixed $serialized, string $name): void
     {
-        $validateMethod = $name . '_validate';
+        $validateMethod = str_replace([' ', ':', ','], '_', $name) . '_validate';
         if (method_exists($this, $validateMethod)) {
             $this->$validateMethod($serialized);
         }
     }
 
-    #[Test, DataProvider('round_trip_examples')]
+    #[Test]
+    #[DataProvider('round_trip_examples')]
+    #[DataProvider('value_object_flatten_examples')]
+    #[DataProvider('mixed_val_property_examples')]
+    #[DataProvider('mixed_val_property_object_examples')]
+    #[DataProvider('union_types_examples')]
+    #[DataProvider('compound_types_examples')]
     public function round_trip(object $data, string $name): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -336,7 +350,10 @@ abstract class SerdeTestCases extends TestCase
             ),
             'name' => 'arrays_with_valid_scalar_values',
         ];
+    }
 
+    public static function value_object_flatten_examples(): \Generator
+    {
         // This set is for ensuring value objects can flatten cleanly.
         yield [
             'data' => new Person('Larry', new Age(21), new Email('me@example.com')),
@@ -357,6 +374,98 @@ abstract class SerdeTestCases extends TestCase
         yield [
             'data' => new JobEntryFlattenedPrefixed(new JobDescription(new Age(18), new Age(65))),
             'name' => 'multiple_same_class_value_objects_work_when_nested_and_flattened_with_prefix',
+        ];
+    }
+
+    public static function mixed_val_property_examples(): iterable
+    {
+        yield 'mixed val: string' => [
+            'data' => new MixedVal('hello'),
+            'name' => 'mixed val: string',
+        ];
+        yield 'mixed val: int' => [
+            'data' => new MixedVal(5),
+            'name' => 'mixed val: int',
+        ];
+        yield 'mixed val: float' => [
+            'data' => new MixedVal(3.14),
+            'name' => 'mixed val: float',
+        ];
+        yield 'mixed val: sequence' => [
+            'data' => new MixedVal(['a', 'b', 'c']),
+            'name' => 'mixed val: sequence',
+        ];
+        yield 'mixed val: dict' => [
+            'data' => new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C']),
+            'name' => 'mixed val: dict',
+        ];
+    }
+
+    public static function mixed_val_property_object_examples(): iterable
+    {
+        yield 'mixed val, object: string' => [
+            'data' => new MixedValObject('hello'),
+            'name' => 'mixed val, object: string',
+        ];
+        yield 'mixed val, object: int' => [
+            'data' => new MixedValObject(5),
+            'name' => 'mixed val, object: int',
+        ];
+        yield 'mixed val, object: float' => [
+            'data' => new MixedValObject(3.14),
+            'name' => 'mixed val, object: float',
+        ];
+        yield 'mixed val, object: object' => [
+            'data' => new MixedValObject(new Point(1, 2, 3)),
+            'name' => 'mixed val, object: object',
+        ];
+    }
+
+    public static function union_types_examples(): iterable
+    {
+        yield 'union: all primitives' => [
+            'data' => new UnionTypes(5, 3.14, 'point', 'email'),
+            'name' => 'union: all primitives',
+        ];
+        yield 'union: object and string' => [
+            'data' => new UnionTypes('five', 3, new Point(1, 2, 3), 'email'),
+            'name' => 'union: object and string',
+        ];
+        yield 'union: property with 2 classes' => [
+            'data' => new UnionTypes('five', 3, new Point(1, 2, 3), new Email('email@example.com')),
+            'name' => 'union: property with 2 classes',
+        ];
+        yield 'union: union with interface, with int' => [
+            'data' => new UnionTypeWithInterface(99),
+            'name' => 'union: union with interface, with int',
+        ];
+        yield 'union: union with interface, with ACT' => [
+            'data' => new UnionTypeWithInterface(new ACT(30)),
+            'name' => 'union: union with interface, with ACT',
+        ];
+        yield 'union: union with interface, with SAT' => [
+            'data' => new UnionTypeWithInterface(new SAT(1300)),
+            'name' => 'union: union with interface, with SAT',
+        ];
+        yield 'union: union with sub-typefield, with string' => [
+            'data' => new UnionTypeSubTypeField('hello'),
+            'name' => 'union: union with sub-typefield, with string',
+        ];
+        yield 'union: union with sub-typefield, with array' => [
+            'data' => new UnionTypeSubTypeField(['hello' => new Point(1, 2, 3)]),
+            'name' => 'union: union with sub-typefield, with array',
+        ];
+    }
+
+    public static function compound_types_examples(): iterable
+    {
+        yield 'string' => [
+            'data' => new CompoundTypes('foo'),
+            'name' => 'string',
+        ];
+        yield 'intersection type' => [
+            'data' => new CompoundTypes(new ClassWithInterfaces('a')),
+            'name' => 'intersection type',
         ];
     }
 
@@ -1057,55 +1166,6 @@ abstract class SerdeTestCases extends TestCase
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $result = $s->deserialize($this->invalidDictStringKey, $this->format, DictionaryKeyTypes::class);
-    }
-
-    #[Test, DataProvider('mixed_val_property_examples')]
-    public function mixed_val_property(mixed $data): void
-    {
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->mixed_val_property_validate($serialized, $data);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: MixedVal::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public static function mixed_val_property_examples(): iterable
-    {
-        yield 'string' => [new MixedVal('hello')];
-        yield 'int' => [new MixedVal(5)];
-        yield 'float' => [new MixedVal(3.14)];
-        yield 'sequence' => [new MixedVal(['a', 'b', 'c'])];
-        yield 'dict' => [new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C'])];
-    }
-
-    #[Test,  DataProvider('mixed_val_property_object_examples')]
-    public function mixed_val_property_object(mixed $data): void
-    {
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->mixed_val_property_validate($serialized, $data);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: MixedValObject::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public static function mixed_val_property_object_examples(): iterable
-    {
-        yield 'string' => [new MixedValObject('hello')];
-        yield 'int' => [new MixedValObject(5)];
-        yield 'float' => [new MixedValObject(3.14)];
-        yield 'object' => [new MixedValObject(new Point(1, 2, 3))];
-    }
-
-    public function mixed_val_property_validate(mixed $serialized, mixed $data): void
-    {
     }
 
     #[Test]
