@@ -69,15 +69,15 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
     #[DataProvider('mixed_val_property_object_examples')]
     #[DataProvider('union_types_examples')]
     #[DataProvider('compound_types_examples')]
-    public function round_trip(object $data, string $name): void
+    public function round_trip(object $data): void
     {
-        if ($name === 'empty_values') {
+        if ($this->dataName() === 'empty_values') {
             /** @var EmptyData $data */
             $s = new SerdeCommon(formatters: $this->formatters);
 
             $serialized = $s->serialize($data, $this->format);
 
-            $this->validateSerialized($serialized, $name);
+            $this->validateSerialized($serialized, $this->dataName());
 
             /** @var EmptyData $result */
             $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
@@ -90,13 +90,13 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
             self::assertEquals($data->nullable, $result->nullable);
             self::assertEquals($data->withDefault, $result->withDefault);
 
-        } elseif ($name === 'array_of_null_serializes_cleanly') {
+        } elseif ($this->dataName() === 'array_of_null_serializes_cleanly') {
             /** @var NullArrays $data */
             $s = new SerdeCommon(formatters: $this->formatters);
 
             $serialized = $s->serialize($data, $this->format);
 
-            $this->validateSerialized($serialized, $name);
+            $this->validateSerialized($serialized, $this->dataName());
 
             /** @var NullArrays $result */
             $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
@@ -108,7 +108,7 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
             self::assertEmpty($result->arr);
         } else {
             // Defer back to the parent for the rest.
-            parent::round_trip($data, $name);
+            parent::round_trip($data);
         }
     }
 

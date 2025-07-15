@@ -203,13 +203,17 @@ abstract class SerdeTestCases extends TestCase
     #[DataProvider('mixed_val_property_object_examples')]
     #[DataProvider('union_types_examples')]
     #[DataProvider('compound_types_examples')]
-    public function round_trip(object $data, string $name): void
+    public function round_trip(object $data): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->validateSerialized($serialized, $name);
+        // dataName() is marked internal, but seems stable enough.
+        // This avoids making each data set provide an extra name string
+        // just for here, when they should already all have a name on
+        // the dataset to begin with.
+        $this->validateSerialized($serialized, (string)$this->dataName());
 
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
@@ -217,7 +221,7 @@ abstract class SerdeTestCases extends TestCase
     }
 
     #[Test, DataProvider('round_trip_flattening_examples'), Group('flattening')]
-    public function round_trip_flattening(object $data, string $name): void
+    public function round_trip_flattening(object $data): void
     {
         foreach ($this->formatters as $formatter) {
             if (($formatter->format() === $this->format) && !$formatter instanceof SupportsCollecting) {
@@ -229,7 +233,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->validateSerialized($serialized, $name);
+        $this->validateSerialized($serialized, (string)$this->dataName());
 
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
@@ -238,19 +242,16 @@ abstract class SerdeTestCases extends TestCase
 
     public static function round_trip_examples(): iterable
     {
-        yield [
+        yield 'point' => [
             'data' => new Point(1, 2, 3),
-            'name' => 'point',
         ];
-        yield [
+        yield 'visibility' => [
             'data' => new Visibility(1, 2, 3, new Visibility(4, 5, 6)),
-            'name' => 'visibility',
         ];
-        yield [
+        yield 'optional_point' => [
             'data' => new OptionalPoint(1, 2),
-            'name' => 'optional_point',
         ];
-        yield [
+        yield 'all_fields' => [
             'data' => new AllFieldTypes(
                 anint: 5,
                 string: 'hello',
@@ -278,22 +279,19 @@ abstract class SerdeTestCases extends TestCase
                 implodedDict: ['a' => 'A', 'b' => 'B'],
 //            untyped: 'beep',
             ),
-            'name' => 'all_fields',
         ];
-        yield [
+        yield 'float_fields_take_ints' => [
             'data' => new AllFieldTypes(afloat: 5.0),
-            'name' => 'float_fields_take_ints',
         ];
-        yield [
+        yield 'name_mangling' => [
             'data' => new MangleNames(
                 customName: 'Larry',
                 toUpper: 'value',
                 toLower: 'value',
                 prefix: 'value',
             ),
-            'name' => 'name_mangling',
         ];
-        yield [
+        yield 'nested_objects' => [
             'data' => new NestedObject(
                 'First',
                 new NestedObject(
@@ -304,76 +302,62 @@ abstract class SerdeTestCases extends TestCase
                     )
                 )
             ),
-            'name' => 'nested_objects',
         ];
-        yield [
+        yield 'empty_values' => [
             'data' => new EmptyData('beep', null),
-            'name' => 'empty_values',
         ];
-        yield [
+        yield 'native_object_serialization' => [
             'data' => new NativeSerUn(
                 1,
                 'beep',
                 new \DateTimeImmutable('1918-11-11 11:11:11', new \DateTimeZone('America/Chicago'))
             ),
-            'name' => 'native_object_serialization',
         ];
-        yield [
+        yield 'dictionary_key' => [
             'data' => new DictionaryKeyTypes(
                 stringKey: ['a' => 'A', 'b' => 'B'],
                 intKey: [5 => 'C', 10 => 'D'],
             ),
-            'name' => 'dictionary_key',
         ];
-        yield [
+        yield 'array_of_null_serializes_cleanly' => [
             'data' => new NullArrays(),
-            'name' => 'array_of_null_serializes_cleanly',
         ];
-        yield [
+        yield 'class_level_renaming_applies' => [
             'data' => new ClassWithDefaultRenaming(string: 'B', int: 12),
-            'name' => 'class_level_renaming_applies',
         ];
-        yield [
+        yield 'null_properties_may_be_excluded' => [
             'data' => new ExcludeNullFields('A'),
-            'name' => 'null_properties_may_be_excluded',
         ];
-        yield [
+        yield 'null_properties_may_be_excluded_class_level' => [
             'data' => new ExcludeNullFieldsClass('A'),
-            'name' => 'null_properties_may_be_excluded_class_level',
         ];
-        yield [
+        yield 'arrays_with_valid_scalar_values' => [
             'data' => new ScalarArrays(
                 ints: [1, 2, 3],
                 floats: [3.14, 2.7],
                 stringMap: ['a' => 'A'],
                 arrayMap: ['a' => [1, 2, 3]],
             ),
-            'name' => 'arrays_with_valid_scalar_values',
         ];
     }
 
     public static function value_object_flatten_examples(): \Generator
     {
         // This set is for ensuring value objects can flatten cleanly.
-        yield [
+        yield 'value_objects_with_similar_property_names_work' => [
             'data' => new Person('Larry', new Age(21), new Email('me@example.com')),
-            'name' => 'value_objects_with_similar_property_names_work',
         ];
-        yield [
+        yield 'multiple_same_class_value_objects_work' => [
             'data' => new JobDescription(new Age(18), new Age(65)),
-            'name' => 'multiple_same_class_value_objects_work',
         ];
-        yield [
+        yield 'multiple_same_class_value_objects_work_when_nested' => [
             'data' => new JobEntry(new JobDescription(new Age(18), new Age(65))),
-            'name' => 'multiple_same_class_value_objects_work_when_nested',
         ];
-        yield [
+        yield 'multiple_same_class_value_objects_work_when_nested_and_flattened' => [
             'data' => new JobEntryFlattened(new JobDescription(new Age(18), new Age(65))),
-            'name' => 'multiple_same_class_value_objects_work_when_nested_and_flattened',
         ];
-        yield [
+        yield 'multiple_same_class_value_objects_work_when_nested_and_flattened_with_prefix' => [
             'data' => new JobEntryFlattenedPrefixed(new JobDescription(new Age(18), new Age(65))),
-            'name' => 'multiple_same_class_value_objects_work_when_nested_and_flattened_with_prefix',
         ];
     }
 
@@ -381,23 +365,18 @@ abstract class SerdeTestCases extends TestCase
     {
         yield 'mixed val: string' => [
             'data' => new MixedVal('hello'),
-            'name' => 'mixed val: string',
         ];
         yield 'mixed val: int' => [
             'data' => new MixedVal(5),
-            'name' => 'mixed val: int',
         ];
         yield 'mixed val: float' => [
             'data' => new MixedVal(3.14),
-            'name' => 'mixed val: float',
         ];
         yield 'mixed val: sequence' => [
             'data' => new MixedVal(['a', 'b', 'c']),
-            'name' => 'mixed val: sequence',
         ];
         yield 'mixed val: dict' => [
             'data' => new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C']),
-            'name' => 'mixed val: dict',
         ];
     }
 
@@ -405,19 +384,15 @@ abstract class SerdeTestCases extends TestCase
     {
         yield 'mixed val, object: string' => [
             'data' => new MixedValObject('hello'),
-            'name' => 'mixed val, object: string',
         ];
         yield 'mixed val, object: int' => [
             'data' => new MixedValObject(5),
-            'name' => 'mixed val, object: int',
         ];
         yield 'mixed val, object: float' => [
             'data' => new MixedValObject(3.14),
-            'name' => 'mixed val, object: float',
         ];
         yield 'mixed val, object: object' => [
             'data' => new MixedValObject(new Point(1, 2, 3)),
-            'name' => 'mixed val, object: object',
         ];
     }
 
@@ -425,35 +400,27 @@ abstract class SerdeTestCases extends TestCase
     {
         yield 'union: all primitives' => [
             'data' => new UnionTypes(5, 3.14, 'point', 'email'),
-            'name' => 'union: all primitives',
         ];
         yield 'union: object and string' => [
             'data' => new UnionTypes('five', 3, new Point(1, 2, 3), 'email'),
-            'name' => 'union: object and string',
         ];
         yield 'union: property with 2 classes' => [
             'data' => new UnionTypes('five', 3, new Point(1, 2, 3), new Email('email@example.com')),
-            'name' => 'union: property with 2 classes',
         ];
         yield 'union: union with interface, with int' => [
             'data' => new UnionTypeWithInterface(99),
-            'name' => 'union: union with interface, with int',
         ];
         yield 'union: union with interface, with ACT' => [
             'data' => new UnionTypeWithInterface(new ACT(30)),
-            'name' => 'union: union with interface, with ACT',
         ];
         yield 'union: union with interface, with SAT' => [
             'data' => new UnionTypeWithInterface(new SAT(1300)),
-            'name' => 'union: union with interface, with SAT',
         ];
         yield 'union: union with sub-typefield, with string' => [
             'data' => new UnionTypeSubTypeField('hello'),
-            'name' => 'union: union with sub-typefield, with string',
         ];
         yield 'union: union with sub-typefield, with array' => [
             'data' => new UnionTypeSubTypeField(['hello' => new Point(1, 2, 3)]),
-            'name' => 'union: union with sub-typefield, with array',
         ];
     }
 
@@ -461,11 +428,9 @@ abstract class SerdeTestCases extends TestCase
     {
         yield 'string' => [
             'data' => new CompoundTypes('foo'),
-            'name' => 'string',
         ];
         yield 'intersection type' => [
             'data' => new CompoundTypes(new ClassWithInterfaces('a')),
-            'name' => 'intersection type',
         ];
     }
 
@@ -474,47 +439,42 @@ abstract class SerdeTestCases extends TestCase
      */
     public static function round_trip_flattening_examples(): iterable
     {
-        yield [
+        yield 'flat_thing_list' => [
             'data' => new FlatThingList(
                 new Point(1,1, 3),
                 new Point(1,2, 4),
                 new Point(2,1, 5),
             ),
-            'name' => 'flat_thing_list',
         ];
-        yield [
+        yield 'flat_thing_map' => [
             'data' => new FlatThingMap(
                 first: new Point(1,1, 3),
                 second: new Point(1,2, 3),
                 third: new Point(2,1, 5),
             ),
-            'name' => 'flat_thing_map',
         ];
-        yield [
+        yield 'flattening' => [
             'data' => new Flattening(
                 first: 'Larry',
                 last: 'Garfield',
                 other: ['a' => 'A', 'b' => 2, 'c' => 'C'],
             ),
-            'name' => 'flattening',
         ];
-        yield [
+        yield 'mapped_collected_dictionary' => [
             'data' => new ThingList(name: 'list', things: [
                 'A' => new ThingA('a', 'b'),
                 'B' => new ThingB('d', 'd'),
                 'C' => new ThingC('e', 'f'),
             ]),
-            'name' => 'mapped_collected_dictionary',
         ];
-        yield [
+        yield 'mapped_collected_sequence' => [
             'data' => new ThingList(name: 'list', things: [
                 new ThingA('a', 'b'),
                 new ThingB('d', 'd'),
                 new ThingC('e', 'f'),
             ]),
-            'name' => 'mapped_collected_sequence',
         ];
-        yield [
+        yield 'pagination_flatten_object' => [
             'data' => new Results(
                 pagination: new Pagination(
                     total: 500,
@@ -527,9 +487,8 @@ abstract class SerdeTestCases extends TestCase
                     new Product('Dohickey', 11.50),
                 ]
             ),
-            'name' => 'pagination_flatten_object',
         ];
-        yield [
+        yield 'pagination_flatten_multiple_object' => [
             'data' => new DetailedResults(
                 pagination: new NestedPagination(
                     total: 500,
@@ -547,7 +506,6 @@ abstract class SerdeTestCases extends TestCase
                 ],
                 other: ['narf' => 'poink', 'bleep' => 'bloop']
             ),
-            'name' => 'pagination_flatten_multiple_object',
         ];
     }
 
