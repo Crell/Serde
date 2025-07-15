@@ -616,7 +616,7 @@ Note that the permissible range of milliseconds and microseconds is considerably
 
 On serialization, Serde will make a good faith effort to derive the type to serialize to from the value itself.  So if a `mixed` property has a value of `"beep"`, it will try to serialize as a string.  If it has a value `[1, 2, 3]`, it will try to serialize as an array.
 
-On deserialization, primitive types (`int`, `float`, `string`) will be read successfully and written to the property.  If no additional information is provided, then sequences and dictionaries will also be read into the property as an `array`, but objects are not supported.  (They'll be treated like a dictionary.)
+On deserialization, Serde will attempt to derive the type by making educated guesses.  If the Deformatter in use implements `SupportsTypeIntrospection` (`json`, `yaml`, `toml`, and `array` already do), then the formatter will be asked what the type should be.  If no additional information is provided, then sequences and dictionaries will also be read into the property as an `array`, but objects are not supported.  (They'll be treated like a dictionary.)
 
 Alternatively, you may specify the field as a `#[MixedField(Point::class)]`, which has one required argument, `suggestedType`.  If that is specified, any incoming array-ish value will be deserialized to the specified class.  If the value is not compatible with that class, an exception will be thrown.  That means it is not possible to support both array deserialization and object deserialization at the same time.
 
@@ -630,6 +630,28 @@ class Message
 ```
 
 If you are only ever serializing an object with a `mixed` property, these concerns should not apply and no additional effort should be required.
+
+### Union and Compound types
+
+Most Serde behavior assumes a single type for a given field.  If the field has a compound type (a union, intersection, or a combination of the two), Serde will internally treat it as if it were `mixed` and will behave like a `mixed` field above.
+
+That does mean that, in practice, union and compound types are only supported when using a `SupportsTypeIntrospection` formatter.  That includes the most common formats, however, so most of the time it will work.  The `MixedField` attribute may be applied to a compound type, and will work as described above.
+
+Alternatively, if the field is a Union type specifically, you may also use the `UnionField` type field attribute.  It works the same as `MixedField`, but has an additional array parameter that lets you specify a separate TypeField for each type in the union.  That is especially useful if, for instance, one of the subtypes is an array, and you want to mark it as a sequence or dictionary so that a list of objects will deserialize correctly.
+
+The example below, for instance, specifies that `$values` could be a `string` or an array of `Point` objects, keyed by a string.  If the system cannot otherwise figure out the type, it will default to just `array`.
+
+```php
+class UnionTypeSubTypeField
+{
+    public function __construct(
+        #[UnionField('array', [
+        'array' => new DictionaryField(Point::class, KeyType::String)]
+        )]
+        public string|array $values,
+    ) {}
+}
+```
 
 ### Generators, Iterables, and Traversables
 
