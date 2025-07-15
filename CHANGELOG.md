@@ -4,6 +4,23 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## 1.5.0 - 2025-07-15
+
+### Added
+- Union, Intersection, and Compound types are now supported.  They work by falling back to `mixed`, and then relying on the Deformatter to derive the type.  Not all Deformatters will have that ability, but the most common bundled ones do.  (`json`, `yaml`, `toml`, and `array`.)  Additionally, Union Types may specify `TypeField`s that apply only when specific types are used.
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.4.0 - 2025-06-19
 
 ### Added
