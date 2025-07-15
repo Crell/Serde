@@ -642,11 +642,11 @@ Alternatively, if the field is a Union type specifically, you may also use the `
 The example below, for instance, specifies that `$values` could be a `string` or an array of `Point` objects, keyed by a string.  If the system cannot otherwise figure out the type, it will default to just `array`.
 
 ```php
-class UnionTypeSubTypeField
+class Record
 {
     public function __construct(
         #[UnionField('array', [
-        'array' => new DictionaryField(Point::class, KeyType::String)]
+            'array' => new DictionaryField(Point::class, KeyType::String)]
         )]
         public string|array $values,
     ) {}
