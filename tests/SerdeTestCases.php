@@ -190,13 +190,18 @@ abstract class SerdeTestCases extends TestCase
 
     protected function validateSerialized(mixed $serialized, string $name): void
     {
-        $validateMethod = $name . '_validate';
+        $validateMethod = str_replace([' ', ':', ','], '_', $name) . '_validate';
         if (method_exists($this, $validateMethod)) {
             $this->$validateMethod($serialized);
         }
     }
 
-    #[Test, DataProvider('round_trip_examples')]
+    #[Test]
+    #[DataProvider('round_trip_examples')]
+    #[DataProvider('union_types_examples')]
+    #[DataProvider('compound_types_examples')]
+    #[DataProvider('mixed_val_property_examples')]
+    #[DataProvider('mixed_val_property_object_examples')]
     public function round_trip(object $data, string $name): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -365,6 +370,98 @@ abstract class SerdeTestCases extends TestCase
         yield [
             'data' => new JobEntryFlattenedPrefixed(new JobDescription(new Age(18), new Age(65))),
             'name' => 'multiple_same_class_value_objects_work_when_nested_and_flattened_with_prefix',
+        ];
+    }
+
+    public static function mixed_val_property_examples(): iterable
+    {
+        yield 'mixed val: string' => [
+            'data' => new MixedVal('hello'),
+            'name' => 'mixed val: string',
+        ];
+        yield 'mixed val: int' => [
+            'data' => new MixedVal(5),
+            'name' => 'mixed val: int',
+        ];
+        yield 'mixed val: float' => [
+            'data' => new MixedVal(3.14),
+            'name' => 'mixed val: float',
+        ];
+        yield 'mixed val: sequence' => [
+            'data' => new MixedVal(['a', 'b', 'c']),
+            'name' => 'mixed val: sequence',
+        ];
+        yield 'mixed val: dict' => [
+            'data' => new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C']),
+            'name' => 'mixed val: dict',
+        ];
+    }
+
+    public static function mixed_val_property_object_examples(): iterable
+    {
+        yield 'mixed val, object: string' => [
+            'data' => new MixedValObject('hello'),
+            'name' => 'mixed val, object: string',
+        ];
+        yield 'mixed val, object: int' => [
+            'data' => new MixedValObject(5),
+            'name' => 'mixed val, object: int',
+        ];
+        yield 'mixed val, object: float' => [
+            'data' => new MixedValObject(3.14),
+            'name' => 'mixed val, object: float',
+        ];
+        yield 'mixed val, object: object' => [
+            'data' => new MixedValObject(new Point(1, 2, 3)),
+            'name' => 'mixed val, object: object',
+        ];
+    }
+
+    public static function union_types_examples(): iterable
+    {
+        yield 'union: all primitives' => [
+            'data' => new UnionTypes(5, 3.14, 'point', 'email'),
+            'name' => 'union: all primitives',
+        ];
+        yield 'union: object and string' => [
+            'data' => new UnionTypes('five', 3, new Point(1, 2, 3), 'email'),
+            'name' => 'union: object and string',
+        ];
+        yield 'union: property with 2 classes' => [
+            'data' => new UnionTypes('five', 3, new Point(1, 2, 3), new Email('email@example.com')),
+            'name' => 'union: property with 2 classes',
+        ];
+        yield 'union: union with interface, with int' => [
+            'data' => new UnionTypeWithInterface(99),
+            'name' => 'union: union with interface, with int',
+        ];
+        yield 'union: union with interface, with ACT' => [
+            'data' => new UnionTypeWithInterface(new ACT(30)),
+            'name' => 'union: union with interface, with ACT',
+        ];
+        yield 'union: union with interface, with SAT' => [
+            'data' => new UnionTypeWithInterface(new SAT(1300)),
+            'name' => 'union: union with interface, with SAT',
+        ];
+        yield 'union: union with sub-typefield, with string' => [
+            'data' => new UnionTypeSubTypeField('hello'),
+            'name' => 'union: union with sub-typefield, with string',
+        ];
+        yield 'union: union with sub-typefield, with array' => [
+            'data' => new UnionTypeSubTypeField(['hello' => new Point(1, 2, 3)]),
+            'name' => 'union: union with sub-typefield, with array',
+        ];
+    }
+
+    public static function compound_types_examples(): iterable
+    {
+        yield 'string' => [
+            'data' => new CompoundTypes('foo'),
+            'name' => 'string',
+        ];
+        yield 'intersection type' => [
+            'data' => new CompoundTypes(new ClassWithInterfaces('a')),
+            'name' => 'intersection type',
         ];
     }
 
@@ -1065,98 +1162,6 @@ abstract class SerdeTestCases extends TestCase
         $s = new SerdeCommon(formatters: $this->formatters);
 
         $result = $s->deserialize($this->invalidDictStringKey, $this->format, DictionaryKeyTypes::class);
-    }
-
-    #[Test, DataProvider('mixed_val_property_examples')]
-    public function mixed_val_property(mixed $data): void
-    {
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->validateSerialized($serialized, __FUNCTION__);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: MixedVal::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public static function mixed_val_property_examples(): iterable
-    {
-        yield 'string' => [new MixedVal('hello')];
-        yield 'int' => [new MixedVal(5)];
-        yield 'float' => [new MixedVal(3.14)];
-        yield 'sequence' => [new MixedVal(['a', 'b', 'c'])];
-        yield 'dict' => [new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C'])];
-    }
-
-    #[Test,  DataProvider('mixed_val_property_object_examples')]
-    public function mixed_val_property_object(mixed $data): void
-    {
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->validateSerialized($serialized, __FUNCTION__);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: MixedValObject::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public static function mixed_val_property_object_examples(): iterable
-    {
-        yield 'string' => [new MixedValObject('hello')];
-        yield 'int' => [new MixedValObject(5)];
-        yield 'float' => [new MixedValObject(3.14)];
-        yield 'object' => [new MixedValObject(new Point(1, 2, 3))];
-    }
-
-    #[Test,  DataProvider('union_types_examples')]
-    public function union_types(mixed $data): void
-    {
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->validateSerialized($serialized, __FUNCTION__);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public static function union_types_examples(): iterable
-    {
-        yield 'all primitives' => [new UnionTypes(5, 3.14, 'point', 'email')];
-        yield 'object and string' => [new UnionTypes('five', 3, new Point(1, 2, 3), 'email')];
-        yield 'property with 2 classes' => [new UnionTypes('five', 3, new Point(1, 2, 3), new Email('email@example.com'))];
-        yield 'union with interface, with int' => [new UnionTypeWithInterface(99)];
-        yield 'union with interface, with ACT' => [new UnionTypeWithInterface(new ACT(30))];
-        yield 'union with interface, with SAT' => [new UnionTypeWithInterface(new SAT(1300))];
-        yield 'union with sub-typefield, with string' => [new UnionTypeSubTypeField('hello')];
-        yield 'union with sub-typefield, with array' => [new UnionTypeSubTypeField(['hello' => new Point(1, 2, 3)])];
-    }
-
-    #[Test,  DataProvider('compound_types_examples')]
-    #[RequiresPhp('>=8.2')]
-    public function compound_types(mixed $data): void
-    {
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->validateSerialized($serialized, __FUNCTION__);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
-
-        self::assertEquals($data, $result);
-    }
-
-    public static function compound_types_examples(): iterable
-    {
-        yield 'string' => [new CompoundTypes('foo')];
-        yield 'intersection type' => [new CompoundTypes(new ClassWithInterfaces('a'))];
     }
 
     #[Test]
