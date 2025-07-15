@@ -99,6 +99,7 @@ use Crell\Serde\Records\TransitiveField;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
+use Crell\Serde\Records\UnionTypeSubTypeField;
 use Crell\Serde\Records\UnionTypeWithInterface;
 use Crell\Serde\Records\UnixTimeExample;
 use Crell\Serde\Records\ValueObjects\Age;
@@ -1141,6 +1142,8 @@ abstract class SerdeTestCases extends TestCase
         yield 'union with interface, with int' => [new UnionTypeWithInterface(99)];
         yield 'union with interface, with ACT' => [new UnionTypeWithInterface(new ACT(30))];
         yield 'union with interface, with SAT' => [new UnionTypeWithInterface(new SAT(1300))];
+        yield 'union with sub-typefield, with string' => [new UnionTypeSubTypeField('hello')];
+        yield 'union with sub-typefield, with array' => [new UnionTypeSubTypeField(['hello' => new Point(1, 2, 3)])];
     }
 
     public function union_types_validate(mixed $serialized, mixed $data): void

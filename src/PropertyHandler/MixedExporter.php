@@ -7,6 +7,7 @@ namespace Crell\Serde\PropertyHandler;
 use Crell\AttributeUtils\TypeComplexity;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Attributes\MixedField;
+use Crell\Serde\Attributes\UnionField;
 use Crell\Serde\UnableToDeriveTypeOnMixedField;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Formatter\SupportsTypeIntrospection;
@@ -40,9 +41,17 @@ class MixedExporter implements Importer, Exporter
         $type = $this->deriveType($deserializer, $field, $source)
             ?? throw UnableToDeriveTypeOnMixedField::create($deserializer->deformatter, $field);
 
+        // Folding UnionField in here is not ideal, but it means we don't have to
+        // worry about ordering a UnionExporter vs this one, and this is the only
+        // difference between the fields.
+        $subTypeField = ($field->typeField instanceof UnionField)
+            ? $field->typeField->typeFields[$type] ?? null
+            : null;
+
         return $deserializer->deserialize($source, Field::create(
             serializedName: $field->serializedName,
             phpType: $type,
+            typeField: $subTypeField,
         ));
     }
 

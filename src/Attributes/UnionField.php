@@ -5,43 +5,32 @@ declare(strict_types=1);
 namespace Crell\Serde\Attributes;
 
 use Crell\AttributeUtils\FromReflectionProperty;
-use Crell\AttributeUtils\SupportsScopes;
 use Crell\AttributeUtils\TypeDef;
-use Crell\Serde\CompoundType;
-use Crell\Serde\TypeField;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-class UnionField implements TypeField, SupportsScopes, FromReflectionProperty, CompoundType
+class UnionField extends MixedField implements FromReflectionProperty
 {
-    // @todo This may make more sense on Field. Not sure yet.
+    // @todo This is also stored on Field; it would be nice to read from there,
+    //   but TypeFields don't get a reference back to the Field.  That may be
+    //   something to improve in 2.0.
     public readonly TypeDef $typeDef;
 
     /**
      * @param string $primaryType
      * @param array<string|null> $scopes
      *   The scopes in which this attribute should apply.
-     *
-     * @todo Maybe we need to allow passing manual TypeFields as an array to this attribute,
-     *   so as to allow things like array or datetime in the union?
     */
     public function __construct(
-        public readonly string $primaryType,
-        protected readonly array $scopes = [null],
-    ) {}
+        string $primaryType,
+        public readonly array $typeFields = [],
+        array $scopes = [null],
+    ) {
+        parent::__construct($primaryType, $scopes);
+    }
 
     public function fromReflection(\ReflectionProperty $subject): void
     {
         $this->typeDef ??= new TypeDef($subject->getType());
-    }
-
-    public function primaryType(): string
-    {
-        return $this->primaryType;
-    }
-
-    public function scopes(): array
-    {
-        return $this->scopes;
     }
 
     public function acceptsType(string $type): bool
@@ -51,7 +40,6 @@ class UnionField implements TypeField, SupportsScopes, FromReflectionProperty, C
 
     public function validate(mixed $value): bool
     {
-        // @todo We can probably do better.
-        return true;
+        return $this->typeDef->accepts(get_debug_type($value));
     }
 }
