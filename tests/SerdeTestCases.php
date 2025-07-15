@@ -125,7 +125,7 @@ use Crell\Serde\Records\UnionTypes;
  *
  * - Extend this class.
  * - In setUp(), set the $formatters and $format property accordingly.
- * - Override any of the *_validate() methods desired to introspect
+ * - Optionally define a <method name>_validate($serialized) method to introspect
  *   the serialized data for that test in a format-specific way.
  */
 abstract class SerdeTestCases extends TestCase
@@ -1074,7 +1074,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->mixed_val_property_validate($serialized, $data);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: MixedVal::class);
 
@@ -1090,10 +1090,6 @@ abstract class SerdeTestCases extends TestCase
         yield 'dict' => [new MixedVal(['a' => 'A', 'b' => 'B', 'c' => 'C'])];
     }
 
-    public function mixed_val_property_validate(mixed $serialized, mixed $data): void
-    {
-    }
-
     #[Test,  DataProvider('mixed_val_property_object_examples')]
     public function mixed_val_property_object(mixed $data): void
     {
@@ -1101,7 +1097,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->mixed_val_property_object_validate($serialized, $data);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: MixedValObject::class);
 
@@ -1116,10 +1112,6 @@ abstract class SerdeTestCases extends TestCase
         yield 'object' => [new MixedValObject(new Point(1, 2, 3))];
     }
 
-    public function mixed_val_property_object_validate(mixed $serialized, mixed $data): void
-    {
-    }
-
     #[Test,  DataProvider('union_types_examples')]
     public function union_types(mixed $data): void
     {
@@ -1127,7 +1119,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->union_types_validate($serialized, $data);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
@@ -1146,10 +1138,6 @@ abstract class SerdeTestCases extends TestCase
         yield 'union with sub-typefield, with array' => [new UnionTypeSubTypeField(['hello' => new Point(1, 2, 3)])];
     }
 
-    public function union_types_validate(mixed $serialized, mixed $data): void
-    {
-    }
-
     #[Test,  DataProvider('compound_types_examples')]
     #[RequiresPhp('>=8.2')]
     public function compound_types(mixed $data): void
@@ -1158,7 +1146,7 @@ abstract class SerdeTestCases extends TestCase
 
         $serialized = $s->serialize($data, $this->format);
 
-        $this->compound_types_validate($serialized, $data);
+        $this->validateSerialized($serialized, __FUNCTION__);
 
         $result = $s->deserialize($serialized, from: $this->format, to: $data::class);
 
@@ -1169,10 +1157,6 @@ abstract class SerdeTestCases extends TestCase
     {
         yield 'string' => [new CompoundTypes('foo')];
         yield 'intersection type' => [new CompoundTypes(new ClassWithInterfaces('a'))];
-    }
-
-    public function compound_types_validate(mixed $serialized, mixed $data): void
-    {
     }
 
     #[Test]
