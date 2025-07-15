@@ -14,6 +14,7 @@ use Crell\Serde\Formatter\SupportsCollecting;
 use Crell\Serde\PropertyHandler\Exporter;
 use Crell\Serde\PropertyHandler\ObjectExporter;
 use Crell\Serde\PropertyHandler\ObjectImporter;
+use Crell\Serde\Records\ACT;
 use Crell\Serde\Records\AliasedFields;
 use Crell\Serde\Records\AllFieldTypes;
 use Crell\Serde\Records\BackedSize;
@@ -80,6 +81,7 @@ use Crell\Serde\Records\RequiresFieldValues;
 use Crell\Serde\Records\RequiresFieldValuesClass;
 use Crell\Serde\Records\RootMap\Type;
 use Crell\Serde\Records\RootMap\TypeB;
+use Crell\Serde\Records\SAT;
 use Crell\Serde\Records\ScalarArrays;
 use Crell\Serde\Records\SequenceOfStrings;
 use Crell\Serde\Records\Shapes\Box;
@@ -97,6 +99,7 @@ use Crell\Serde\Records\TransitiveField;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
+use Crell\Serde\Records\UnionTypeWithInterface;
 use Crell\Serde\Records\UnixTimeExample;
 use Crell\Serde\Records\ValueObjects\Age;
 use Crell\Serde\Records\ValueObjects\Email;
@@ -1135,6 +1138,9 @@ abstract class SerdeTestCases extends TestCase
         yield 'all primitives' => [new UnionTypes(5, 3.14, 'point', 'email')];
         yield 'object and string' => [new UnionTypes('five', 3, new Point(1, 2, 3), 'email')];
         yield 'property with 2 classes' => [new UnionTypes('five', 3, new Point(1, 2, 3), new Email('email@example.com'))];
+        yield 'union with interface, with int' => [new UnionTypeWithInterface(99)];
+        yield 'union with interface, with ACT' => [new UnionTypeWithInterface(new ACT(30))];
+        yield 'union with interface, with SAT' => [new UnionTypeWithInterface(new SAT(1300))];
     }
 
     public function union_types_validate(mixed $serialized, mixed $data): void
