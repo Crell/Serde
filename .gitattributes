@@ -15,6 +15,7 @@
 /tests              export-ignore
 /docs               export-ignore
 /docker             export-ignore
+/phpdocker          export-ignore
 /benchmarks         export-ignore
 /docker-compose.yml export-ignore
 /phpbench.json      export-ignore
