@@ -28,11 +28,21 @@ class MixedExporter implements Importer, Exporter
 {
     public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
+        $type = \get_debug_type($value);
+
+        // Folding UnionField in here is not ideal, but it means we don't have to
+        // worry about ordering a UnionExporter vs this one, and this is the only
+        // difference between the fields.
+        $subTypeField = ($field->typeField instanceof UnionField)
+            ? $field->typeField->typeFields[$type] ?? null
+            : null;
+
         // We need to bypass the circular reference check in Serializer::serialize(),
         // or else an object would always fail here.
         return $serializer->doSerialize($value, $runningValue, Field::create(
             serializedName: $field->serializedName,
-            phpType: \get_debug_type($value),
+            phpType: $type,
+            typeField: $subTypeField,
         ));
     }
 

@@ -6,6 +6,7 @@ namespace Crell\Serde\Attributes;
 
 use Crell\AttributeUtils\FromReflectionProperty;
 use Crell\AttributeUtils\TypeDef;
+use Crell\Serde\TypeField;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class UnionField extends MixedField implements FromReflectionProperty
@@ -17,9 +18,13 @@ class UnionField extends MixedField implements FromReflectionProperty
 
     /**
      * @param string $primaryType
+     * @param array<string, TypeField> $typeFields
+     *   A list of TypeFields that should apply only if the specified value is
+     *   one of the types in the union.  The key is the type, the value is a TypeField
+     *   instance.
      * @param array<string|null> $scopes
      *   The scopes in which this attribute should apply.
-    */
+     */
     public function __construct(
         string $primaryType,
         public readonly array $typeFields = [],
