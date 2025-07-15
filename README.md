@@ -1400,6 +1400,8 @@ If you discover any security related issues, please use the [GitHub security rep
 
 Initial development of this library was sponsored by [TYPO3 GmbH](https://typo3.com/).
 
+Additional development sponsored in part by [MakersHub](https://makershub.ai/).
+
 ## License
 
 The Lesser GPL version 3 or later. Please see [License File](LICENSE.md) for more information.
