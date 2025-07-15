@@ -9,7 +9,7 @@ use Crell\Serde\Attributes\StaticTypeMap;
 class UnionTypeWithInterface
 {
     public function __construct(
-        public int|StandardTest $value,
+        public int|StandardizedTest $value,
     ) {}
 }
 
@@ -17,18 +17,4 @@ class UnionTypeWithInterface
     'act' => ACT::class,
     'sat' => SAT::class,
 ])]
-interface StandardTest {}
-
-class ACT implements StandardTest
-{
-    public function __construct(
-        public int $score,
-    ) {}
-}
-
-class SAT implements StandardTest
-{
-    public function __construct(
-        public int $score,
-    ) {}
-}
+interface StandardizedTest {}

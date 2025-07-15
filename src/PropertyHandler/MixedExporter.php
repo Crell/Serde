@@ -88,7 +88,7 @@ class MixedExporter implements Importer, Exporter
             // and a suggested type is specified, assume the specified type.
             return $typeField->suggestedType();
         }
-        if (class_exists($type) || interface_exists($type)) {
+        if ($type && (class_exists($type) || interface_exists($type))) {
             // The deformatter already determined what class it should be. Trust it.
             return $type;
         }
@@ -97,7 +97,7 @@ class MixedExporter implements Importer, Exporter
             // listed types is a class, we can deduce that is probably what it should
             // be deserialized into.  If multiple classes are specified, the first
             // will be used.  If that's not desired, specify a suggested type via attribute.
-            foreach ($field->typeDef->getUnionTypes() as $t) {
+            foreach ($field->typeDef->getUnionTypes() ?? [] as $t) {
                 if (class_exists($t) || interface_exists($t)) {
                     return $t;
                 }
