@@ -191,7 +191,7 @@ trait ArrayBasedDeformatter
                 return $data;
             }
 
-            throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[array_key_first($data)] . ')'));
+            throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[array_key_first($data) ?? ''] . ')'));
         }
 
         if (class_exists($class) || interface_exists($class)) {
