@@ -11,13 +11,16 @@ use Crell\Serde\DeformatterResult;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Serializer;
 use Crell\Serde\UnixTimestampOutOfRange;
+use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
 
 class UnixTimeExporter implements Importer, Exporter {
 
     /**
      * @param Serializer $serializer
      * @param Field $field
-     * @param \DateTimeInterface $value
+     * @param DateTimeInterface $value
      * @param mixed $runningValue
      * @return mixed
      */
@@ -50,7 +53,7 @@ class UnixTimeExporter implements Importer, Exporter {
 
     public function canExport(Field $field, mixed $value, string $format): bool
     {
-        return $field->typeField instanceof UnixTimeField && $value instanceof \DateTimeInterface;
+        return $field->typeField instanceof UnixTimeField && $value instanceof DateTimeInterface;
     }
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
@@ -76,6 +79,6 @@ class UnixTimeExporter implements Importer, Exporter {
 
     public function canImport(Field $field, string $format): bool
     {
-        return $field->typeField instanceof UnixTimeField && in_array($field->phpType, [\DateTimeInterface::class, \DateTime::class, \DateTimeImmutable::class], true);
+        return $field->typeField instanceof UnixTimeField && in_array($field->phpType, [DateTimeInterface::class, DateTime::class, DateTimeImmutable::class], true);
     }
 }

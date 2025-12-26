@@ -226,7 +226,7 @@ trait ArrayBasedDeformatter
      * @param array<string, mixed> $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return array<string, mixed>|DeformatterResult
+     * @return array<string, mixed>|DeformatterResult|null
      */
     public function deserializeObject(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult|null
     {

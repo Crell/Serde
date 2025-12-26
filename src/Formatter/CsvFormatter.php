@@ -11,6 +11,7 @@ use Crell\Serde\CsvFormatRequiresExplicitRowType;
 use Crell\Serde\Deserializer;
 use Crell\Serde\FormatParseError;
 use Crell\Serde\TypeMismatch;
+use RuntimeException;
 use function Crell\fp\amap;
 use function Crell\fp\explode;
 use function Crell\fp\pipe;
@@ -46,7 +47,6 @@ class CsvFormatter implements Formatter, Deformatter, SupportsCollecting
     }
 
     /**
-     * @param Field $rootField
      * @return array<string, mixed>
      */
     public function serializeInitialize(ClassSettings $classDef, Field $rootField): array
@@ -59,7 +59,7 @@ class CsvFormatter implements Formatter, Deformatter, SupportsCollecting
      */
     public function serializeFinalize(mixed $runningValue, ClassSettings $classDef): string
     {
-        $stream = fopen('php://temp/', 'wb') ?: throw new \RuntimeException('Failed to create temp stream.');
+        $stream = fopen('php://temp/', 'wb') ?: throw new RuntimeException('Failed to create temp stream.');
 
         $records = $runningValue['root'][array_key_first($classDef->properties)];
 
@@ -70,7 +70,7 @@ class CsvFormatter implements Formatter, Deformatter, SupportsCollecting
         }
 
         fseek($stream, 0);
-        return stream_get_contents($stream) ?: throw new \RuntimeException('Failed to get stream contents.');
+        return stream_get_contents($stream) ?: throw new RuntimeException('Failed to get stream contents.');
     }
 
     public function deserializeInitialize(

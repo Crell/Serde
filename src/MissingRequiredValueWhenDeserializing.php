@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class MissingRequiredValueWhenDeserializing extends \InvalidArgumentException implements SerdeException
+use InvalidArgumentException;
+
+class MissingRequiredValueWhenDeserializing extends InvalidArgumentException implements SerdeException
 {
     public readonly string $name;
     public readonly string $class;

@@ -16,7 +16,7 @@ trait StreamFormatter
         return Field::create('root', $type);
     }
 
-    public function serializeInitialize(ClassSettings $classDef, Field $rootField): mixed
+    public function serializeInitialize(ClassSettings $classDef, Field $rootField): FormatterStream
     {
         return FormatterStream::new(fopen('php://temp/', 'wb'));
     }

@@ -8,11 +8,12 @@ use Crell\AttributeUtils\TypeComplexity;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Attributes\MixedField;
 use Crell\Serde\Attributes\UnionField;
-use Crell\Serde\UnableToDeriveTypeOnMixedField;
 use Crell\Serde\Deserializer;
 use Crell\Serde\Formatter\SupportsTypeIntrospection;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
+use Crell\Serde\UnableToDeriveTypeOnMixedField;
+use function get_debug_type;
 
 /**
  * Exporter/importer for `mixed` properties.
@@ -28,7 +29,7 @@ class MixedExporter implements Importer, Exporter
 {
     public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
-        $type = \get_debug_type($value);
+        $type = get_debug_type($value);
 
         // Folding UnionField in here is not ideal, but it means we don't have to
         // worry about ordering a UnionExporter vs this one, and this is the only

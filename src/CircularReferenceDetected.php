@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class CircularReferenceDetected extends \RuntimeException
+use RuntimeException;
+
+class CircularReferenceDetected extends RuntimeException
 {
 
     public static function create(object $object): self

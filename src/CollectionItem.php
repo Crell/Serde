@@ -17,11 +17,11 @@ use Crell\Serde\Attributes\Field;
  * @see Dict
  * @see Sequence
  */
-class CollectionItem
+readonly class CollectionItem
 {
     public function __construct(
-        public readonly Field $field,
-        public readonly mixed $value,
+        public Field $field,
+        public mixed $value,
     ) {
     }
 }

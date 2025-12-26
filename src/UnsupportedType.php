@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class UnsupportedType extends \RuntimeException implements SerdeException
+use RuntimeException;
+
+class UnsupportedType extends RuntimeException implements SerdeException
 {
     public readonly string $type;
 

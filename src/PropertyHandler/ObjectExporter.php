@@ -6,15 +6,16 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\CollectionItem;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Dict;
 use Crell\Serde\InvalidFieldForFlattening;
-use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMap;
 use function Crell\fp\pipe;
 use function Crell\fp\reduce;
 use function Crell\fp\reduceWithKeys;
+use function get_debug_type;
 
 class ObjectExporter implements Exporter
 {
@@ -34,7 +35,7 @@ class ObjectExporter implements Exporter
         $propReader = (fn (string $prop): mixed
             => array_key_exists($prop, get_object_vars($this)) ? $this->$prop : DeformatterResult::Missing)->bindTo($value, $value);
 
-        /** @var \Crell\Serde\Dict $dict */
+        /** @var Dict $dict */
         $dict = pipe(
             $serializer->propertiesFor($value::class),
             reduce(new Dict(), fn(Dict $dict, Field $f) => $this->flattenValue($dict, $f, $propReader, $serializer)),
@@ -115,7 +116,7 @@ class ObjectExporter implements Exporter
         if ($map) {
             $extra[$map->keyField()] = $map->findIdentifier($val::class);
         }
-        $f = Field::create(serializedName: "$key", phpType: \get_debug_type($val), extraProperties: $extra);
+        $f = Field::create(serializedName: (string)$key, phpType: get_debug_type($val), extraProperties: $extra);
         return $dict->add(new CollectionItem(field: $f, value: $val));
     }
 

@@ -6,12 +6,13 @@ namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
+use UnitEnum;
 
 class EnumOnArrayImporter extends EnumExporter
 {
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
-        if (($source[$field->serializedName] ?? null) instanceof \UnitEnum) {
+        if (($source[$field->serializedName] ?? null) instanceof UnitEnum) {
             return $source[$field->serializedName];
         }
         return parent::importValue($deserializer, $field, $source);

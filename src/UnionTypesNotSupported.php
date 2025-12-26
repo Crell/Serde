@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class UnionTypesNotSupported extends \TypeError
-{
-    public readonly \ReflectionProperty $property;
+use ReflectionProperty;
+use TypeError;
 
-    public static function create(\ReflectionProperty $property): self
+class UnionTypesNotSupported extends TypeError
+{
+    public readonly ReflectionProperty $property;
+
+    public static function create(ReflectionProperty $property): self
     {
         $new = new self();
         $new->property = $property;

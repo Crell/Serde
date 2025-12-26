@@ -6,8 +6,8 @@ namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
-use Crell\Serde\Deserializer;
 use Crell\Serde\DeformatterResult;
+use Crell\Serde\Deserializer;
 
 /**
  * Decode data from a given format when called by an Importer.
@@ -45,7 +45,7 @@ interface Deformatter
      * @param mixed $decoded
      * @param Field $field
      * @param Deserializer $deserializer
-     * @return mixed[]|DeformatterResult|null
+     * @return array<int|string, mixed>|DeformatterResult|null
      */
     public function deserializeSequence(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult|null;
 

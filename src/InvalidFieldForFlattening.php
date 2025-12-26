@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Attributes\Field;
+use InvalidArgumentException;
 
-class InvalidFieldForFlattening extends \InvalidArgumentException implements SerdeException
+class InvalidFieldForFlattening extends InvalidArgumentException implements SerdeException
 {
     public readonly Field $field;
 

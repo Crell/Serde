@@ -13,6 +13,7 @@ use Crell\Serde\Sequence;
 use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
+use function get_debug_type;
 
 class SequenceExporter implements Exporter, Importer
 {
@@ -30,7 +31,7 @@ class SequenceExporter implements Exporter, Importer
     }
 
     /**
-     * @param mixed[] $value
+     * @param iterable<string|int, mixed> $value
      */
     protected function iterableToSequence(iterable $value): Sequence
     {
@@ -38,7 +39,7 @@ class SequenceExporter implements Exporter, Importer
 
         $seq->items = (static function () use ($value) {
             foreach ($value as $k => $v) {
-                $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
+                $f = Field::create(serializedName: (string)$k, phpType: get_debug_type($v));
                 yield new CollectionItem(field: $f, value: $v);
             }
         })();
@@ -46,13 +47,13 @@ class SequenceExporter implements Exporter, Importer
     }
 
     /**
-     * @param array<mixed> $value
+     * @param array<string|int, mixed> $value
      */
     protected function arrayToSequence(array $value): Sequence
     {
         $items = [];
         foreach ($value as $k => $v) {
-            $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
+            $f = Field::create(serializedName: (string)$k, phpType: get_debug_type($v));
             $items[] = new CollectionItem(field: $f, value: $v);
         }
         return new Sequence($items);

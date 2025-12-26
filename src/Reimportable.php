@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-// @phpstan-ignore trait.unused
+use ReflectionClass;
+
+/** @phpstan-ignore trait.unused */
 trait Reimportable
 {
     /**
@@ -16,7 +18,7 @@ trait Reimportable
     public static function __set_state(array $data): static
     {
         static $reflector;
-        $reflector ??= new \ReflectionClass(static::class);
+        $reflector ??= new ReflectionClass(static::class);
         $new = $reflector->newInstanceWithoutConstructor();
         foreach ($data as $k => $v) {
             $new->$k = $v;

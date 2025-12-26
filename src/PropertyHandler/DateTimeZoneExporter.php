@@ -8,13 +8,14 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
+use DateTimeZone;
 
 class DateTimeZoneExporter implements Exporter, Importer
 {
     /**
      * @param Serializer $serializer
      * @param Field $field
-     * @param \DateTimeZone $value
+     * @param DateTimeZone $value
      * @param mixed $runningValue
      * @return mixed
      */
@@ -26,10 +27,10 @@ class DateTimeZoneExporter implements Exporter, Importer
 
     public function canExport(Field $field, mixed $value, string $format): bool
     {
-        return $field->phpType === \DateTimeZone::class;
+        return $field->phpType === DateTimeZone::class;
     }
 
-    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): ?DateTimeZone
     {
         $string = $deserializer->deformatter->deserializeString($source, $field);
 
@@ -37,11 +38,11 @@ class DateTimeZoneExporter implements Exporter, Importer
             return null;
         }
 
-        return new \DateTimeZone($string);
+        return new DateTimeZone($string);
     }
 
     public function canImport(Field $field, string $format): bool
     {
-        return $field->phpType === \DateTimeZone::class;
+        return $field->phpType === DateTimeZone::class;
     }
 }

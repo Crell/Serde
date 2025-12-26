@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Crell\Serde\PropertyHandler;
 
 use Crell\Serde\Attributes\Field;
-use Crell\Serde\Deserializer;
 use Crell\Serde\DeformatterResult;
+use Crell\Serde\Deserializer;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
+use Crell\Serde\TypeMismatch;
+use ReflectionEnum;
 
 class EnumExporter implements Exporter, Importer
 {
@@ -33,9 +35,9 @@ class EnumExporter implements Exporter, Importer
     {
         // It's kind of amusing that both of these work, but they work.
         $val = match ($field->typeCategory) {
-            TypeCategory::UnitEnum => $deserializer->deformatter->deserializeString($source, $field),
+            TypeCategory::UnitEnum, TypeCategory::StringEnum => $deserializer->deformatter->deserializeString($source, $field),
             TypeCategory::IntEnum => $deserializer->deformatter->deserializeInt($source, $field),
-            TypeCategory::StringEnum => $deserializer->deformatter->deserializeString($source, $field),
+            default => throw TypeMismatch::create($field->phpName, $field->phpType, get_debug_type($source)),
         };
 
         if ($field->nullable && $val === null) {
@@ -50,8 +52,9 @@ class EnumExporter implements Exporter, Importer
         return match ($field->typeCategory) {
             // The first line will only be called if $val is a string, but PHPStan thinks it could be an array.
             // @phpstan-ignore-next-line
-            TypeCategory::UnitEnum => (new \ReflectionEnum($field->phpType))->getCase($val)->getValue(),
+            TypeCategory::UnitEnum => (new ReflectionEnum($field->phpType))->getCase($val)->getValue(),
             TypeCategory::IntEnum, TypeCategory::StringEnum => $field->phpType::from($val),
+            default => throw TypeMismatch::create($field->phpName, $field->phpType, get_debug_type($source)),
         };
     }
 

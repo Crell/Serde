@@ -52,8 +52,6 @@ class TomlFormatter implements Formatter, Deformatter, SupportsCollecting, Suppo
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param Sequence $next
      * @return array<string, mixed>
      */
     public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): array
@@ -64,8 +62,6 @@ class TomlFormatter implements Formatter, Deformatter, SupportsCollecting, Suppo
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param Dict $next
      * @return array<string, mixed>
      */
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): array

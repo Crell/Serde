@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class ResourcePropertiesNotAllowed extends \InvalidArgumentException
+use InvalidArgumentException;
+
+class ResourcePropertiesNotAllowed extends InvalidArgumentException
 {
     public readonly string $name;
 

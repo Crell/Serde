@@ -27,8 +27,6 @@ trait ArrayBasedFormatter
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param int|null $next
      * @return array<string, mixed>
      */
     public function serializeInt(mixed $runningValue, Field $field, ?int $next): array
@@ -39,8 +37,6 @@ trait ArrayBasedFormatter
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param float|null $next
      * @return array<string, mixed>
      */
     public function serializeFloat(mixed $runningValue, Field $field, ?float $next): array
@@ -51,8 +47,6 @@ trait ArrayBasedFormatter
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param string|null $next
      * @return array<string, mixed>
      */
     public function serializeString(mixed $runningValue, Field $field, ?string $next): array
@@ -63,8 +57,6 @@ trait ArrayBasedFormatter
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param bool|null $next
      * @return array<string, mixed>
      */
     public function serializeBool(mixed $runningValue, Field $field, ?bool $next): array
@@ -75,8 +67,6 @@ trait ArrayBasedFormatter
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param Sequence $next
      * @return array<string, mixed>
      */
     public function serializeSequence(mixed $runningValue, Field $field, Sequence $next, Serializer $serializer): array
@@ -93,8 +83,6 @@ trait ArrayBasedFormatter
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param Dict $next
      * @return array<string, mixed>
      */
     public function serializeDictionary(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): array
@@ -114,8 +102,6 @@ trait ArrayBasedFormatter
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param Dict $next
      * @return array<string, mixed>
      */
     public function serializeObject(mixed $runningValue, Field $field, Dict $next, Serializer $serializer): array
@@ -125,8 +111,6 @@ trait ArrayBasedFormatter
 
     /**
      * @param array<string, mixed> $runningValue
-     * @param Field $field
-     * @param int $next
      * @return array<string, mixed>
      */
     public function serializeNull(mixed $runningValue, Field $field, mixed $next): mixed

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Crell\Serde\PropertyHandler;
 
+use Closure;
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
@@ -12,11 +13,13 @@ use Crell\Serde\InvalidArrayKeyType;
 use Crell\Serde\MissingRequiredValueWhenDeserializing;
 use Crell\Serde\DeformatterResult;
 use Crell\Serde\TypeCategory;
+use ReflectionClass;
+use ReflectionException;
 
 class ObjectImporter implements Importer
 {
-    protected readonly \Closure $populator;
-    protected readonly \Closure $methodCaller;
+    protected readonly Closure $populator;
+    protected readonly Closure $methodCaller;
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
     {
@@ -40,7 +43,6 @@ class ObjectImporter implements Importer
     /**
      * @param array<string, mixed> $dict
      * @param class-string $class
-     * @param Deserializer $deserializer
      * @return array{object, mixed[]}
      */
     protected function populateObject(array $dict, string $class, Deserializer $deserializer, ?Field $parentField = null): array
@@ -159,12 +161,12 @@ class ObjectImporter implements Importer
      *   An array of method names to invoke after the properties are populated.
      * @return object
      *   The populated object.
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function createObject(string $class, array $props, array $callbacks): object
     {
         // Make an empty instance of the target class.
-        $rClass = new \ReflectionClass($class);
+        $rClass = new ReflectionClass($class);
         $new = $rClass->newInstanceWithoutConstructor();
 
         // Cache the populator template since it will be rebound

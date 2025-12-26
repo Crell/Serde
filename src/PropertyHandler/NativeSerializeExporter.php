@@ -11,6 +11,8 @@ use Crell\Serde\Dict;
 use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
+use ReflectionClass;
+use function get_debug_type;
 
 class NativeSerializeExporter implements Exporter, Importer
 {
@@ -23,7 +25,7 @@ class NativeSerializeExporter implements Exporter, Importer
 
         foreach ($propValues as $k => $v) {
             $dict->items[] = new CollectionItem(
-                field: Field::create(serializedName: "$k", phpType: \get_debug_type($v)),
+                field: Field::create(serializedName: (string)$k, phpType: get_debug_type($v)),
                 value: $v,
             );
         }
@@ -43,7 +45,7 @@ class NativeSerializeExporter implements Exporter, Importer
         return $field->typeCategory === TypeCategory::Object && method_exists($value, '__serialize');
     }
 
-    public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
+    public function importValue(Deserializer $deserializer, Field $field, mixed $source): ?object
     {
         // The data may not have any relation at all to the original object's
         // properties.  So deserialize as a basic dictionary instead.
@@ -64,7 +66,7 @@ class NativeSerializeExporter implements Exporter, Importer
         }
 
         // Make an empty instance of the target class.
-        $rClass = new \ReflectionClass($class);
+        $rClass = new ReflectionClass($class);
         $new = $rClass->newInstanceWithoutConstructor();
 
         // We wouldn't have gotten here unless this method is defined, but PHPStan

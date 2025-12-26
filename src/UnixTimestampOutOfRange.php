@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Attributes\Enums\UnixTimeResolution;
+use DateTimeInterface;
+use InvalidArgumentException;
 
-class UnixTimestampOutOfRange extends \InvalidArgumentException implements SerdeException
+class UnixTimestampOutOfRange extends InvalidArgumentException implements SerdeException
 {
-    public readonly \DateTimeInterface $timestamp;
+    public readonly DateTimeInterface $timestamp;
     public readonly UnixTimeResolution $resolution;
 
-    public static function create(\DateTimeInterface $timestamp, UnixTimeResolution $resolution): self
+    public static function create(DateTimeInterface $timestamp, UnixTimeResolution $resolution): self
     {
         $new = new self();
         $new->timestamp = $timestamp;

@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Attributes\Field;
+use InvalidArgumentException;
 
-class TypeMapOnNonObjectField extends \InvalidArgumentException
+class TypeMapOnNonObjectField extends InvalidArgumentException
 {
     public readonly Field $field;
 

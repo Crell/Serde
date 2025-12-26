@@ -15,9 +15,13 @@ use Crell\Serde\KeyType;
 use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
 use Crell\Serde\TypeCategory;
+use function get_debug_type;
 
 class DictionaryExporter implements Exporter, Importer
 {
+    /**
+     * @param array<string, mixed> $value
+     */
     public function exportValue(Serializer $serializer, Field $field, mixed $value, mixed $runningValue): mixed
     {
         /** @var DictionaryField|null $typeField */
@@ -33,11 +37,11 @@ class DictionaryExporter implements Exporter, Importer
     }
 
     /**
-     * @param array<mixed, mixed> $value
+     * @param array<string|int, mixed> $value
      */
     protected function iterableToDict(iterable $value, Field $field): Dict
     {
-        $dict = new Dict((static function () use ($value, $field) {
+        return new Dict((static function () use ($value, $field) {
             /** @var DictionaryField|null $typeField */
             $typeField = $field->typeField;
             foreach ($value as $k => $v) {
@@ -47,16 +51,14 @@ class DictionaryExporter implements Exporter, Importer
                 // of the key going out in the Exporter. The Formatter
                 // will have to do so, if it cares. However, we can still
                 // detect and reject string-in-int.
-                if ($typeField?->keyType === KeyType::Int && \get_debug_type($k) === 'string') {
+                if ($typeField?->keyType === KeyType::Int && get_debug_type($k) === 'string') {
                     // It's an int field, but the key is a string. That's a no-no.
                     throw InvalidArrayKeyType::create($field, 'string');
                 }
-                $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
+                $f = Field::create(serializedName: (string)$k, phpType: get_debug_type($v));
                 yield new CollectionItem(field: $f, value: $v);
             }
         })());
-
-        return $dict;
     }
 
     /**
@@ -75,11 +77,11 @@ class DictionaryExporter implements Exporter, Importer
             // of the key going out in the Exporter. The Formatter
             // will have to do so, if it cares. However, we can still
             // detect and reject string-in-int.
-            if ($typeField?->keyType === KeyType::Int && \get_debug_type($k) === 'string') {
+            if ($typeField?->keyType === KeyType::Int && get_debug_type($k) === 'string') {
                 // It's an int field, but the key is a string. That's a no-no.
                 throw InvalidArrayKeyType::create($field, 'string');
             }
-            $f = Field::create(serializedName: "$k", phpType: \get_debug_type($v));
+            $f = Field::create(serializedName: (string)$k, phpType: get_debug_type($v));
             $items[] = new CollectionItem(field: $f, value: $v);
         }
 

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class FieldTypeIncompatible extends \InvalidArgumentException implements SerdeException
+use InvalidArgumentException;
+
+class FieldTypeIncompatible extends InvalidArgumentException implements SerdeException
 {
     public readonly string $typeField;
     public readonly string $propertyType;

@@ -6,8 +6,9 @@ namespace Crell\Serde;
 
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Formatter\Deformatter;
+use RuntimeException;
 
-class UnableToDeriveTypeOnMixedField extends \RuntimeException
+class UnableToDeriveTypeOnMixedField extends RuntimeException
 {
     public readonly Deformatter $deformatter;
     public readonly Field $field;

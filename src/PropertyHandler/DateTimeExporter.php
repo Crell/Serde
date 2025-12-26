@@ -9,13 +9,17 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;
 use Crell\Serde\DeformatterResult;
 use Crell\Serde\Serializer;
+use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
 
 class DateTimeExporter implements Exporter, Importer
 {
     /**
      * @param Serializer $serializer
      * @param Field $field
-     * @param \DateTimeInterface $value
+     * @param DateTimeInterface $value
      * @param mixed $runningValue
      * @return mixed
      */
@@ -25,17 +29,17 @@ class DateTimeExporter implements Exporter, Importer
         $typeField = $field->typeField;
 
         if ($timezone = $typeField?->timezone) {
-            if ($value instanceof \DateTime) {
+            if ($value instanceof DateTime) {
                 // Seriously, who still uses DateTime?
                 $value = clone($value);
-                $value->setTimezone(new \DateTimeZone($timezone));
+                $value->setTimezone(new DateTimeZone($timezone));
             } else {
-                /** @var \DateTimeImmutable $value */
-                $value = $value->setTimezone(new \DateTimeZone($timezone));
+                /** @var DateTimeImmutable $value */
+                $value = $value->setTimezone(new DateTimeZone($timezone));
             }
         }
 
-        $format = $typeField->format ?? \DateTimeInterface::RFC3339_EXTENDED;
+        $format = $typeField->format ?? DateTimeInterface::RFC3339_EXTENDED;
 
         $string = $value->format($format);
         return $serializer->formatter->serializeString($runningValue, $field, $string);
@@ -43,7 +47,7 @@ class DateTimeExporter implements Exporter, Importer
 
     public function canExport(Field $field, mixed $value, string $format): bool
     {
-        return $value instanceof \DateTimeInterface;
+        return $value instanceof DateTimeInterface;
     }
 
     public function importValue(Deserializer $deserializer, Field $field, mixed $source): mixed
@@ -69,6 +73,6 @@ class DateTimeExporter implements Exporter, Importer
 
     public function canImport(Field $field, string $format): bool
     {
-        return in_array($field->phpType, [\DateTimeInterface::class, \DateTime::class, \DateTimeImmutable::class], true);
+        return in_array($field->phpType, [DateTimeInterface::class, DateTime::class, DateTimeImmutable::class], true);
     }
 }

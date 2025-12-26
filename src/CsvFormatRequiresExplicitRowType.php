@@ -6,8 +6,9 @@ namespace Crell\Serde;
 
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\Field;
+use InvalidArgumentException;
 
-class CsvFormatRequiresExplicitRowType extends \InvalidArgumentException implements SerdeException
+class CsvFormatRequiresExplicitRowType extends InvalidArgumentException implements SerdeException
 {
     public readonly ClassSettings $classDef;
     public readonly Field $rowField;

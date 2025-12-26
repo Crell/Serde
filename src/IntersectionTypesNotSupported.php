@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Crell\Serde;
 
-class IntersectionTypesNotSupported extends \TypeError
-{
-    public readonly \ReflectionProperty $property;
+use ReflectionProperty;
+use TypeError;
 
-    public static function create(\ReflectionProperty $property): self
+class IntersectionTypesNotSupported extends TypeError
+{
+    public readonly ReflectionProperty $property;
+
+    public static function create(ReflectionProperty $property): self
     {
         $new = new self();
         $new->property = $property;
