@@ -150,15 +150,16 @@ trait ArrayBasedDeformatter
             }
             if ($class->assert($data)) {
                 return $data;
-            } else {
-                throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[0]) . ')');
             }
+
+            throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[0]) . ')');
         }
-        else if (class_exists($class) || interface_exists($class)) {
+
+        if (class_exists($class) || interface_exists($class)) {
             return $this->upcastArray($data, $deserializer, $class);
-        } else {
-            return $this->upcastArray($data, $deserializer);
         }
+
+        return $this->upcastArray($data, $deserializer);
     }
 
     public function deserializeDictionary(mixed $decoded, Field $field, Deserializer $deserializer): array|DeformatterResult|null
@@ -188,15 +189,16 @@ trait ArrayBasedDeformatter
             }
             if ($class->assert($data)) {
                 return $data;
-            } else {
-                throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[array_key_first($data)] . ')'));
             }
+
+            throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[array_key_first($data)] . ')'));
         }
-        else if (class_exists($class) || interface_exists($class)) {
+
+        if (class_exists($class) || interface_exists($class)) {
             return $this->upcastArray($data, $deserializer, $class);
-        } else {
-            return $this->upcastArray($data, $deserializer);
         }
+
+        return $this->upcastArray($data, $deserializer);
     }
 
     /**
