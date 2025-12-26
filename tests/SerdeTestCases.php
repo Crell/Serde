@@ -26,6 +26,7 @@ use Crell\Serde\Records\ClassWithPropertyWithTransitiveTypeField;
 use Crell\Serde\Records\ClassWithReducibleProperty;
 use Crell\Serde\Records\CompoundTypes;
 use Crell\Serde\Records\DateTimeExample;
+use Crell\Serde\Records\DateTimeInterfaceExample;
 use Crell\Serde\Records\DictionaryKeyTypes;
 use Crell\Serde\Records\Drupal\EmailItem;
 use Crell\Serde\Records\Drupal\FieldItemList;
@@ -337,6 +338,11 @@ abstract class SerdeTestCases extends TestCase
                 floats: [3.14, 2.7],
                 stringMap: ['a' => 'A'],
                 arrayMap: ['a' => [1, 2, 3]],
+            ),
+        ];
+        yield 'datetimeinterface_type' => [
+            'data' => new DateTimeInterfaceExample(
+                interfaceProperty: new \DateTimeImmutable('2025-12-25 12:34:56.789'),
             ),
         ];
     }
@@ -1057,27 +1063,6 @@ abstract class SerdeTestCases extends TestCase
         $result = $s->deserialize($serialized, from: $this->format, to: DateTimeExample::class);
 
         self::assertEquals($expected, $result);
-    }
-
-    #[Test]
-    public function datetime_field_can_be_datetimeinterface(): void
-    {
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $timeString = '2025-12-25 12:34:56.789';
-        $stampImmutable = new \DateTimeImmutable($timeString);
-
-        $data = new class($stampImmutable) {
-            public function __construct(public readonly \DateTimeInterface $stamp) {}
-        };
-
-        $serialized = $s->serialize($data, $this->format);
-
-        $this->validateSerialized($serialized, __FUNCTION__);
-
-        $result = $s->deserialize($serialized, from: $this->format, to: get_class($data));
-
-        self::assertEquals($data, $result);
     }
 
     #[Test]
