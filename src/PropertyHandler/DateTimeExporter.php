@@ -68,7 +68,10 @@ class DateTimeExporter implements Exporter, Importer
         // an opt-in/out flag to restrict the format on import should be added
         // to DateField to get used here.  Until then, this will do.
 
-        return new ($field->phpType)($string);
+        // If the PHP type is a DateTimeInterface, fulfill that with a DateTimeImmutable.
+        $type = ($field->phpType === \DateTimeInterface::class) ? \DateTimeImmutable::class : $field->phpType;
+
+        return new ($type)($string);
     }
 
     public function canImport(Field $field, string $format): bool

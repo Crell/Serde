@@ -1060,6 +1060,27 @@ abstract class SerdeTestCases extends TestCase
     }
 
     #[Test]
+    public function datetime_field_can_be_datetimeinterface(): void
+    {
+        $s = new SerdeCommon(formatters: $this->formatters);
+
+        $timeString = '2025-12-25 12:34:56.789';
+        $stampImmutable = new \DateTimeImmutable($timeString);
+
+        $data = new class($stampImmutable) {
+            public function __construct(public readonly \DateTimeInterface $stamp) {}
+        };
+
+        $serialized = $s->serialize($data, $this->format);
+
+        $this->validateSerialized($serialized, __FUNCTION__);
+
+        $result = $s->deserialize($serialized, from: $this->format, to: get_class($data));
+
+        self::assertEquals($data, $result);
+    }
+
+    #[Test]
     public function unixtime_fields_in_range_are_supported(): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
