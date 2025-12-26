@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Crell\Serde\Formatter;
 
 use Crell\Serde\Attributes\Field;
-use Crell\Serde\Attributes\SequenceField;
+use Crell\Serde\DeformatterResult;
 use Crell\Serde\Deserializer;
 use Crell\Serde\FormatParseError;
-use Crell\Serde\DeformatterResult;
 use Crell\Serde\TypeCategory;
 use Crell\Serde\TypeMismatch;
 use Crell\Serde\ValueType;
 use function Crell\fp\first;
 use function Crell\fp\pipe;
 use function Crell\fp\reduceWithKeys;
+use function get_debug_type;
 
 /**
  * Utility implementations for array-based formats.
@@ -35,7 +35,7 @@ trait ArrayBasedDeformatter
 
         if ($field->strict) {
             if (!is_int($value) && !($field->nullable && is_null($value))) {
-                throw TypeMismatch::create($field->serializedName, 'int', \get_debug_type($decoded[$field->serializedName]));
+                throw TypeMismatch::create($field->serializedName, 'int', get_debug_type($decoded[$field->serializedName]));
             }
             return $decoded[$field->serializedName];
         }
@@ -54,7 +54,7 @@ trait ArrayBasedDeformatter
 
         if ($field->strict) {
             if (!is_int($value) && !is_float($value) && !($field->nullable && is_null($value))) {
-                throw TypeMismatch::create($field->serializedName, 'float', \get_debug_type($decoded[$field->serializedName]));
+                throw TypeMismatch::create($field->serializedName, 'float', get_debug_type($decoded[$field->serializedName]));
             }
             return $decoded[$field->serializedName];
         }
@@ -73,7 +73,7 @@ trait ArrayBasedDeformatter
 
         if ($field->strict) {
             if (!is_bool($value) && !($field->nullable && is_null($value))) {
-                throw TypeMismatch::create($field->serializedName, 'bool', \get_debug_type($decoded[$field->serializedName]));
+                throw TypeMismatch::create($field->serializedName, 'bool', get_debug_type($decoded[$field->serializedName]));
             }
             return $decoded[$field->serializedName];
         }
@@ -92,7 +92,7 @@ trait ArrayBasedDeformatter
 
         if ($field->strict) {
             if (!is_string($value) && !($field->nullable && is_null($value))) {
-                throw TypeMismatch::create($field->serializedName, 'string', \get_debug_type($value));
+                throw TypeMismatch::create($field->serializedName, 'string', get_debug_type($value));
             }
             return $value;
         }
@@ -110,7 +110,7 @@ trait ArrayBasedDeformatter
 
         // Strict and weak mode are the same here; null must always be null.
         if (!is_null($decoded[$field->serializedName])) {
-            throw TypeMismatch::create($field->serializedName, 'null', \get_debug_type($decoded[$field->serializedName]));
+            throw TypeMismatch::create($field->serializedName, 'null', get_debug_type($decoded[$field->serializedName]));
         }
 
         return $decoded[$field->serializedName];
@@ -130,7 +130,7 @@ trait ArrayBasedDeformatter
         $data = $decoded[$field->serializedName];
 
         if (!is_array($data)) {
-            throw TypeMismatch::create($field->serializedName, 'array (sequence)', \get_debug_type($decoded[$field->serializedName]));
+            throw TypeMismatch::create($field->serializedName, 'array (sequence)', get_debug_type($decoded[$field->serializedName]));
         }
 
         if (!array_is_list($data)) {
@@ -143,7 +143,7 @@ trait ArrayBasedDeformatter
         // This line is fine, because if typeField is somehow not of a type with an
         // arrayType property, it resolves to null anyway, which is exactly what we want.
         // @phpstan-ignore-next-line
-        $class = $field?->typeField?->arrayType ?? '';
+        $class = $field->typeField?->arrayType ?? '';
         if ($class instanceof ValueType) {
             if (!$field->strict) {
                 $data = $class->coerce($data);
@@ -152,7 +152,7 @@ trait ArrayBasedDeformatter
                 return $data;
             }
 
-            throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[0]) . ')');
+            throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . get_debug_type($data[0]) . ')');
         }
 
         if (class_exists($class) || interface_exists($class)) {
@@ -182,7 +182,7 @@ trait ArrayBasedDeformatter
         // This line is fine, because if typeField is somehow not of a type with an
         // arrayType property, it resolves to null anyway, which is exactly what we want.
         // @phpstan-ignore-next-line
-        $class = $field?->typeField?->arrayType ?? '';
+        $class = $field->typeField?->arrayType ?? '';
         if ($class instanceof ValueType) {
             if (!$field->strict) {
                 $data = $class->coerce($data);
@@ -191,7 +191,7 @@ trait ArrayBasedDeformatter
                 return $data;
             }
 
-            throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . \get_debug_type($data[array_key_first($data) ?? ''] . ')'));
+            throw TypeMismatch::create($field->serializedName, "array($class->name)", "array(" . get_debug_type($data[array_key_first($data) ?? ''] . ')'));
         }
 
         if (class_exists($class) || interface_exists($class)) {
@@ -214,7 +214,7 @@ trait ArrayBasedDeformatter
         $upcast = function(array $ret, mixed $v, int|string $k) use ($deserializer, $type, $data) {
             $map = $type ? $deserializer->typeMapper->typeMapForClass($type) : null;
             $arrayType = $map?->findClass($v[$map->keyField()]) ?? $type ?? get_debug_type($v);
-            $f = Field::create(serializedName: "$k", phpType: $arrayType);
+            $f = Field::create(serializedName: (string)$k, phpType: $arrayType);
             $ret[$k] = $deserializer->deserialize($data, $f);
             return $ret;
         };
@@ -299,7 +299,7 @@ trait ArrayBasedDeformatter
         if ($collectingArray && $map = $deserializer->typeMapper->typeMapForField($collectingArray)) {
             foreach ($remaining as $k => $v) {
                 $class = $map->findClass($v[$map->keyField()]);
-                $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: "$k", phpType: $class));
+                $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: (string)$k, phpType: $class));
             }
         } elseif ($class = $collectingArray->typeField->arrayType ?? false) {
             // @todo This check should really rely on there being an interface with an arrayType
@@ -307,7 +307,7 @@ trait ArrayBasedDeformatter
             //   it's a little shaky as we're just relying on both attributes having the same
             //   property name by convention.  Something for the inevitable PHP 8.4+ upgrade.
             foreach ($remaining as $k => $v) {
-                $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: "$k", phpType: $class));
+                $ret[$k] = $deserializer->deserialize($remaining, Field::create(serializedName: (string)$k, phpType: $class));
             }
         } elseif ($remaining) {
             // Otherwise, just tack on whatever is left to the processed data.
@@ -329,6 +329,6 @@ trait ArrayBasedDeformatter
 
     public function getType(mixed $decoded, Field $field): string
     {
-        return \get_debug_type($decoded[$field->serializedName]);
+        return get_debug_type($decoded[$field->serializedName]);
     }
 }

@@ -21,3 +21,9 @@ services:
             - './phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.4/cli/conf.d/99-overrides.ini'
         environment:
             PHP_IDE_CONFIG: "serverName=Docker"
+
+    php85:
+        image: php:8.5-fpm
+        volumes:
+            - '.:/app'
+        working_dir: /app
