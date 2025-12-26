@@ -257,7 +257,6 @@ trait ArrayBasedDeformatter
 
         $ret = [];
 
-        /** @var Field $propField */
         foreach ($deserializer->typeMapper->propertyList($field, $data) as $propField) {
             $usedNames[] = $propField->serializedName;
             if ($propField->flatten && $propField->typeCategory === TypeCategory::Array) {
