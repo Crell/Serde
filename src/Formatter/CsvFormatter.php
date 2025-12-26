@@ -9,6 +9,7 @@ use Crell\Serde\Attributes\Field;
 use Crell\Serde\Attributes\SequenceField;
 use Crell\Serde\CsvFormatRequiresExplicitRowType;
 use Crell\Serde\Deserializer;
+use Crell\Serde\FormatParseError;
 use Crell\Serde\TypeMismatch;
 use function Crell\fp\amap;
 use function Crell\fp\explode;
@@ -79,13 +80,16 @@ class CsvFormatter implements Formatter, Deformatter, SupportsCollecting
         Deserializer $deserializer
     ): mixed
     {
+        if (!$classDef->properties) {
+            throw FormatParseError::create($rootField, $this->format(), $serialized);
+        }
         $rowField = $classDef->properties[array_key_first($classDef->properties)];
 
         $typeField = $rowField->typeField;
         if (! $typeField instanceof SequenceField) {
             throw CsvFormatRequiresExplicitRowType::create($classDef, $rowField);
         }
-        // The row must be an object, to an array type of a primitive doesn't make sense.
+        // The row must be an object, as an array type of a primitive doesn't make sense.
         if (!$typeField->arrayType || !is_string($typeField->arrayType) || !class_exists($typeField->arrayType)) {
             throw CsvFormatRequiresExplicitRowType::create($classDef, $rowField);
         }
