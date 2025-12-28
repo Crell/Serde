@@ -4,6 +4,23 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
+## Unreleased
+
+### Added
+- Nothing
+
+### Deprecated
+- Nothing
+
+### Fixed
+- A PHP type hint of `DateTimeInterface` will now deserialize to a `DateTimeImmutable` object instead of throwing an error.
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.5.0 - 2025-07-15
 
 ### Added

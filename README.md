@@ -566,6 +566,8 @@ Will serialize to this JSON:
 }
 ```
 
+Note that a type of `DateTimeInterface` will deserialize to a `DateTimeImmutable` object.
+
 #### `timezone`
 
 The `timezone` argument may be any timezone string legal in PHP, such as `America/Chicago` or `UTC`.  If specified, the value will be cast to this timezone first before it is serialized.  If not specified, the value will be left in whatever timezone it is in before being serialized.  Whether that makes a difference to the output depends on the `format`.

@@ -26,6 +26,7 @@ use Crell\Serde\Records\ClassWithPropertyWithTransitiveTypeField;
 use Crell\Serde\Records\ClassWithReducibleProperty;
 use Crell\Serde\Records\CompoundTypes;
 use Crell\Serde\Records\DateTimeExample;
+use Crell\Serde\Records\DateTimeInterfaceExample;
 use Crell\Serde\Records\DictionaryKeyTypes;
 use Crell\Serde\Records\Drupal\EmailItem;
 use Crell\Serde\Records\Drupal\FieldItemList;
@@ -337,6 +338,11 @@ abstract class SerdeTestCases extends TestCase
                 floats: [3.14, 2.7],
                 stringMap: ['a' => 'A'],
                 arrayMap: ['a' => [1, 2, 3]],
+            ),
+        ];
+        yield 'datetimeinterface_type' => [
+            'data' => new DateTimeInterfaceExample(
+                interfaceProperty: new \DateTimeImmutable('2025-12-25 12:34:56.789'),
             ),
         ];
     }
