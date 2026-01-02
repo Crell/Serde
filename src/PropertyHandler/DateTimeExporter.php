@@ -76,6 +76,6 @@ class DateTimeExporter implements Exporter, Importer
 
     public function canImport(Field $field, string $format): bool
     {
-        return in_array($field->phpType, [DateTimeInterface::class, DateTime::class, DateTimeImmutable::class], true);
+        return is_a($field->phpType, DateTimeInterface::class, allow_string: true);
     }
 }
