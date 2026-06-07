@@ -373,14 +373,18 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      */
     public function validate(mixed $value): bool
     {
+        if ($this->nullable && $value === null) {
+            // If the field is nullable and the value is null, we know it's valid.
+            // No need to call the validate() method further down.
+            return true;
+        }
+
         $valueType = \get_debug_type($value);
 
         if ($this->phpType === $valueType) {
             $valid = true;
         } elseif ($this->phpType === 'mixed') {
             // From a type perspective, mixed accepts anything.
-            $valid = true;
-        } elseif ($this->nullable && $valueType === 'null') {
             $valid = true;
         } elseif (is_object($value) || class_exists($this->phpType) || interface_exists($this->phpType)) {
             // For objects, do a type check and we're done.
@@ -412,18 +416,6 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
                 // in any other case.
                 default => true,
             };
-        }
-
-        /**
-         * We're returning early under this conditions due to the fact that a SequenceField
-         * instance call to `validate` with a null value would throw an exception.
-         *
-         * Unfortunately at this moment, only the value can be passed to the `validate`,
-         * meaning we cannot check `$this->nullable`, which would allow us to have this check inside the `validate`
-         * method of the SequenceField instance.
-         */
-        if ($this->phpType === 'array' && $this->nullable && $value === null && $valid) {
-            return true;
         }
 
         // The value validates if it passes the simple check above,
