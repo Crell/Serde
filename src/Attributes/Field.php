@@ -373,14 +373,18 @@ class Field implements FromReflectionProperty, HasSubAttributes, Excludable, Sup
      */
     public function validate(mixed $value): bool
     {
+        if ($this->nullable && $value === null) {
+            // If the field is nullable and the value is null, we know it's valid.
+            // No need to call the validate() method further down.
+            return true;
+        }
+
         $valueType = \get_debug_type($value);
 
         if ($this->phpType === $valueType) {
             $valid = true;
         } elseif ($this->phpType === 'mixed') {
             // From a type perspective, mixed accepts anything.
-            $valid = true;
-        } elseif ($this->nullable && $valueType === 'null') {
             $valid = true;
         } elseif (is_object($value) || class_exists($this->phpType) || interface_exists($this->phpType)) {
             // For objects, do a type check and we're done.

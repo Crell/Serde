@@ -68,6 +68,8 @@ use Crell\Serde\Records\NativeSerUn;
 use Crell\Serde\Records\NestedFlattenObject;
 use Crell\Serde\Records\NestedObject;
 use Crell\Serde\Records\NonPromotedDefault;
+use Crell\Serde\Records\NullablePointListWithoutConstructor;
+use Crell\Serde\Records\NullablePointList;
 use Crell\Serde\Records\NullArrays;
 use Crell\Serde\Records\NullProps;
 use Crell\Serde\Records\OptionalPoint;
@@ -123,6 +125,7 @@ use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Crell\Serde\Records\UnionTypes;
+use ReflectionClass;
 
 /**
  * Testing base class.
@@ -355,6 +358,16 @@ abstract class SerdeTestCases extends TestCase
             'data' => new DateTimeExtendsExample(
                 extendsProperty: new DateTimeExtends('2025-12-25 12:34:56.789'),
             ),
+        ];
+        yield 'nullable_list_with_constructor' => [
+            'data' => new NullablePointList(),
+        ];
+
+        $reflected = new ReflectionClass(NullablePointListWithoutConstructor::class);
+        $instance = $reflected->newInstanceWithoutConstructor();
+        $reflected->getProperty('points')->setValue($instance, null);
+        yield 'nullable_list_without_constructor' => [
+            'data' => $instance,
         ];
     }
 
