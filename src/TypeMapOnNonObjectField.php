@@ -17,7 +17,7 @@ class TypeMapOnNonObjectField extends InvalidArgumentException
 
         $new->field = $field;
 
-        $new->message = sprintf('Type maps may only be applied to object or array fields. Tried to apply type map to field %s of type %s.  Honestly I do not know how you even got here.', $field->phpName ?? $field->serializedName, $field->phpType);
+        $new->message = sprintf('Type maps may only be applied to object, backed enums or array fields. Tried to apply type map to field %s of type %s.  Honestly I do not know how you even got here.', $field->phpName ?? $field->serializedName, $field->phpType);
 
         return $new;
     }

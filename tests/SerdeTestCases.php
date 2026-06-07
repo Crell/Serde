@@ -102,6 +102,9 @@ use Crell\Serde\Records\TransitiveField;
 use Crell\Serde\Records\TraversableInts;
 use Crell\Serde\Records\TraversablePoints;
 use Crell\Serde\Records\Traversables;
+use Crell\Serde\Records\TypeMappedEnum;
+use Crell\Serde\Records\TypeMappedMixedElements;
+use Crell\Serde\Records\TypeMappedObject;
 use Crell\Serde\Records\UnionTypeSubTypeField;
 use Crell\Serde\Records\UnionTypeWithInterface;
 use Crell\Serde\Records\UnixTimeExample;
@@ -206,6 +209,7 @@ abstract class SerdeTestCases extends TestCase
     #[DataProvider('mixed_val_property_object_examples')]
     #[DataProvider('union_types_examples')]
     #[DataProvider('compound_types_examples')]
+    #[DataProvider('interface_typemap_and_enum_permutations')]
     public function round_trip(object $data): void
     {
         $s = new SerdeCommon(formatters: $this->formatters);
@@ -519,6 +523,22 @@ abstract class SerdeTestCases extends TestCase
                 ],
                 other: ['narf' => 'poink', 'bleep' => 'bloop']
             ),
+        ];
+    }
+
+    /**
+     * specific permutations for cases of using type maps against an interface.
+     */
+    public static function interface_typemap_and_enum_permutations(): iterable
+    {
+        yield 'interface typemap for enum' => [
+            'data' => new TypeMappedMixedElements([TypeMappedEnum::A]),
+        ];
+        yield 'interface typemap for object' => [
+            'data' => new TypeMappedMixedElements([new TypeMappedObject(2)]),
+        ];
+        yield 'interface typemap for enum and object' => [
+            'data' => new TypeMappedMixedElements([TypeMappedEnum::A, new TypeMappedObject(2)]),
         ];
     }
 

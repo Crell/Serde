@@ -968,6 +968,37 @@ interface Product {}
 
 And both `Sale` and `Order` will still serialize with the appropriate key.
 
+#### Type mapped enums
+
+When an enum is used as part of a type map, its backing value will be serialized with the `value` property.
+
+Consider the following enum:
+```php
+enum Genre: string {
+    case Action = 'action';
+    case Adventure = 'adventure';
+}
+```
+
+And consider the following TypeMap
+```php
+use Crell\Serde\Attributes\StaticTypeMap;
+
+#[StaticTypeMap(key: 'type', map: [
+    'genre' => Genre::class,
+])]
+interface Book {}
+```
+
+Serializing the `Genre::Action` enum as part of the TypeMap will result in the following serialized representation:
+
+```json
+{
+    "type": "genre",
+    "value": "action"
+}
+```
+
 #### Dynamic type maps
 
 Type Maps may also be provided directly to the Serde object when it is created.  Any object that implements `TypeMap` may be used.  This is most useful when the list of possible classes is dynamic based on user configuration, database values, what plugins are installed in your application, etc.

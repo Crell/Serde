@@ -75,7 +75,7 @@ abstract class ArrayBasedFormatterTestCases extends SerdeTestCases
         self::assertEquals('C', $toTest['c']);
     }
 
-    protected function static_type_map_validate(mixed $serialized): void
+    protected function static_typemap_validate(mixed $serialized): void
     {
         $toTest = $this->arrayify($serialized);
 

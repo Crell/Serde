@@ -20,7 +20,7 @@ class TypeMapper
 
     public function typeMapForField(Field $field): ?TypeMap
     {
-        if (!in_array($field->typeCategory, [TypeCategory::Object, TypeCategory::Array], true)) {
+        if (!in_array($field->typeCategory, [TypeCategory::Object, TypeCategory::Array, TypeCategory::IntEnum, TypeCategory::StringEnum], true)) {
             throw TypeMapOnNonObjectField::create($field);
         }
 

@@ -72,6 +72,7 @@ class TomlFormatterTest extends ArrayBasedFormatterTestCases
     #[DataProvider('mixed_val_property_object_examples')]
     #[DataProvider('union_types_examples')]
     #[DataProvider('compound_types_examples')]
+    #[DataProvider('interface_typemap_and_enum_permutations')]
     public function round_trip(object $data): void
     {
         if ($this->dataName() === 'empty_values') {
