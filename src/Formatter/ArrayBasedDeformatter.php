@@ -41,6 +41,9 @@ trait ArrayBasedDeformatter
         }
 
         // Weak mode.
+        if ($field->nullable && is_null($value)) {
+            return null;
+        }
         return (int)($decoded[$field->serializedName]);
     }
 
@@ -60,6 +63,9 @@ trait ArrayBasedDeformatter
         }
 
         // Weak mode.
+        if ($field->nullable && is_null($value)) {
+            return null;
+        }
         return (float)($decoded[$field->serializedName]);
     }
 
@@ -79,6 +85,9 @@ trait ArrayBasedDeformatter
         }
 
         // Weak mode.
+        if ($field->nullable && is_null($value)) {
+            return null;
+        }
         return (bool)($decoded[$field->serializedName]);
     }
 
@@ -98,6 +107,9 @@ trait ArrayBasedDeformatter
         }
 
         // Weak mode.
+        if ($field->nullable && is_null($value)) {
+            return null;
+        }
         return (string)($value);
     }
 
