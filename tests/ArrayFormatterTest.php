@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Crell\Serde;
 
 use Crell\Serde\Formatter\ArrayFormatter;
-use Crell\Serde\NonStrict\NonStrictNullableProperties;
 use Crell\Serde\PropertyHandler\EnumOnArrayImporter;
 use Crell\Serde\Records\BackedSize;
 use Crell\Serde\Records\LiteralEnums;
@@ -85,26 +84,6 @@ class ArrayFormatterTest extends ArrayBasedFormatterTestCases
         $expected = new LiteralEnums(size: Size::Medium, backedSize: BackedSize::Small);
 
         self::assertEquals($expected, $result);
-    }
-
-    #[Test]
-    public function non_strict_null_stays_null_on_nullable_fields(): void
-    {
-        $s = new SerdeCommon(formatters: $this->formatters);
-
-        $serialized = [
-            'int' => null,
-            'float' => null,
-            'string' => null,
-            'bool' => null,
-        ];
-
-        $result = $s->deserialize($serialized, from: 'array', to: NonStrictNullableProperties::class);
-
-        self::assertNull($result->int);
-        self::assertNull($result->float);
-        self::assertNull($result->string);
-        self::assertNull($result->bool);
     }
 
     public static function non_strict_properties_examples(): iterable

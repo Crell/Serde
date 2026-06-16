@@ -11,6 +11,7 @@ use Crell\Serde\Attributes\ReducingTransitiveTypeField;
 use Crell\Serde\Attributes\StaticTypeMap;
 use Crell\Serde\Attributes\TransitiveTypeField;
 use Crell\Serde\Formatter\SupportsCollecting;
+use Crell\Serde\NonStrict\NonStrictNullableProperties;
 use Crell\Serde\PropertyHandler\Exporter;
 use Crell\Serde\PropertyHandler\ObjectExporter;
 use Crell\Serde\PropertyHandler\ObjectImporter;
@@ -315,6 +316,9 @@ abstract class SerdeTestCases extends TestCase
         ];
         yield 'empty_values' => [
             'data' => new EmptyData('beep', null),
+        ];
+        yield 'non_strict_null_stays_null' => [
+            'data' => new NonStrictNullableProperties(),
         ];
         yield 'native_object_serialization' => [
             'data' => new NativeSerUn(
