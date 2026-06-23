@@ -4,16 +4,23 @@ All notable changes to `Serde` will be documented in this file.
 
 Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
 
-## Unreleased
+## 1.6.0 - 2026-06-23
 
 ### Added
-- Nothing
+- Enums may now be used as a type map.
+- There is now a MAINTENANCE-TERMS.md document that describes the maintenance agreement for this project.  (That is, none.)
 
 ### Deprecated
 - Nothing
 
 ### Fixed
+- CI now runs on PHP 8.5, with no errors.
 - A PHP type hint of `DateTimeInterface` will now deserialize to a `DateTimeImmutable` object instead of throwing an error.
+- Made PHPUnit checks stricter.
+- Reworked tests a bit to leverage PHPUnit better.  (Sizing, Before/After, Groups, etc.)
+- Nullable properties when deserialized in non-strict type mode will be set to null, not to the zero-value of their type.
+- Nullable arrays now deserialize as null when empty, not an empty array.
+- Various PHPStan issues resolved.
 
 ### Removed
 - Nothing
